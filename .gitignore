@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+
+.codex/config.toml
+node_modules/

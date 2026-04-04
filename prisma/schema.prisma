@@ -1,0 +1,354 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  admin
+  atendimento
+  cozinha
+  entrega
+  caixa
+  cliente
+}
+
+enum OrderChannel {
+  web
+  whatsapp
+  local
+}
+
+enum OrderType {
+  delivery
+  retirada
+  local
+}
+
+enum OrderStatus {
+  novo
+  aceito
+  em_preparo
+  pronto
+  saiu_para_entrega
+  entregue
+  fechado
+  cancelado
+}
+
+enum PaymentMethod {
+  dinheiro
+  cartao_credito
+  cartao_debito
+  pix
+  outro
+}
+
+enum PaymentStatus {
+  pendente
+  combinado
+  pago
+  cancelado
+}
+
+enum ConversationChannel {
+  whatsapp
+}
+
+enum WhatsAppMessageDirection {
+  inbound
+  outbound
+}
+
+enum WhatsAppMessageStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+}
+
+model User {
+  id              String             @id @default(cuid())
+  email           String             @unique
+  passwordHash    String?
+  role            UserRole           @default(cliente)
+  isActive        Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  customerProfile CustomerProfile?
+  statusEvents    OrderStatusEvent[] @relation("StatusChangedBy")
+  acceptedOrders  Order[]            @relation("AcceptedBy")
+  commandas       Comanda[]          @relation("OpenedBy")
+}
+
+model CustomerProfile {
+  id                    String                 @id @default(cuid())
+  userId                String                 @unique
+  fullName              String
+  phone                 String                 @unique
+  whatsappOptIn         Boolean                @default(true)
+  defaultAddressId      String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultAddress        Address?               @relation("DefaultCustomerAddress", fields: [defaultAddressId], references: [id], onDelete: SetNull)
+  addresses             Address[]              @relation("CustomerAddresses")
+  orders                Order[]
+  commandas             Comanda[]
+  whatsappConversations WhatsAppConversation[]
+}
+
+model Address {
+  id                  String            @id @default(cuid())
+  customerProfileId   String?
+  label               String?
+  recipientName       String?
+  phone               String?
+  zipCode             String?
+  street              String
+  number              String
+  complement          String?
+  neighborhood        String
+  city                String
+  state               String
+  reference           String?
+  isDefault           Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  customerProfile     CustomerProfile?  @relation("CustomerAddresses", fields: [customerProfileId], references: [id], onDelete: SetNull)
+  defaultForCustomers CustomerProfile[] @relation("DefaultCustomerAddress")
+  orders              Order[]
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  menuItems   MenuItem[]
+}
+
+model MenuItem {
+  id             String                @id @default(cuid())
+  categoryId     String
+  name           String
+  slug           String                @unique
+  description    String?
+  imageUrl       String?
+  price          Decimal               @db.Decimal(10, 2)
+  compareAtPrice Decimal?              @db.Decimal(10, 2)
+  isActive       Boolean               @default(true)
+  isFeatured     Boolean               @default(false)
+  sortOrder      Int                   @default(0)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  optionGroups   MenuItemOptionGroup[]
+  orderItems     OrderItem[]
+  comandaEntries ComandaEntry[]
+}
+
+model OptionGroup {
+  id            String                @id @default(cuid())
+  name          String
+  slug          String                @unique
+  description   String?
+  minSelections Int                   @default(0)
+  maxSelections Int?
+  isRequired    Boolean               @default(false)
+  sortOrder     Int                   @default(0)
+  isActive      Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  options       OptionItem[]
+  menuItems     MenuItemOptionGroup[]
+}
+
+model OptionItem {
+  id             String               @id @default(cuid())
+  optionGroupId  String
+  name           String
+  slug           String
+  description    String?
+  priceDelta     Decimal              @default(0) @db.Decimal(10, 2)
+  isDefault      Boolean              @default(false)
+  isActive       Boolean              @default(true)
+  sortOrder      Int                  @default(0)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  optionGroup    OptionGroup          @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+  orderItemLinks OrderItemOption[]
+  comandaLinks   ComandaEntryOption[]
+
+  @@unique([optionGroupId, slug])
+}
+
+model MenuItemOptionGroup {
+  menuItemId    String
+  optionGroupId String
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  menuItem      MenuItem    @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  optionGroup   OptionGroup @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+
+  @@id([menuItemId, optionGroupId])
+}
+
+model Order {
+  id                   String                @id @default(cuid())
+  customerProfileId    String?
+  addressId            String?
+  acceptedById         String?
+  code                 String                @unique
+  channel              OrderChannel
+  type                 OrderType
+  status               OrderStatus           @default(novo)
+  notes                String?
+  subtotalAmount       Decimal               @db.Decimal(10, 2)
+  deliveryFeeAmount    Decimal               @default(0) @db.Decimal(10, 2)
+  discountAmount       Decimal               @default(0) @db.Decimal(10, 2)
+  totalAmount          Decimal               @db.Decimal(10, 2)
+  paymentMethod        PaymentMethod?
+  paymentStatus        PaymentStatus         @default(pendente)
+  acceptedAt           DateTime?
+  preparedAt           DateTime?
+  dispatchedAt         DateTime?
+  deliveredAt          DateTime?
+  cancelledAt          DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  customerProfile      CustomerProfile?      @relation(fields: [customerProfileId], references: [id], onDelete: SetNull)
+  deliveryAddress      Address?              @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  acceptedBy           User?                 @relation("AcceptedBy", fields: [acceptedById], references: [id], onDelete: SetNull)
+  items                OrderItem[]
+  statusEvents         OrderStatusEvent[]
+  whatsappConversation WhatsAppConversation?
+}
+
+model OrderItem {
+  id              String            @id @default(cuid())
+  orderId         String
+  menuItemId      String
+  quantity        Int
+  unitPrice       Decimal           @db.Decimal(10, 2)
+  subtotalAmount  Decimal           @db.Decimal(10, 2)
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem        MenuItem          @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  selectedOptions OrderItemOption[]
+}
+
+model OrderItemOption {
+  orderItemId    String
+  optionItemId   String
+  quantity       Int        @default(1)
+  unitPriceDelta Decimal    @default(0) @db.Decimal(10, 2)
+  orderItem      OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  optionItem     OptionItem @relation(fields: [optionItemId], references: [id], onDelete: Restrict)
+
+  @@id([orderItemId, optionItemId])
+}
+
+model Comanda {
+  id                String           @id @default(cuid())
+  customerProfileId String?
+  openedById        String?
+  code              String           @unique
+  qrCodeSlug        String           @unique
+  name              String?
+  notes             String?
+  status            OrderStatus      @default(novo)
+  subtotalAmount    Decimal          @default(0) @db.Decimal(10, 2)
+  discountAmount    Decimal          @default(0) @db.Decimal(10, 2)
+  totalAmount       Decimal          @default(0) @db.Decimal(10, 2)
+  paymentMethod     PaymentMethod?
+  paymentStatus     PaymentStatus    @default(pendente)
+  closedAt          DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  customerProfile   CustomerProfile? @relation(fields: [customerProfileId], references: [id], onDelete: SetNull)
+  openedBy          User?            @relation("OpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
+  entries           ComandaEntry[]
+}
+
+model ComandaEntry {
+  id              String               @id @default(cuid())
+  comandaId       String
+  menuItemId      String
+  quantity        Int
+  unitPrice       Decimal              @db.Decimal(10, 2)
+  subtotalAmount  Decimal              @db.Decimal(10, 2)
+  notes           String?
+  sentToKitchenAt DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  comanda         Comanda              @relation(fields: [comandaId], references: [id], onDelete: Cascade)
+  menuItem        MenuItem             @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  selectedOptions ComandaEntryOption[]
+}
+
+model ComandaEntryOption {
+  comandaEntryId String
+  optionItemId   String
+  quantity       Int          @default(1)
+  unitPriceDelta Decimal      @default(0) @db.Decimal(10, 2)
+  comandaEntry   ComandaEntry @relation(fields: [comandaEntryId], references: [id], onDelete: Cascade)
+  optionItem     OptionItem   @relation(fields: [optionItemId], references: [id], onDelete: Restrict)
+
+  @@id([comandaEntryId, optionItemId])
+}
+
+model OrderStatusEvent {
+  id          String       @id @default(cuid())
+  orderId     String
+  changedById String?
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  note        String?
+  createdAt   DateTime     @default(now())
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  changedBy   User?        @relation("StatusChangedBy", fields: [changedById], references: [id], onDelete: SetNull)
+}
+
+model WhatsAppConversation {
+  id                String              @id @default(cuid())
+  customerProfileId String
+  orderId           String?             @unique
+  channel           ConversationChannel @default(whatsapp)
+  phone             String
+  externalThreadId  String?             @unique
+  state             String
+  startedAt         DateTime            @default(now())
+  lastMessageAt     DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  customerProfile   CustomerProfile     @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  order             Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  messages          WhatsAppMessage[]
+}
+
+model WhatsAppMessage {
+  id                String                   @id @default(cuid())
+  conversationId    String
+  externalMessageId String?                  @unique
+  direction         WhatsAppMessageDirection
+  status            WhatsAppMessageStatus    @default(pending)
+  content           String
+  payload           Json?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  conversation      WhatsAppConversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}

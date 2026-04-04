@@ -1,0 +1,28 @@
+{
+  "name": "lanchonete",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma da lanchonete",
+  "scripts": {
+    "prisma:format": "DOTENV_CONFIG_PATH=.env.local prisma format --schema=prisma/schema.prisma",
+    "prisma:validate": "DOTENV_CONFIG_PATH=.env.local prisma validate --schema=prisma/schema.prisma"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cledson96/lanchonete.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cledson96/lanchonete/issues"
+  },
+  "homepage": "https://github.com/Cledson96/lanchonete#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.0",
+    "prisma": "^7.6.0"
+  }
+}
