@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { brandContent } from "@/lib/brand-content";
+import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getPublicMenu } from "@/lib/services/menu-service";
 import { formatMoney } from "@/lib/utils";
 
@@ -148,6 +149,15 @@ export default async function HomePage() {
                           : "border-[#dccfbc] bg-white/65"
                       }`}
                     >
+                      <div className="relative mb-4 h-36 overflow-hidden rounded-[1.1rem]">
+                        <Image
+                          alt={item.name}
+                          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                          fill
+                          sizes="(max-width: 640px) 100vw, 320px"
+                          src={resolveMenuItemImage(item.imageUrl)}
+                        />
+                      </div>
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <p
@@ -256,7 +266,7 @@ export default async function HomePage() {
           </div>
 
           <div className="space-y-16">
-            {categories.map((category, index) => {
+            {categories.map((category) => {
               const [featuredItem, ...restItems] = category.menuItems;
               const accentBg = "bg-[linear-gradient(140deg,#163224_0%,#1d3b2d_100%)] text-white";
               const accentBorder = "border-white/10";
@@ -289,6 +299,15 @@ export default async function HomePage() {
                       <article
                         className={`rounded-[2rem] border p-6 ${accentBg} ${accentBorder}`}
                       >
+                        <div className="relative mb-5 h-60 overflow-hidden rounded-[1.5rem]">
+                          <Image
+                            alt={featuredItem.name}
+                            className="object-cover"
+                            fill
+                            sizes="(max-width: 1024px) 100vw, 480px"
+                            src={resolveMenuItemImage(featuredItem.imageUrl)}
+                          />
+                        </div>
                         <p className="eyebrow mb-4 text-current/58">
                           Destaque da casa
                         </p>
@@ -330,28 +349,39 @@ export default async function HomePage() {
                             key={item.id}
                             className="soft-divider grid gap-4 px-1 py-5 first:border-t-0"
                           >
-                            <div className="flex items-start justify-between gap-6">
-                              <div>
-                                <h4 className="text-xl font-semibold tracking-tight">
-                                  {item.name}
-                                </h4>
-                                {item.description ? (
-                                  <p className="mt-2 max-w-2xl leading-7 text-muted">
-                                    {item.description}
-                                  </p>
-                                ) : null}
-                                {item.optionGroups.length ? (
-                                  <p className="mt-3 text-sm text-[#42604e]">
-                                    Adicionais:{" "}
-                                    {item.optionGroups
-                                      .map((group) => group.name)
-                                      .join(", ")}
-                                  </p>
-                                ) : null}
+                            <div className="grid gap-4 md:grid-cols-[110px_minmax(0,1fr)] md:items-start">
+                              <div className="relative h-28 overflow-hidden rounded-[1.2rem]">
+                                <Image
+                                  alt={item.name}
+                                  className="object-cover"
+                                  fill
+                                  sizes="110px"
+                                  src={resolveMenuItemImage(item.imageUrl)}
+                                />
                               </div>
-                              <p className="menu-price whitespace-nowrap text-2xl text-accent">
-                                {formatMoney(Number(item.price))}
-                              </p>
+                              <div className="flex items-start justify-between gap-6">
+                                <div>
+                                  <h4 className="text-xl font-semibold tracking-tight">
+                                    {item.name}
+                                  </h4>
+                                  {item.description ? (
+                                    <p className="mt-2 max-w-2xl leading-7 text-muted">
+                                      {item.description}
+                                    </p>
+                                  ) : null}
+                                  {item.optionGroups.length ? (
+                                    <p className="mt-3 text-sm text-[#42604e]">
+                                      Adicionais:{" "}
+                                      {item.optionGroups
+                                        .map((group) => group.name)
+                                        .join(", ")}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <p className="menu-price whitespace-nowrap text-2xl text-accent">
+                                  {formatMoney(Number(item.price))}
+                                </p>
+                              </div>
                             </div>
                           </article>
                         ))

@@ -110,7 +110,9 @@ export const createMenuItemSchema = z.object({
   imageUrl: z
     .string()
     .trim()
-    .url()
+    .refine((value) => !value || value.startsWith("/") || z.string().url().safeParse(value).success, {
+      message: "Informe uma URL valida ou um caminho local iniciado com /.",
+    })
     .optional()
     .or(z.literal(""))
     .transform(optionalTrimmed),

@@ -1,0 +1,22 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#13241B"/>
+  <rect x="58" y="58" width="1084" height="784" rx="48" fill="url(#paint0_linear)"/>
+  <circle cx="918" cy="221" r="158" fill="#D5672E" fill-opacity="0.18"/>
+  <circle cx="262" cy="703" r="210" fill="#F2AE61" fill-opacity="0.14"/>
+  <rect x="152" y="222" width="896" height="456" rx="40" fill="#FBF5EC" fill-opacity="0.08" stroke="#FBF5EC" stroke-opacity="0.16" stroke-width="3"/>
+  <path d="M346 464C346 383.366 411.366 318 492 318H708C788.634 318 854 383.366 854 464V474H346V464Z" fill="#FBF5EC" fill-opacity="0.82"/>
+  <path d="M332 492H868C868 592.516 786.516 674 686 674H514C413.484 674 332 592.516 332 492Z" fill="#D5672E"/>
+  <path d="M394 474H806V512C806 537.405 785.405 558 760 558H440C414.595 558 394 537.405 394 512V474Z" fill="#31533F"/>
+  <circle cx="474" cy="401" r="22" fill="#31533F"/>
+  <circle cx="553" cy="389" r="20" fill="#D5672E"/>
+  <circle cx="637" cy="396" r="18" fill="#31533F"/>
+  <circle cx="714" cy="389" r="20" fill="#D5672E"/>
+  <path d="M358 452C388.751 424.387 441.774 402 501 402H699C758.226 402 811.249 424.387 842 452H358Z" fill="#F2AE61"/>
+  <text x="600" y="768" text-anchor="middle" fill="#FBF5EC" font-family="Arial, sans-serif" font-size="48" font-weight="700" letter-spacing="8">IMAGEM DO ITEM</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="600" y1="58" x2="600" y2="842" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#193729"/>
+      <stop offset="1" stop-color="#102218"/>
+    </linearGradient>
+  </defs>
+</svg>
