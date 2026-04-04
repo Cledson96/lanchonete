@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 const sans = Bricolage_Grotesque({
@@ -13,12 +13,23 @@ const mono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+const display = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "Lanchonete",
-    template: "%s | Lanchonete",
+    default: "Lanchonete Familia",
+    template: "%s | Lanchonete Familia",
   },
-  description: "Pedidos, comandas e operacao da lanchonete em um unico sistema.",
+  description:
+    "Burgers artesanais, sucos e combinacoes caprichadas para pedir no site ou no WhatsApp.",
+  icons: {
+    icon: "/landing/brand-seal.svg",
+    shortcut: "/landing/brand-seal.svg",
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +38,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${sans.variable} ${mono.variable} ${display.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
