@@ -1,0 +1,251 @@
+import { OrderStatus } from "@prisma/client";
+import { ApiError } from "@/lib/http";
+import { prisma } from "@/lib/prisma";
+import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
+import { normalizePhone } from "@/lib/utils";
+
+const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+  novo: ["aceito", "cancelado"],
+  aceito: ["em_preparo", "cancelado"],
+  em_preparo: ["pronto", "cancelado"],
+  pronto: ["saiu_para_entrega", "fechado"],
+  saiu_para_entrega: ["entregue", "cancelado"],
+  entregue: ["fechado"],
+  fechado: [],
+  cancelado: [],
+};
+
+function getStatusMessage(code: string, status: OrderStatus) {
+  if (status === "aceito") {
+    return `Pedido ${code} aceito. Ja estamos preparando tudo por aqui.`;
+  }
+
+  if (status === "saiu_para_entrega") {
+    return `Pedido ${code} saiu para entrega. Ja esta a caminho.`;
+  }
+
+  return null;
+}
+
+async function recordOutboundOrderMessage(order: {
+  id: string;
+  customerProfileId: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
+}, content: string, externalMessageId?: string) {
+  if (!order.customerPhone) {
+    return;
+  }
+
+  const phone = normalizePhone(order.customerPhone);
+  const customer =
+    order.customerProfileId
+      ? await prisma.customerProfile.findUnique({
+          where: { id: order.customerProfileId },
+        })
+      : await prisma.customerProfile.upsert({
+          where: { phone },
+          create: {
+            phone,
+            fullName: order.customerName || "Cliente",
+          },
+          update: {
+            fullName: order.customerName || undefined,
+          },
+        });
+
+  if (!customer) {
+    return;
+  }
+
+  const conversation =
+    (await prisma.whatsAppConversation.findFirst({
+      where: {
+        customerProfileId: customer.id,
+      },
+      orderBy: { updatedAt: "desc" },
+    })) ||
+    (await prisma.whatsAppConversation.create({
+      data: {
+        customerProfileId: customer.id,
+        orderId: order.id,
+        phone,
+        state: "order_updates",
+        lastMessageAt: new Date(),
+      },
+    }));
+
+  await prisma.whatsAppMessage.create({
+    data: {
+      conversationId: conversation.id,
+      externalMessageId: externalMessageId || undefined,
+      direction: "outbound",
+      status: externalMessageId ? "sent" : "pending",
+      content,
+      sentAt: new Date(),
+    },
+  });
+}
+
+export async function listOrders(filters?: {
+  status?: OrderStatus;
+  channel?: "web" | "whatsapp" | "local";
+  type?: "delivery" | "retirada" | "local";
+}) {
+  return prisma.order.findMany({
+    where: {
+      status: filters?.status,
+      channel: filters?.channel,
+      type: filters?.type,
+    },
+    orderBy: [{ createdAt: "desc" }],
+    include: {
+      customerProfile: true,
+      acceptedBy: true,
+      items: {
+        include: {
+          menuItem: true,
+        },
+      },
+      statusEvents: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+}
+
+export async function getOrderById(id: string) {
+  return prisma.order.findUnique({
+    where: { id },
+    include: {
+      customerProfile: true,
+      deliveryAddress: true,
+      deliveryFeeRule: true,
+      acceptedBy: true,
+      items: {
+        include: {
+          menuItem: true,
+          selectedOptions: {
+            include: {
+              optionItem: true,
+            },
+          },
+        },
+      },
+      statusEvents: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          changedBy: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getDashboardMetrics() {
+  const [newOrders, preparingOrders, dispatchingOrders, openCommandas] =
+    await Promise.all([
+      prisma.order.count({ where: { status: "novo" } }),
+      prisma.order.count({ where: { status: { in: ["aceito", "em_preparo"] } } }),
+      prisma.order.count({ where: { status: "saiu_para_entrega" } }),
+      prisma.comanda.count({ where: { status: { notIn: ["fechado", "cancelado"] } } }),
+    ]);
+
+  return {
+    newOrders,
+    preparingOrders,
+    dispatchingOrders,
+    openCommandas,
+  };
+}
+
+export async function transitionOrderStatus(input: {
+  orderId: string;
+  toStatus: OrderStatus;
+  note?: string;
+  changedById?: string;
+}) {
+  const order = await prisma.order.findUnique({
+    where: { id: input.orderId },
+  });
+
+  if (!order) {
+    throw new ApiError(404, "Pedido nao encontrado.");
+  }
+
+  if (order.status === input.toStatus) {
+    throw new ApiError(409, "O pedido ja esta neste status.");
+  }
+
+  if (!allowedTransitions[order.status].includes(input.toStatus)) {
+    throw new ApiError(409, "Transicao de status invalida.");
+  }
+
+  const now = new Date();
+
+  const updatedOrder = await prisma.$transaction(async (tx) => {
+    const updated = await tx.order.update({
+      where: { id: order.id },
+      data: {
+        status: input.toStatus,
+        acceptedById:
+          input.toStatus === "aceito"
+            ? input.changedById || order.acceptedById
+            : order.acceptedById,
+        acceptedAt: input.toStatus === "aceito" ? now : order.acceptedAt,
+        preparedAt: input.toStatus === "pronto" ? now : order.preparedAt,
+        dispatchedAt:
+          input.toStatus === "saiu_para_entrega" ? now : order.dispatchedAt,
+        deliveredAt: input.toStatus === "entregue" ? now : order.deliveredAt,
+        cancelledAt: input.toStatus === "cancelado" ? now : order.cancelledAt,
+        statusEvents: {
+          create: {
+            changedById: input.changedById,
+            fromStatus: order.status,
+            toStatus: input.toStatus,
+            note: input.note || null,
+          },
+        },
+      },
+      include: {
+        customerProfile: true,
+        items: {
+          include: {
+            menuItem: true,
+          },
+        },
+        statusEvents: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    return updated;
+  });
+
+  const message = getStatusMessage(updatedOrder.code, input.toStatus);
+
+  if (message && updatedOrder.customerPhone) {
+    try {
+      const result = await sendWhatsAppTextMessage({
+        to: updatedOrder.customerPhone,
+        body: message,
+      });
+
+      await recordOutboundOrderMessage(
+        {
+          id: updatedOrder.id,
+          customerProfileId: updatedOrder.customerProfileId,
+          customerName: updatedOrder.customerName,
+          customerPhone: updatedOrder.customerPhone,
+        },
+        message,
+        result.externalMessageId,
+      );
+    } catch (error) {
+      console.error("[order-status:whatsapp]", error);
+    }
+  }
+
+  return updatedOrder;
+}

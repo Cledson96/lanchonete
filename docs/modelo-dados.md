@@ -11,6 +11,7 @@ Este documento resume o primeiro desenho do banco em `prisma/schema.prisma`.
 - `Comanda`, `ComandaEntry` e `ComandaEntryOption`: consumo no local com acumulado por comanda.
 - `OrderStatusEvent`: historico de mudancas de status do pedido.
 - `WhatsAppConversation` e `WhatsAppMessage`: trilha da conversa automatizada.
+- `PhoneVerificationChallenge`: desafios de codigo para validar telefone antes do pedido web.
 
 ## Decisoes importantes
 - `User.role` cobre perfis internos e cliente.
@@ -20,6 +21,7 @@ Este documento resume o primeiro desenho do banco em `prisma/schema.prisma`.
 - `Order` e `Comanda` mantem totais consolidados, enquanto itens e entradas guardam o valor congelado no momento do lancamento.
 - `Order` guarda `customerName` e `customerPhone` como snapshot historico do momento da compra.
 - `Order.deliveryFeeRuleId` aponta para a regra de frete aplicada quando o pedido for entrega.
+- `PhoneVerificationChallenge` guarda o OTP com expiracao e tentativas para validar telefone no checkout.
 - O cardapio usa relacao explicita entre `MenuItem` e `OptionGroup`, permitindo reutilizar grupos de adicionais em varios itens.
 - O Prisma vai apontar para `DATABASE_URL` no local e usar `DIRECT_DATABASE_REMOTE_URL` quando precisarmos migrar contra a Neon.
 

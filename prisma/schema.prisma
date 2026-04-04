@@ -53,6 +53,10 @@ enum PaymentStatus {
   cancelado
 }
 
+enum VerificationPurpose {
+  order_checkout
+}
+
 enum ConversationChannel {
   whatsapp
 }
@@ -85,20 +89,21 @@ model User {
 }
 
 model CustomerProfile {
-  id                    String                 @id @default(cuid())
-  userId                String?                @unique
-  fullName              String
-  phone                 String                 @unique
-  whatsappOptIn         Boolean                @default(true)
-  defaultAddressId      String?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  user                  User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  defaultAddress        Address?               @relation("DefaultCustomerAddress", fields: [defaultAddressId], references: [id], onDelete: SetNull)
-  addresses             Address[]              @relation("CustomerAddresses")
-  orders                Order[]
-  commandas             Comanda[]
-  whatsappConversations WhatsAppConversation[]
+  id                     String                       @id @default(cuid())
+  userId                 String?                      @unique
+  fullName               String
+  phone                  String                       @unique
+  whatsappOptIn          Boolean                      @default(true)
+  defaultAddressId       String?
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  user                   User?                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultAddress         Address?                     @relation("DefaultCustomerAddress", fields: [defaultAddressId], references: [id], onDelete: SetNull)
+  addresses              Address[]                    @relation("CustomerAddresses")
+  orders                 Order[]
+  commandas              Comanda[]
+  whatsappConversations  WhatsAppConversation[]
+  verificationChallenges PhoneVerificationChallenge[]
 }
 
 model Address {
@@ -375,4 +380,21 @@ model WhatsAppMessage {
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   conversation      WhatsAppConversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model PhoneVerificationChallenge {
+  id                String              @id @default(cuid())
+  customerProfileId String?
+  phone             String
+  customerName      String?
+  purpose           VerificationPurpose @default(order_checkout)
+  codeHash          String
+  attemptCount      Int                 @default(0)
+  expiresAt         DateTime
+  consumedAt        DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  customerProfile   CustomerProfile?    @relation(fields: [customerProfileId], references: [id], onDelete: SetNull)
+
+  @@index([phone, purpose])
 }
