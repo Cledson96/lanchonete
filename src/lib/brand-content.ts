@@ -7,20 +7,24 @@ export const brandContent = {
   whatsappUrl: process.env.NEXT_PUBLIC_WHATSAPP_URL || fallbackWhatsAppUrl,
   location: "Rua da Familia, 128 - Centro, Sao Paulo",
   hours: "Seg a Dom, das 18h as 23h30",
-  eyebrow: "Sabor de casa, entrega no ponto",
-  headline: "O lanche da noite com cara de encontro em familia.",
+  eyebrow: "Cardapio vivo, pedido facil",
+  headline: "Abra o cardapio da noite e escolha o que sai da chapa primeiro.",
   subheadline:
-    "Burger alto, frita sequinha, suco gelado e atendimento que conhece seu nome. Peça no site, retire no balcao ou chame no WhatsApp.",
+    "Burgers artesanais, sucos gelados e adicionais da casa em uma pagina pensada para escolher rapido, pedir bonito e matar a fome sem friccao.",
   supportPoints: [
     "Pedido online sem enrolacao",
     "Delivery, retirada e comanda local",
     "WhatsApp conectado ao preparo do pedido",
   ],
   stats: [
-    { label: "Lanches assinados", value: "12 sabores" },
     { label: "Entrega media", value: "20-40 min" },
+    { label: "Pedido no WhatsApp", value: "Ativo" },
     { label: "Atendimento", value: "Todos os dias" },
   ],
+  serviceLine: ["Delivery", "Retirada", "Comanda local"],
+  menuTitle: "O menu vem primeiro.",
+  menuBody:
+    "A primeira leitura da home precisa te colocar diante dos sabores, dos precos e das categorias. A marca aparece no clima, no ritmo e no acabamento.",
   storyTitle: "Feita para mesa cheia, conversa longa e fome boa.",
   storyBody:
     "A Lanchonete Familia junta a praticidade do pedido online com o cuidado de uma casa que conhece seu bairro. O cardapio vai do burger caprichado aos sucos e adicionais que deixam cada pedido do seu jeito.",
