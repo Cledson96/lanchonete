@@ -1,0 +1,73 @@
+.swagger-shell {
+  width: min(1320px, calc(100vw - 2rem));
+  margin: 0 auto;
+}
+
+.swagger-ui {
+  background: #fff8f0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+}
+
+.swagger-ui .topbar {
+  display: none;
+}
+
+.swagger-ui .information-container,
+.swagger-ui .scheme-container {
+  background: linear-gradient(180deg, #fffaf4 0%, #f6ebdf 100%);
+}
+
+.swagger-ui .info .title,
+.swagger-ui,
+.swagger-ui .opblock-tag,
+.swagger-ui .btn,
+.swagger-ui input,
+.swagger-ui textarea,
+.swagger-ui select {
+  font-family: var(--font-sans), sans-serif;
+}
+
+.swagger-ui .opblock.opblock-post {
+  border-color: rgba(212, 110, 50, 0.35);
+}
+
+.swagger-ui .opblock.opblock-get {
+  border-color: rgba(45, 123, 92, 0.28);
+}
+
+.swagger-ui .opblock.opblock-patch {
+  border-color: rgba(126, 91, 29, 0.3);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background: #b3471f;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+  background: #1c7a51;
+}
+
+.swagger-ui .opblock.opblock-patch .opblock-summary-method {
+  background: #845417;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary {
+  border-color: rgba(179, 71, 31, 0.18);
+}
+
+.swagger-ui .opblock-tag {
+  color: #24170d;
+}
+
+.swagger-ui .btn.execute {
+  background: #b3471f;
+  border-color: #b3471f;
+}
+
+.swagger-ui .btn.execute:hover {
+  background: #842f10;
+  border-color: #842f10;
+}

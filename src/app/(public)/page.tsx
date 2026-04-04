@@ -49,6 +49,12 @@ export default function HomePage() {
             >
               Ver operacao
             </Link>
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-line/60 bg-transparent px-6 py-3 font-medium text-muted transition hover:border-line hover:text-foreground"
+              href="/api-docs"
+            >
+              Ver Swagger
+            </Link>
           </div>
         </div>
         <div className="panel rounded-[2rem] p-6 lg:p-8">

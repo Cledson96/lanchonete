@@ -4,7 +4,7 @@
   "private": true,
   "description": "Plataforma da lanchonete",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint src prisma.config.ts prisma/seed.ts next.config.ts eslint.config.mjs --max-warnings=0",
@@ -40,6 +40,7 @@
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "swagger-ui-react": "^5.32.1",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -47,6 +48,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/swagger-ui-react": "^5.18.0",
     "dotenv": "^17.4.0",
     "eslint": "^9.38.0",
     "eslint-config-next": "16.2.2",
