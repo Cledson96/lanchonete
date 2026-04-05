@@ -7,10 +7,10 @@ export const brandContent = {
   whatsappUrl: process.env.NEXT_PUBLIC_WHATSAPP_URL || fallbackWhatsAppUrl,
   location: "Rua da Familia, 128 - Centro, Sao Paulo",
   hours: "Seg a Dom, das 18h as 23h30",
-  eyebrow: "Cardapio vivo, pedido facil",
-  headline: "Abra o cardapio da noite e escolha o que sai da chapa primeiro.",
+  eyebrow: "Categorias reais, fotos reais, pedido rapido",
+  headline: "Escolha a categoria e monte seu pedido sem perder tempo.",
   subheadline:
-    "Burgers artesanais, sucos gelados e adicionais da casa em uma pagina pensada para escolher rapido, pedir bonito e matar a fome sem friccao.",
+    "Lanches, pasteis, tapiocas, acai e combos da casa em uma vitrine feita para clicar, ver as fotos e adicionar no carrinho sem confusao.",
   supportPoints: [
     "Pedido online sem enrolacao",
     "Delivery, retirada e comanda local",
@@ -24,7 +24,7 @@ export const brandContent = {
   serviceLine: ["Delivery", "Retirada", "Comanda local"],
   menuTitle: "O menu vem primeiro.",
   menuBody:
-    "A primeira leitura da home precisa te colocar diante dos sabores, dos precos e das categorias. A marca aparece no clima, no ritmo e no acabamento.",
+    "Toque na categoria, navegue pelos itens aos poucos e siga para o pedido com mais clareza visual e menos rolagem.",
   storyTitle: "Feita para mesa cheia, conversa longa e fome boa.",
   storyBody:
     "A Lanchonete Familia junta a praticidade do pedido online com o cuidado de uma casa que conhece seu bairro. O cardapio vai do burger caprichado aos sucos e adicionais que deixam cada pedido do seu jeito.",
@@ -35,5 +35,5 @@ export const brandContent = {
   ],
   finalTitle: "Escolha o seu combo da noite e a gente cuida do resto.",
   finalBody:
-    "Abra o cardapio, monte o pedido e acompanhe tudo com a mesma atencao da cozinha ao balcao.",
+    "Abra o cardapio, escolha por foto e categoria, monte o carrinho e siga para o pedido com a mesma atencao da cozinha ao balcao.",
 };

@@ -1,87 +1,134 @@
 type BrandLogoProps = {
-  theme?: "light" | "dark";
+  theme?: "light" | "dark" | "orange";
   compact?: boolean;
   className?: string;
 };
 
-const themeMap = {
+const themeStyles = {
   light: {
-    markBg: "#163224",
-    markFg: "#f7f0e7",
-    word: "#163224",
-    accent: "#d5672e",
-    whisper: "rgba(22, 50, 36, 0.72)",
+    ring: "bg-white border-[#f2d7bf]",
+    bun: "#ea6f2d",
+    lettuce: "#3d8b4f",
+    textPrimary: "#e96824",
+    textSecondary: "#8a5a34",
   },
   dark: {
-    markBg: "#f7f0e7",
-    markFg: "#163224",
-    word: "#f7f0e7",
-    accent: "#ff9955",
-    whisper: "rgba(247, 240, 231, 0.7)",
+    ring: "bg-white/12 border-white/16",
+    bun: "#ff9f5d",
+    lettuce: "#6ccb79",
+    textPrimary: "#fff2e6",
+    textSecondary: "rgba(255,242,230,0.7)",
   },
-} as const;
+  orange: {
+    ring: "bg-white/18 border-white/25",
+    bun: "#fff4eb",
+    lettuce: "#4cb95d",
+    textPrimary: "#fff4eb",
+    textSecondary: "rgba(255,244,235,0.74)",
+  },
+};
+
+function BurgerSeal({ theme }: { theme: BrandLogoProps["theme"] }) {
+  const colors = themeStyles[theme || "light"];
+
+  return (
+    <span
+      className={`relative flex shrink-0 items-center justify-center rounded-full border ${colors.ring}`}
+      style={{
+        width: 48,
+        height: 48,
+      }}
+    >
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 24,
+          height: 10,
+          top: 13,
+          background: colors.bun,
+        }}
+      />
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 28,
+          height: 4,
+          top: 23,
+          background: colors.lettuce,
+        }}
+      />
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 28,
+          height: 4,
+          top: 28,
+          background: "#6f3415",
+        }}
+      />
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 24,
+          height: 8,
+          top: 34,
+          background: colors.bun,
+        }}
+      />
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 3,
+          height: 3,
+          top: 16,
+          left: 18,
+          background: "#f7c283",
+        }}
+      />
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 3,
+          height: 3,
+          top: 15,
+          left: 27,
+          background: "#f7c283",
+        }}
+      />
+      <span
+        className="absolute rounded-full"
+        style={{
+          width: 3,
+          height: 3,
+          top: 17,
+          left: 32,
+          background: "#f7c283",
+        }}
+      />
+    </span>
+  );
+}
 
 export function BrandLogo({
   theme = "light",
   compact = false,
   className = "",
 }: BrandLogoProps) {
-  const palette = themeMap[theme];
+  const colors = themeStyles[theme];
 
   return (
     <div className={`inline-flex items-center gap-3 ${className}`.trim()}>
-      <svg
-        aria-hidden="true"
-        className={compact ? "h-11 w-11" : "h-14 w-14"}
-        viewBox="0 0 72 72"
-      >
-        <circle cx="36" cy="36" r="34" fill={palette.markBg} />
-        <circle cx="36" cy="36" r="25.5" fill="none" opacity="0.22" stroke={palette.accent} strokeWidth="2" />
-        <path
-          d="M18 34.5C20.8 26.4 27 22 36 22C45 22 51.2 26.4 54 34.5"
-          fill="none"
-          stroke={palette.markFg}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="4.2"
-        />
-        <path
-          d="M22.5 37.5H49.5"
-          fill="none"
-          stroke={palette.accent}
-          strokeLinecap="round"
-          strokeWidth="3.8"
-        />
-        <path
-          d="M23.5 41.5C26 48 30.5 51.5 36 51.5C41.5 51.5 46 48 48.5 41.5"
-          fill="none"
-          stroke={palette.markFg}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="4.2"
-        />
-        <path
-          d="M26.5 28.3L36 19.8L45.5 28.3"
-          fill="none"
-          stroke={palette.accent}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2.8"
-        />
-        <circle cx="36" cy="19.6" r="2.2" fill={palette.accent} />
-      </svg>
-      <div className="leading-none">
+      <BurgerSeal theme={theme} />
+      <div className={compact ? "leading-none" : "leading-none"}>
         <p
-          className={`font-display text-[0.7rem] uppercase tracking-[0.26em] ${
-            compact ? "mb-1" : "mb-1.5"
-          }`}
-          style={{ color: palette.whisper }}
+          className="text-[0.62rem] font-semibold uppercase tracking-[0.34em]"
+          style={{ color: colors.textSecondary }}
         >
           Lanchonete
         </p>
         <p
-          className={`font-display text-balance ${compact ? "text-2xl" : "text-[2rem] sm:text-[2.35rem]"}`}
-          style={{ color: palette.word }}
+          className={`${compact ? "text-[1.65rem]" : "text-[2.1rem]"} font-display font-bold tracking-tight`}
+          style={{ color: colors.textPrimary }}
         >
           Familia
         </p>
