@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PedidoCartSummary } from "@/components/pedido-cart-summary";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getPublicMenu } from "@/lib/services/menu-service";
 import { formatMoney } from "@/lib/utils";
@@ -109,6 +110,10 @@ export default async function PedidoPage() {
             ))}
           </div>
         </section>
+      </div>
+
+      <div className="mt-8">
+        <PedidoCartSummary />
       </div>
     </main>
   );

@@ -29,8 +29,8 @@ export function MenuItemCard({
   const [added, setAdded] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const handleAdd = useCallback(() => {
-    addItem({ id, name, price, imageUrl, categoryName });
+  const handleAdd = useCallback((notes?: string) => {
+    addItem({ menuItemId: id, name, price, imageUrl, categoryName, notes });
     openCart();
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1300);
@@ -51,9 +51,9 @@ export function MenuItemCard({
   const displayDescription =
     description?.trim() || "Ingredientes sob consulta no atendimento.";
 
-  const handleAddFromDetails = useCallback(() => {
+  const handleAddFromDetails = useCallback((notes?: string) => {
     setDetailsOpen(false);
-    handleAdd();
+    handleAdd(notes);
   }, [handleAdd]);
 
   return (
@@ -128,7 +128,7 @@ export function MenuItemCard({
               className={`flex-[1.2] cursor-pointer rounded-[1rem] px-4 py-3.5 text-sm font-bold text-white transition duration-200 active:scale-[0.98] ${
                 added ? "bg-[#6da141]" : "bg-[#567b35] hover:bg-[#47652b]"
               }`}
-              onClick={handleAdd}
+              onClick={() => handleAdd()}
               type="button"
             >
               {added ? "Adicionado" : `Adicionar - ${displayPrice}`}

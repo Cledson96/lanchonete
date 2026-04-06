@@ -2,13 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
 
 export function CartDrawer() {
-  const { state, removeItem, updateQuantity, clearCart, closeCart, totalPrice } =
-    useCart();
+  const {
+    state,
+    removeItem,
+    updateQuantity,
+    updateNotes,
+    clearCart,
+    closeCart,
+    totalPrice,
+  } = useCart();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!state.isOpen) return;
@@ -27,6 +37,19 @@ export function CartDrawer() {
     style: "currency",
     currency: "BRL",
   }).format(totalPrice);
+
+  function startEditing(itemId: string, currentNotes?: string | null) {
+    setEditingItemId(itemId);
+    setDraftNotes((prev) => ({
+      ...prev,
+      [itemId]: currentNotes ?? "",
+    }));
+  }
+
+  function saveNotes(itemId: string) {
+    updateNotes(itemId, draftNotes[itemId] ?? "");
+    setEditingItemId(null);
+  }
 
   return (
     <>
@@ -145,7 +168,7 @@ export function CartDrawer() {
                       className="object-cover"
                       fill
                       sizes="64px"
-                      src={item.imageUrl || "/landing/menu-item-placeholder.svg"}
+                      src={resolveMenuItemImage(item.imageUrl)}
                     />
                   </div>
                   <div className="flex flex-1 flex-col gap-1">
@@ -155,6 +178,64 @@ export function CartDrawer() {
                     <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[#2D7D3D]">
                       {item.categoryName}
                     </p>
+                    {editingItemId === item.id ? (
+                      <div className="mt-2 rounded-2xl border border-[#ead9c4] bg-[#fff8ef] p-3">
+                        <label
+                          className="block text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#a06f42]"
+                          htmlFor={`cart-notes-${item.id}`}
+                        >
+                          Observacao
+                        </label>
+                        <textarea
+                          className="mt-2 min-h-20 w-full rounded-[0.95rem] border border-[#dfceb8] bg-white px-3 py-2 text-sm text-[#4f4032] outline-none transition placeholder:text-[#b8a18b] focus:border-[#d5672e] focus:ring-2 focus:ring-[#f2be91]/40"
+                          id={`cart-notes-${item.id}`}
+                          maxLength={180}
+                          onChange={(event) =>
+                            setDraftNotes((prev) => ({
+                              ...prev,
+                              [item.id]: event.target.value,
+                            }))
+                          }
+                          placeholder="Ex.: sem tomate, tirar cebola..."
+                          value={draftNotes[item.id] ?? ""}
+                        />
+                        <div className="mt-2 flex gap-2">
+                          <button
+                            className="cursor-pointer rounded-full bg-[#567b35] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#47652b]"
+                            onClick={() => saveNotes(item.id)}
+                            type="button"
+                          >
+                            Salvar
+                          </button>
+                          <button
+                            className="cursor-pointer rounded-full border border-[#dfceb8] px-3 py-2 text-xs font-bold text-[#5d5142] transition hover:bg-[#f7efdf]"
+                            onClick={() => setEditingItemId(null)}
+                            type="button"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : item.notes ? (
+                      <button
+                        className="mt-2 cursor-pointer rounded-2xl bg-[#fff1df] px-3 py-2 text-left text-sm text-[#7a5f43] transition hover:bg-[#ffe6cb]"
+                        onClick={() => startEditing(item.id, item.notes)}
+                        type="button"
+                      >
+                        <span className="block text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#a06f42]">
+                          Observacao
+                        </span>
+                        <span className="mt-1 block leading-5">{item.notes}</span>
+                      </button>
+                    ) : (
+                      <button
+                        className="mt-2 cursor-pointer text-left text-xs font-semibold uppercase tracking-[0.16em] text-[#a06f42] transition hover:text-[#d5672e]"
+                        onClick={() => startEditing(item.id, item.notes)}
+                        type="button"
+                      >
+                        Adicionar observacao
+                      </button>
+                    )}
                     <div className="mt-auto flex items-center justify-between gap-2">
                       <p className="menu-price text-base font-bold text-[#D5672E]">
                         {new Intl.NumberFormat("pt-BR", {

@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 
 type MenuItemDetailDialogProps = {
   open: boolean;
   onClose: () => void;
-  onAdd: () => void;
+  onAdd: (notes?: string) => void;
   added: boolean;
   name: string;
   categoryName: string;
@@ -29,6 +29,8 @@ export function MenuItemDetailDialog({
   priceLabel,
   compareAtPriceLabel,
 }: MenuItemDetailDialogProps) {
+  const notesRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
     if (!open) return;
 
@@ -125,6 +127,26 @@ export function MenuItemDetailDialog({
             </p>
           </div>
 
+          <div className="rounded-[1.4rem] border border-[#ead9c4] bg-white px-4 py-4 sm:px-5">
+            <label
+              className="block text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#a06f42]"
+              htmlFor={`notes-${name}`}
+            >
+              Observacao do item
+            </label>
+            <p className="mt-2 text-sm text-[#7a6c59]">
+              Exemplo: sem tomate, tirar cebola, maionese a parte.
+            </p>
+            <textarea
+              className="mt-3 min-h-24 w-full rounded-[1rem] border border-[#e4d3bc] bg-[#fffaf4] px-4 py-3 text-sm text-[#433426] outline-none transition placeholder:text-[#b19a82] focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+              defaultValue=""
+              id={`notes-${name}`}
+              maxLength={180}
+              placeholder="Alguma observacao para este item?"
+              ref={notesRef}
+            />
+          </div>
+
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               className="cursor-pointer rounded-full border border-[#dfceb8] bg-white px-5 py-3.5 text-sm font-bold text-[#5d5142] transition hover:bg-[#f7efdf]"
@@ -137,7 +159,7 @@ export function MenuItemDetailDialog({
               className={`cursor-pointer rounded-full px-5 py-3.5 text-sm font-bold text-white transition ${
                 added ? "bg-[#6da141]" : "bg-[#567b35] hover:bg-[#47652b]"
               }`}
-              onClick={onAdd}
+              onClick={() => onAdd(notesRef.current?.value)}
               type="button"
             >
               {added ? "Adicionado ao carrinho" : `Adicionar - ${priceLabel}`}

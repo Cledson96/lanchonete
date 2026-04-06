@@ -10,11 +10,13 @@ import {
 
 export type CartItem = {
   id: string;
+  menuItemId: string;
   name: string;
   price: number;
   imageUrl?: string | null;
   categoryName: string;
   quantity: number;
+  notes?: string | null;
 };
 
 type CartState = {
@@ -23,30 +25,58 @@ type CartState = {
 };
 
 type CartAction =
-  | { type: "ADD_ITEM"; item: Omit<CartItem, "quantity"> }
+  | { type: "ADD_ITEM"; item: Omit<CartItem, "quantity" | "id"> }
   | { type: "REMOVE_ITEM"; id: string }
   | { type: "UPDATE_QUANTITY"; id: string; quantity: number }
+  | { type: "UPDATE_NOTES"; id: string; notes?: string | null }
   | { type: "CLEAR_CART" }
   | { type: "SET_OPEN"; open: boolean }
   | { type: "HYDRATE"; items: CartItem[] };
+
+function normalizeNotes(notes?: string | null) {
+  const trimmed = notes?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function createCartLineId(menuItemId: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `${menuItemId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "HYDRATE":
       return { ...state, items: action.items };
     case "ADD_ITEM": {
-      const existing = state.items.find((i) => i.id === action.item.id);
+      const incomingNotes = normalizeNotes(action.item.notes);
+      const existing = state.items.find(
+        (i) =>
+          i.menuItemId === action.item.menuItemId &&
+          normalizeNotes(i.notes) === incomingNotes,
+      );
+
       if (existing) {
         return {
           ...state,
           items: state.items.map((i) =>
-            i.id === action.item.id ? { ...i, quantity: i.quantity + 1 } : i,
+            i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i,
           ),
         };
       }
       return {
         ...state,
-        items: [...state.items, { ...action.item, quantity: 1 }],
+        items: [
+          ...state.items,
+          {
+            ...action.item,
+            id: createCartLineId(action.item.menuItemId),
+            notes: incomingNotes,
+            quantity: 1,
+          },
+        ],
       };
     }
     case "REMOVE_ITEM":
@@ -68,6 +98,13 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         ),
       };
     }
+    case "UPDATE_NOTES":
+      return {
+        ...state,
+        items: state.items.map((i) =>
+          i.id === action.id ? { ...i, notes: normalizeNotes(action.notes) } : i,
+        ),
+      };
     case "CLEAR_CART":
       return { ...state, items: [] };
     case "SET_OPEN":
@@ -81,9 +118,10 @@ const STORAGE_KEY = "lanchonete-cart";
 
 const CartContext = createContext<{
   state: CartState;
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity" | "id">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  updateNotes: (id: string, notes?: string | null) => void;
   clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -98,7 +136,47 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        dispatch({ type: "HYDRATE", items: JSON.parse(stored) });
+        const parsed = JSON.parse(stored);
+
+        if (Array.isArray(parsed)) {
+          const hydratedItems = parsed
+            .map((item) => {
+              if (!item || typeof item !== "object") return null;
+
+              const menuItemId =
+                typeof item.menuItemId === "string"
+                  ? item.menuItemId
+                  : typeof item.id === "string"
+                    ? item.id
+                    : null;
+
+              if (!menuItemId || typeof item.name !== "string") return null;
+
+              return {
+                id:
+                  typeof item.id === "string" && item.id.length > 0
+                    ? item.id
+                    : createCartLineId(menuItemId),
+                menuItemId,
+                name: item.name,
+                price: Number(item.price) || 0,
+                imageUrl:
+                  typeof item.imageUrl === "string" ? item.imageUrl : null,
+                categoryName:
+                  typeof item.categoryName === "string" ? item.categoryName : "",
+                quantity:
+                  typeof item.quantity === "number" && item.quantity > 0
+                    ? Math.min(Math.floor(item.quantity), 99)
+                    : 1,
+                notes: normalizeNotes(
+                  typeof item.notes === "string" ? item.notes : null,
+                ),
+              } satisfies CartItem;
+            })
+            .filter(Boolean) as CartItem[];
+
+          dispatch({ type: "HYDRATE", items: hydratedItems });
+        }
       }
     } catch {
       // ignore parse errors
@@ -113,7 +191,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.items]);
 
-  const addItem = useCallback((item: Omit<CartItem, "quantity">) => {
+  const addItem = useCallback((item: Omit<CartItem, "quantity" | "id">) => {
     dispatch({ type: "ADD_ITEM", item });
   }, []);
 
@@ -123,6 +201,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
     dispatch({ type: "UPDATE_QUANTITY", id, quantity });
+  }, []);
+
+  const updateNotes = useCallback((id: string, notes?: string | null) => {
+    dispatch({ type: "UPDATE_NOTES", id, notes });
   }, []);
 
   const clearCart = useCallback(() => {
@@ -150,6 +232,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         addItem,
         removeItem,
         updateQuantity,
+        updateNotes,
         clearCart,
         openCart,
         closeCart,
