@@ -1,14 +1,13 @@
-import { requireCustomer } from "@/lib/auth/customer";
 import { handleRouteError, ok } from "@/lib/http";
-import { getCustomerById } from "@/lib/services/customer-service";
+import { readRequestBody } from "@/lib/request";
+import { getCustomerCheckoutProfileByPhone } from "@/lib/services/customer-service";
+import { customerLookupSchema } from "@/lib/validators";
 
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const session = await requireCustomer();
-    const customer = await getCustomerById(session.customerProfileId);
-
+    const input = await readRequestBody(request, customerLookupSchema);
+    const customer = await getCustomerCheckoutProfileByPhone(input.phone);
     const defaultAddress = customer?.defaultAddress || customer?.addresses[0] || null;
-    const lastOrder = customer?.orders[0] || null;
 
     return ok({
       customer: customer
@@ -29,8 +28,8 @@ export async function GET() {
                   reference: defaultAddress.reference,
                 }
               : null,
-            lastPaymentMethod: lastOrder?.paymentMethod || null,
-            lastOrderType: lastOrder?.type || null,
+            lastPaymentMethod: customer.orders[0]?.paymentMethod || null,
+            lastOrderType: customer.orders[0]?.type || null,
           }
         : null,
     });

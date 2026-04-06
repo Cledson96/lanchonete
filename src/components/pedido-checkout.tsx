@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
@@ -48,12 +48,40 @@ type ConfirmVerificationResponse = {
   };
 };
 
+type CheckoutAddress = {
+  id: string;
+  street: string;
+  number: string;
+  complement?: string | null;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode?: string | null;
+  reference?: string | null;
+};
+
+type CheckoutCustomerSnapshot = {
+  id: string;
+  fullName?: string | null;
+  phone: string;
+  defaultAddress?: CheckoutAddress | null;
+  lastPaymentMethod?: PaymentMethod | null;
+  lastOrderType?: FulfillmentType | "local" | null;
+};
+
 type CustomerMeResponse = {
   customer: {
     id: string;
     fullName?: string | null;
     phone: string;
+    defaultAddress?: CheckoutAddress | null;
+    lastPaymentMethod?: PaymentMethod | null;
+    lastOrderType?: FulfillmentType | "local" | null;
   } | null;
+};
+
+type CustomerLookupResponse = {
+  customer: CheckoutCustomerSnapshot | null;
 };
 
 type CreateOrderResponse = {
@@ -146,6 +174,9 @@ export function PedidoCheckout() {
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [devCodePreview, setDevCodePreview] = useState<string | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
+  const [customerLookupLoading, setCustomerLookupLoading] = useState(false);
+  const [customerLookupMessage, setCustomerLookupMessage] = useState<string | null>(null);
+  const [customerLookupPhone, setCustomerLookupPhone] = useState("");
 
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
@@ -168,6 +199,47 @@ export function PedidoCheckout() {
     fulfillmentType === "delivery" ? deliveryQuote?.feeAmount || 0 : 0;
   const totalAmount = subtotal + deliveryFeeAmount;
 
+  const applyAddress = useCallback((address?: CheckoutAddress | null) => {
+    if (!address) return;
+
+    setStreet(address.street || "");
+    setNumber(address.number || "");
+    setComplement(address.complement || "");
+    setNeighborhood(address.neighborhood || "");
+    setCity(address.city || "");
+    setStateCode(address.state || "");
+    setZipCode(address.zipCode || "");
+    setReference(address.reference || "");
+  }, []);
+
+  const clearAddress = useCallback(() => {
+    setStreet("");
+    setNumber("");
+    setComplement("");
+    setNeighborhood("");
+    setCity("");
+    setStateCode("");
+    setZipCode("");
+    setReference("");
+  }, []);
+
+  const applyCustomerSnapshot = useCallback((
+    customer: CheckoutCustomerSnapshot,
+    options?: { preserveVerified?: boolean },
+  ) => {
+    setCustomerName(customer.fullName || "");
+    setPaymentMethod(customer.lastPaymentMethod || "pix");
+    applyAddress(customer.defaultAddress);
+    setCustomerLookupPhone(customer.phone);
+    setCustomerLookupMessage("Cliente encontrado. Preenchemos os dados salvos.");
+
+    if (options?.preserveVerified) {
+      setVerificationConfirmed(true);
+      setVerifiedPhone(customer.phone);
+      setVerificationMessage("Telefone ja validado para esta sessao.");
+    }
+  }, [applyAddress]);
+
   useEffect(() => {
     let active = true;
 
@@ -175,11 +247,8 @@ export function PedidoCheckout() {
       .then((payload) => {
         if (!active || !payload.customer) return;
 
-        setCustomerName((current) => current || payload.customer?.fullName || "");
-        setCustomerPhone((current) => current || payload.customer?.phone || "");
-        setVerificationConfirmed(true);
-        setVerifiedPhone(payload.customer.phone);
-        setVerificationMessage("Telefone ja validado para esta sessao.");
+        setCustomerPhone(payload.customer.phone);
+        applyCustomerSnapshot(payload.customer, { preserveVerified: true });
       })
       .catch(() => {
         if (!active) return;
@@ -193,7 +262,7 @@ export function PedidoCheckout() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [applyCustomerSnapshot]);
 
   useEffect(() => {
     const normalizedCurrentPhone = normalizePhoneForCompare(customerPhone);
@@ -206,6 +275,62 @@ export function PedidoCheckout() {
       setVerificationMessage("Telefone alterado. Confirme novamente antes de finalizar.");
     }
   }, [customerPhone, verifiedPhone]);
+
+  useEffect(() => {
+    const normalizedPhone = normalizePhoneForCompare(customerPhone);
+
+    if (digitsOnly(customerPhone).length < 10) {
+      setCustomerLookupLoading(false);
+      setCustomerLookupMessage(null);
+      return;
+    }
+
+    if (normalizedPhone === verifiedPhone || normalizedPhone === customerLookupPhone) {
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      setCustomerLookupLoading(true);
+      setCustomerLookupMessage(null);
+
+      try {
+        const payload = await readJson<CustomerLookupResponse>("/api/customer/lookup", {
+          method: "POST",
+          body: JSON.stringify({
+            phone: customerPhone,
+          }),
+        });
+
+        if (payload.customer) {
+          applyCustomerSnapshot(payload.customer);
+        } else {
+          setCustomerLookupPhone(normalizedPhone);
+          setCustomerLookupMessage(
+            "Nao encontramos cadastro anterior para esse telefone. Pode continuar e preencher os dados.",
+          );
+          setCustomerName("");
+          setPaymentMethod("pix");
+          clearAddress();
+        }
+      } catch (error) {
+        setCustomerLookupMessage(
+          error instanceof Error ? error.message : "Nao foi possivel consultar o cadastro.",
+        );
+      } finally {
+        setCustomerLookupLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [
+    customerPhone,
+    verifiedPhone,
+    customerLookupPhone,
+    applyCustomerSnapshot,
+    clearAddress,
+  ]);
 
   useEffect(() => {
     if (fulfillmentType !== "delivery") {
@@ -448,6 +573,56 @@ export function PedidoCheckout() {
               </Link>
             </div>
           </div>
+
+          <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div className="max-w-2xl">
+                <p className="eyebrow mb-3">Primeiro passo</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                  Informe seu telefone
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-muted">
+                  Se este numero ja tiver historico na {brandContent.shortName},
+                  vamos puxar nome, endereco padrao e a ultima forma de pagamento.
+                </p>
+              </div>
+              <span className="rounded-full bg-[#eef5e8] px-4 py-2 text-sm font-semibold text-[#567b35]">
+                {verificationConfirmed ? "Telefone validado" : "Telefone primeiro"}
+              </span>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-foreground">
+                  WhatsApp do cliente
+                </span>
+                <input
+                  className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                  onChange={(event) => setCustomerPhone(event.target.value)}
+                  placeholder="(11) 99999-0000"
+                  value={customerPhone}
+                />
+              </label>
+
+              <div className="flex items-end">
+                <div className="rounded-[1rem] border border-line bg-white px-4 py-3 text-sm leading-6 text-muted">
+                  {customerLookupLoading
+                    ? "Buscando cadastro..."
+                    : isLoadingCustomer
+                      ? "Verificando sessao..."
+                      : verificationConfirmed
+                        ? "Telefone liberado para finalizar."
+                        : "Vamos buscar o historico assim que o numero estiver completo."}
+                </div>
+              </div>
+            </div>
+
+            {customerLookupMessage ? (
+              <div className="mt-4 rounded-[1.3rem] border border-line bg-white/88 px-4 py-4 text-sm leading-6 text-muted">
+                {customerLookupMessage}
+              </div>
+            ) : null}
+          </section>
 
           <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
             <div className="flex items-center justify-between gap-4">
@@ -746,7 +921,7 @@ export function PedidoCheckout() {
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
               Quem vai receber o pedido
             </h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="mt-5 grid gap-4 md:grid-cols-1">
               <label className="block">
                 <span className="mb-2 block text-sm font-semibold text-foreground">
                   Nome
@@ -756,17 +931,6 @@ export function PedidoCheckout() {
                   onChange={(event) => setCustomerName(event.target.value)}
                   placeholder="Seu nome"
                   value={customerName}
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-foreground">
-                  Telefone
-                </span>
-                <input
-                  className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
-                  onChange={(event) => setCustomerPhone(event.target.value)}
-                  placeholder="(11) 99999-0000"
-                  value={customerPhone}
                 />
               </label>
             </div>

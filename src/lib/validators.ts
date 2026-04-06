@@ -58,6 +58,10 @@ export const verificationRequestSchema = z.object({
   customerName: optionalStringField,
 });
 
+export const customerLookupSchema = z.object({
+  phone: phoneSchema,
+});
+
 export const verificationConfirmSchema = z.object({
   phone: phoneSchema,
   code: stringField.regex(/^\d{6}$/, "Codigo invalido."),

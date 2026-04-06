@@ -131,6 +131,15 @@ export async function createOrder(input: CreateOrderInput) {
   const totalAmount = subtotal + deliveryFeeAmount;
 
   return prisma.$transaction(async (tx) => {
+    if (input.customerProfileId) {
+      await tx.customerProfile.update({
+        where: { id: input.customerProfileId },
+        data: {
+          fullName: input.customerName,
+        },
+      });
+    }
+
     const address =
       input.type === "delivery" && input.address
         ? await tx.address.create({
@@ -149,6 +158,32 @@ export async function createOrder(input: CreateOrderInput) {
             },
           })
         : null;
+
+    if (input.customerProfileId && address) {
+      await tx.address.updateMany({
+        where: {
+          customerProfileId: input.customerProfileId,
+          NOT: { id: address.id },
+        },
+        data: {
+          isDefault: false,
+        },
+      });
+
+      await tx.address.update({
+        where: { id: address.id },
+        data: {
+          isDefault: true,
+        },
+      });
+
+      await tx.customerProfile.update({
+        where: { id: input.customerProfileId },
+        data: {
+          defaultAddressId: address.id,
+        },
+      });
+    }
 
     const order = await tx.order.create({
       data: {
