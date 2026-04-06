@@ -28,9 +28,23 @@ export function MenuItemCard({
   const { addItem, openCart } = useCart();
   const [added, setAdded] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsVersion, setDetailsVersion] = useState(0);
 
-  const handleAdd = useCallback((notes?: string) => {
-    addItem({ menuItemId: id, name, price, imageUrl, categoryName, notes });
+  const openDetails = useCallback(() => {
+    setDetailsVersion((current) => current + 1);
+    setDetailsOpen(true);
+  }, []);
+
+  const handleAdd = useCallback((notes?: string, quantity = 1) => {
+    addItem({
+      menuItemId: id,
+      name,
+      price,
+      imageUrl,
+      categoryName,
+      notes,
+      quantity,
+    });
     openCart();
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1300);
@@ -51,9 +65,9 @@ export function MenuItemCard({
   const displayDescription =
     description?.trim() || "Ingredientes sob consulta no atendimento.";
 
-  const handleAddFromDetails = useCallback((notes?: string) => {
+  const handleAddFromDetails = useCallback((notes?: string, quantity = 1) => {
     setDetailsOpen(false);
-    handleAdd(notes);
+    handleAdd(notes, quantity);
   }, [handleAdd]);
 
   return (
@@ -62,7 +76,7 @@ export function MenuItemCard({
         <button
           aria-label={`Ver detalhes de ${name}`}
           className="relative h-48 cursor-pointer overflow-hidden bg-[#fff0df] text-left"
-          onClick={() => setDetailsOpen(true)}
+          onClick={openDetails}
           type="button"
         >
           <Image
@@ -86,7 +100,7 @@ export function MenuItemCard({
           <div className="min-h-[9.25rem]">
             <button
               className="cursor-pointer text-left"
-              onClick={() => setDetailsOpen(true)}
+              onClick={openDetails}
               type="button"
             >
               <h3 className="text-[1.35rem] font-display font-semibold leading-tight text-[#2b2013] transition hover:text-[#567b35]">
@@ -118,7 +132,7 @@ export function MenuItemCard({
           <div className="mt-5 flex gap-2.5">
             <button
               className="flex-1 cursor-pointer rounded-[1rem] border border-[#d9ceb8] bg-white px-4 py-3.5 text-sm font-bold text-[#5f5443] transition hover:bg-[#f7efdf]"
-              onClick={() => setDetailsOpen(true)}
+              onClick={openDetails}
               type="button"
             >
               Ver item
@@ -128,10 +142,10 @@ export function MenuItemCard({
               className={`flex-[1.2] cursor-pointer rounded-[1rem] px-4 py-3.5 text-sm font-bold text-white transition duration-200 active:scale-[0.98] ${
                 added ? "bg-[#6da141]" : "bg-[#567b35] hover:bg-[#47652b]"
               }`}
-              onClick={() => handleAdd()}
+              onClick={openDetails}
               type="button"
             >
-              {added ? "Adicionado" : `Adicionar - ${displayPrice}`}
+              {added ? "Adicionado" : `Adicionar pedido`}
             </button>
           </div>
         </div>
@@ -143,10 +157,12 @@ export function MenuItemCard({
         compareAtPriceLabel={displayCompare}
         description={displayDescription}
         imageUrl={imageUrl}
+        key={`${id}-${detailsVersion}`}
         name={name}
         onAdd={handleAddFromDetails}
         onClose={() => setDetailsOpen(false)}
         open={detailsOpen}
+        price={price}
         priceLabel={displayPrice}
       />
     </>

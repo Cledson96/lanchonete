@@ -1,18 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 
 type MenuItemDetailDialogProps = {
   open: boolean;
   onClose: () => void;
-  onAdd: (notes?: string) => void;
+  onAdd: (notes?: string, quantity?: number) => void;
   added: boolean;
   name: string;
   categoryName: string;
   description?: string | null;
   imageUrl?: string | null;
+  price: number;
   priceLabel: string;
   compareAtPriceLabel?: string | null;
 };
@@ -26,10 +27,12 @@ export function MenuItemDetailDialog({
   categoryName,
   description,
   imageUrl,
+  price,
   priceLabel,
   compareAtPriceLabel,
 }: MenuItemDetailDialogProps) {
   const notesRef = useRef<HTMLTextAreaElement>(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (!open) return;
@@ -147,6 +150,64 @@ export function MenuItemDetailDialog({
             />
           </div>
 
+          <div className="rounded-[1.4rem] border border-[#ead9c4] bg-white px-4 py-4 sm:px-5">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#a06f42]">
+              Quantidade
+            </p>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#dfceb8] bg-[#fff8ef] p-1">
+              <button
+                aria-label="Diminuir quantidade"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-[#5d5142] transition hover:bg-[#f7efdf]"
+                onClick={() => setQuantity((current) => Math.max(current - 1, 1))}
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <span className="min-w-10 text-center text-lg font-bold text-[#2a1d14]">
+                {quantity}
+              </span>
+              <button
+                aria-label="Aumentar quantidade"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-[#5d5142] transition hover:bg-[#f7efdf]"
+                onClick={() => setQuantity((current) => Math.min(current + 1, 99))}
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 5v14m-7-7h14"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <p className="mt-3 text-sm text-[#7a6c59]">
+              Total deste item:{" "}
+              <span className="font-semibold text-[#db7324]">
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(price * quantity)}
+              </span>
+            </p>
+          </div>
+
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               className="cursor-pointer rounded-full border border-[#dfceb8] bg-white px-5 py-3.5 text-sm font-bold text-[#5d5142] transition hover:bg-[#f7efdf]"
@@ -159,10 +220,12 @@ export function MenuItemDetailDialog({
               className={`cursor-pointer rounded-full px-5 py-3.5 text-sm font-bold text-white transition ${
                 added ? "bg-[#6da141]" : "bg-[#567b35] hover:bg-[#47652b]"
               }`}
-              onClick={() => onAdd(notesRef.current?.value)}
+              onClick={() => onAdd(notesRef.current?.value, quantity)}
               type="button"
             >
-              {added ? "Adicionado ao carrinho" : `Adicionar - ${priceLabel}`}
+              {added
+                ? "Adicionado ao carrinho"
+                : `Adicionar ${quantity} ${quantity > 1 ? "itens" : "item"}`}
             </button>
           </div>
         </div>

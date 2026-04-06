@@ -25,7 +25,7 @@ type CartState = {
 };
 
 type CartAction =
-  | { type: "ADD_ITEM"; item: Omit<CartItem, "quantity" | "id"> }
+  | { type: "ADD_ITEM"; item: Omit<CartItem, "id"> }
   | { type: "REMOVE_ITEM"; id: string }
   | { type: "UPDATE_QUANTITY"; id: string; quantity: number }
   | { type: "UPDATE_NOTES"; id: string; notes?: string | null }
@@ -52,6 +52,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return { ...state, items: action.items };
     case "ADD_ITEM": {
       const incomingNotes = normalizeNotes(action.item.notes);
+      const incomingQuantity = Math.min(Math.max(action.item.quantity, 1), 99);
       const existing = state.items.find(
         (i) =>
           i.menuItemId === action.item.menuItemId &&
@@ -62,7 +63,9 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         return {
           ...state,
           items: state.items.map((i) =>
-            i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i,
+            i.id === existing.id
+              ? { ...i, quantity: i.quantity + incomingQuantity }
+              : i,
           ),
         };
       }
@@ -74,7 +77,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
             ...action.item,
             id: createCartLineId(action.item.menuItemId),
             notes: incomingNotes,
-            quantity: 1,
+            quantity: incomingQuantity,
           },
         ],
       };
@@ -118,7 +121,7 @@ const STORAGE_KEY = "lanchonete-cart";
 
 const CartContext = createContext<{
   state: CartState;
-  addItem: (item: Omit<CartItem, "quantity" | "id">) => void;
+  addItem: (item: Omit<CartItem, "id">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   updateNotes: (id: string, notes?: string | null) => void;
@@ -191,7 +194,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.items]);
 
-  const addItem = useCallback((item: Omit<CartItem, "quantity" | "id">) => {
+  const addItem = useCallback((item: Omit<CartItem, "id">) => {
     dispatch({ type: "ADD_ITEM", item });
   }, []);
 
