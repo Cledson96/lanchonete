@@ -775,16 +775,16 @@ export function PedidoCheckout() {
             <p className="eyebrow mb-3">Pedido online</p>
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div className="max-w-2xl">
-                <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-[3.3rem]">
+                <h1 className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-[3.3rem]">
                   Feche seu pedido com entrega ou retirada.
                 </h1>
-                <p className="mt-3 max-w-xl text-base leading-7 text-muted">
+                <p className="mt-3 max-w-xl text-base leading-7 text-[var(--muted)]">
                   Revise os itens, confirme seu telefone e envie tudo em uma unica
                   etapa, sem sair da tela.
                 </p>
               </div>
               <Link
-                className="inline-flex rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold text-foreground transition hover:border-[#d7b386] hover:bg-[#fff0dd]"
+                className="inline-flex rounded-[1rem] border border-[var(--line)] bg-[var(--surface)] px-5 py-3 text-[0.88rem] font-bold text-[var(--muted)] transition-all duration-300 hover:border-[var(--brand-orange)]/50 hover:bg-[var(--brand-orange)]/5 hover:text-[var(--brand-orange-dark)] hover:-translate-y-0.5 shadow-sm hover:shadow-md"
                 href="/#cardapio"
               >
                 Voltar ao cardapio
@@ -796,26 +796,26 @@ export function PedidoCheckout() {
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div className="max-w-2xl">
                 <p className="eyebrow mb-3">Primeiro passo</p>
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
                   Informe seu telefone
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-muted">
+                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
                   Se este numero ja tiver historico na {brandContent.shortName},
                   vamos puxar nome, endereco padrao e a ultima forma de pagamento.
                 </p>
               </div>
-              <span className="rounded-full bg-[#eef5e8] px-4 py-2 text-sm font-semibold text-[#567b35]">
+              <span className={`rounded-full px-4 py-2 text-[0.8rem] font-bold ${verificationConfirmed ? "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)]" : "bg-[var(--muted)]/5 text-[var(--muted)]"}`}>
                 {verificationConfirmed ? "Telefone validado" : "Telefone primeiro"}
               </span>
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-foreground">
+                <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                   WhatsApp do cliente
                 </span>
                 <input
-                  className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                  className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                   inputMode="numeric"
                   onChange={(event) => setCustomerPhone(formatPhoneNumber(event.target.value))}
                   placeholder="(11) 99999-0000"
@@ -824,7 +824,7 @@ export function PedidoCheckout() {
               </label>
 
               <div className="flex items-end">
-                <div className="rounded-[1rem] border border-line bg-white px-4 py-3 text-sm leading-6 text-muted">
+                <div className="rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-6 text-[var(--muted)]">
                   {customerLookupLoading
                     ? "Buscando cadastro..."
                     : isLoadingCustomer
@@ -837,7 +837,7 @@ export function PedidoCheckout() {
             </div>
 
             {customerLookupMessage ? (
-              <div className="mt-4 rounded-[1.3rem] border border-line bg-white/88 px-4 py-4 text-sm leading-6 text-muted">
+              <div className="mt-4 rounded-[1.3rem] border border-[var(--line)] bg-white/88 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
                 {customerLookupMessage}
               </div>
             ) : null}
@@ -847,26 +847,26 @@ export function PedidoCheckout() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="eyebrow mb-2">Seu pedido</p>
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
                   Itens escolhidos
                 </h2>
               </div>
-              <span className="rounded-full bg-[#fff0dd] px-4 py-2 text-sm font-semibold text-[#a55a20]">
+              <span className="rounded-full bg-[var(--brand-orange)]/10 px-4 py-2 text-[0.8rem] font-bold text-[var(--brand-orange-dark)]">
                 {state.items.length} {state.items.length === 1 ? "item" : "itens"}
               </span>
             </div>
 
             {state.items.length === 0 ? (
-              <div className="mt-5 rounded-[1.6rem] border border-dashed border-line bg-white/80 px-5 py-8 text-center">
-                <p className="text-lg font-semibold text-foreground">
+              <div className="mt-5 rounded-[1.6rem] border border-dashed border-[var(--line)] bg-white/80 px-5 py-8 text-center">
+                <p className="text-lg font-semibold text-[var(--foreground)]">
                   Seu carrinho esta vazio.
                 </p>
-                <p className="mt-2 text-sm leading-6 text-muted">
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   Volte para o cardapio e adicione lanches, combos, pasteis,
                   tapiocas ou acai para continuar.
                 </p>
                 <Link
-                  className="mt-5 inline-flex rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong"
+                  className="mt-5 inline-flex rounded-[1.2rem] bg-[var(--brand-orange)] px-6 py-3 text-[0.95rem] font-bold text-white transition-all shadow-[0_4px_14px_rgba(242,122,34,0.3)] hover:bg-[var(--brand-orange-dark)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(242,122,34,0.4)]"
                   href="/#cardapio"
                 >
                   Escolher itens
@@ -877,7 +877,7 @@ export function PedidoCheckout() {
                 {state.items.map((item) => (
                   <article
                     key={item.id}
-                    className="grid gap-4 rounded-[1.6rem] border border-line bg-white/88 p-4 md:grid-cols-[5.5rem_minmax(0,1fr)_auto]"
+                    className="group grid gap-4 rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm transition-all hover:shadow-md hover:border-[var(--brand-orange)]/30 md:grid-cols-[6.5rem_minmax(0,1fr)_auto]"
                   >
                     <div className="relative h-22 overflow-hidden rounded-[1.15rem] bg-background-strong md:h-24">
                       <Image
@@ -892,31 +892,31 @@ export function PedidoCheckout() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-xl font-semibold text-foreground">{item.name}</h3>
-                          <p className="mt-1 text-[0.72rem] uppercase tracking-[0.18em] text-muted">
+                          <h3 className="text-xl font-semibold text-[var(--foreground)]">{item.name}</h3>
+                          <p className="mt-1 text-[0.72rem] uppercase tracking-[0.18em] text-[var(--muted)]">
                             {item.categoryName}
                           </p>
                         </div>
-                        <p className="menu-price text-xl font-bold text-accent">
+                        <p className="menu-price text-xl font-bold text-[var(--brand-orange)]">
                           {formatMoney(item.price * item.quantity)}
                         </p>
                       </div>
 
-                      <div className="mt-3 rounded-[1.1rem] bg-[#fff6ea] px-4 py-3">
-                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#a06f42]">
+                      <div className="mt-3 rounded-[1rem] bg-[var(--brand-orange)]/5 px-4 py-3 border border-[var(--brand-orange)]/10">
+                        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[var(--brand-orange-dark)]">
                           Observacao do item
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-[#6f5d4a]">
+                        <p className="mt-1 text-[0.85rem] leading-6 text-[var(--foreground)]">
                           {item.notes || "Sem observacao para este item."}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex flex-row items-center justify-between gap-3 md:flex-col md:items-end">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-[#dfceb8] bg-[#fff8ef] p-1">
+                      <div className="inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                         <button
                           aria-label="Diminuir quantidade"
-                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[#5d5142] transition hover:bg-[#f7efdf]"
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[var(--foreground)] transition-all hover:bg-[var(--brand-green)] hover:text-white active:scale-95"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           type="button"
                         >
@@ -931,12 +931,12 @@ export function PedidoCheckout() {
                             <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
-                        <span className="min-w-8 text-center text-base font-bold text-foreground">
+                        <span className="min-w-6 text-center text-[0.95rem] font-bold text-[var(--foreground)]">
                           {item.quantity}
                         </span>
                         <button
                           aria-label="Aumentar quantidade"
-                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[#5d5142] transition hover:bg-[#f7efdf]"
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[var(--foreground)] transition-all hover:bg-[var(--brand-orange)] hover:text-white active:scale-95"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           type="button"
                         >
@@ -957,7 +957,7 @@ export function PedidoCheckout() {
                         </button>
                       </div>
                       <button
-                        className="cursor-pointer rounded-full border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                        className="cursor-pointer rounded-[0.8rem] border border-transparent px-4 py-2 text-[0.85rem] font-semibold text-[var(--muted)] transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 mt-2 md:mt-0"
                         onClick={() => removeItem(item.id)}
                         type="button"
                       >
@@ -972,7 +972,7 @@ export function PedidoCheckout() {
 
           <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
             <p className="eyebrow mb-3">Como quer receber</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
               Entrega ou retirada
             </h2>
 
@@ -980,28 +980,28 @@ export function PedidoCheckout() {
               <button
                 className={`cursor-pointer rounded-[1.4rem] border px-5 py-4 text-left transition ${
                   fulfillmentType === "delivery"
-                    ? "border-[#d97428] bg-[#fff0dd] shadow-[0_18px_30px_rgba(219,115,36,0.12)]"
-                    : "border-line bg-white hover:border-[#e3c3a0]"
+                    ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 shadow-[0_18px_30px_rgba(242,122,34,0.15)]"
+                    : "border-[var(--line)] bg-white hover:border-[var(--brand-orange)]/40 hover:bg-[var(--surface)] hover:shadow-md hover:-translate-y-0.5"
                 }`}
                 onClick={() => setFulfillmentType("delivery")}
                 type="button"
               >
-                <p className="text-lg font-semibold text-foreground">Entrega</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
+                <p className="text-lg font-semibold text-[var(--foreground)]">Entrega</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   Calcule o frete por bairro ou CEP e receba em casa.
                 </p>
               </button>
               <button
                 className={`cursor-pointer rounded-[1.4rem] border px-5 py-4 text-left transition ${
                   fulfillmentType === "retirada"
-                    ? "border-[#567b35] bg-[#eef5e8] shadow-[0_18px_30px_rgba(86,123,53,0.12)]"
-                    : "border-line bg-white hover:border-[#c7d9b5]"
+                    ? "border-[var(--brand-green)] bg-[var(--brand-green)]/10 shadow-[0_18px_30px_rgba(140,198,63,0.15)]"
+                    : "border-[var(--line)] bg-white hover:border-[var(--brand-green)]/40 hover:bg-[var(--surface)] hover:shadow-md hover:-translate-y-0.5"
                 }`}
                 onClick={() => setFulfillmentType("retirada")}
                 type="button"
               >
-                <p className="text-lg font-semibold text-foreground">Retirada</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
+                <p className="text-lg font-semibold text-[var(--foreground)]">Retirada</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   Retire direto na loja e finalize sem custo de entrega.
                 </p>
               </button>
@@ -1010,11 +1010,11 @@ export function PedidoCheckout() {
             {fulfillmentType === "delivery" ? (
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     CEP
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     inputMode="numeric"
                     onChange={(event) => setZipCode(formatZipCode(event.target.value))}
                     placeholder="00000-000"
@@ -1022,11 +1022,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Rua
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields || streetLocked}
                     onChange={(event) => setStreet(event.target.value)}
                     placeholder={
@@ -1040,11 +1040,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Numero
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields}
                     onChange={(event) => setNumber(event.target.value)}
                     placeholder={!canEditAddressFields ? "Digite o CEP primeiro" : "123"}
@@ -1052,11 +1052,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Complemento
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields || complementLocked}
                     onChange={(event) => setComplement(event.target.value)}
                     placeholder={
@@ -1070,11 +1070,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Bairro
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields || neighborhoodLocked}
                     onChange={(event) => setNeighborhood(event.target.value)}
                     placeholder={
@@ -1088,11 +1088,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Cidade
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields || cityLocked}
                     onChange={(event) => setCity(event.target.value)}
                     placeholder={
@@ -1106,11 +1106,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Estado
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 uppercase outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 uppercase outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields || stateLocked}
                     maxLength={2}
                     onChange={(event) => setStateCode(event.target.value.toUpperCase())}
@@ -1125,11 +1125,11 @@ export function PedidoCheckout() {
                   />
                 </label>
                 <label className="block md:col-span-2">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
+                  <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                     Referencia
                   </span>
                   <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     disabled={!canEditAddressFields}
                     onChange={(event) => setReference(event.target.value)}
                     placeholder={!canEditAddressFields ? "Digite o CEP primeiro" : "Perto de..."}
@@ -1137,7 +1137,7 @@ export function PedidoCheckout() {
                   />
                 </label>
 
-                <div className="md:col-span-2 rounded-[1.3rem] border border-line bg-white/88 px-4 py-4 text-sm leading-6 text-muted">
+                <div className="md:col-span-2 rounded-[1.3rem] border border-[var(--line)] bg-white/88 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
                   {zipLookupLoading
                     ? "Buscando endereco pelo CEP..."
                     : zipLookupMessage ||
@@ -1145,20 +1145,20 @@ export function PedidoCheckout() {
                 </div>
               </div>
             ) : (
-              <div className="mt-6 rounded-[1.4rem] border border-[#d9e6cb] bg-[#f4f8ef] px-5 py-4 text-sm leading-6 text-[#567b35]">
+              <div className="mt-6 rounded-[1rem] border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 px-5 py-4 text-[0.88rem] leading-6 text-[var(--brand-green-dark)] font-medium">
                 Retirada selecionada. O pedido sera separado para buscar na{" "}
                 {brandContent.location}.
               </div>
             )}
 
             {fulfillmentType === "delivery" ? (
-              <div className="mt-5 rounded-[1.4rem] border border-line bg-white/85 px-5 py-4">
+              <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-5 py-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-foreground">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
                       Status do frete
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-muted">
+                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
                       {deliveryQuoteLoading
                         ? "Calculando frete..."
                         : deliveryQuote
@@ -1169,7 +1169,7 @@ export function PedidoCheckout() {
                     </p>
                   </div>
                   {deliveryQuote ? (
-                    <span className="rounded-full bg-[#eef5e8] px-4 py-2 text-sm font-semibold text-[#567b35]">
+                    <span className="rounded-full bg-[var(--brand-green)]/10 px-4 py-2 text-[0.8rem] font-bold text-[var(--brand-green-dark)]">
                       {deliveryQuote.estimatedMinMinutes && deliveryQuote.estimatedMaxMinutes
                         ? `${deliveryQuote.estimatedMinMinutes}-${deliveryQuote.estimatedMaxMinutes} min`
                         : "Entrega disponivel"}
@@ -1182,16 +1182,16 @@ export function PedidoCheckout() {
 
           <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
             <p className="eyebrow mb-3">Seus dados</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
               Quem vai receber o pedido
             </h2>
             <div className="mt-5 grid gap-4 md:grid-cols-1">
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-foreground">
+                <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                   Nome
                 </span>
                 <input
-                  className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                  className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                   onChange={(event) => setCustomerName(event.target.value)}
                   placeholder="Seu nome"
                   value={customerName}
@@ -1199,9 +1199,9 @@ export function PedidoCheckout() {
               </label>
             </div>
 
-            <div className="mt-5 rounded-[1.4rem] border border-line bg-white/85 px-5 py-4">
-              <p className="text-sm font-semibold text-foreground">Sessao atual</p>
-              <p className="mt-1 text-sm leading-6 text-muted">
+            <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-5 py-4">
+              <p className="text-sm font-semibold text-[var(--foreground)]">Sessao atual</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
                 {isLoadingCustomer
                   ? "Verificando se ja existe telefone validado..."
                   : verificationConfirmed
@@ -1213,7 +1213,7 @@ export function PedidoCheckout() {
 
           <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
             <p className="eyebrow mb-3">Pagamento</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
               Como vai pagar
             </h2>
 
@@ -1221,25 +1221,21 @@ export function PedidoCheckout() {
               {paymentOptions.map((option) => (
                 <button
                   key={option.value}
-                  className={`cursor-pointer rounded-[1.3rem] border px-4 py-4 text-left transition ${
-                    paymentMethod === option.value
-                      ? "border-[#d97428] bg-[#fff0dd]"
-                      : "border-line bg-white hover:border-[#e3c3a0]"
-                  }`}
+                  className={`cursor-pointer rounded-[1.2rem] border px-4 py-4 text-left transition-all duration-300 ${paymentMethod === option.value ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 shadow-[0_8px_20px_rgba(242,122,34,0.15)] -translate-y-0.5" : "border-[var(--line)] bg-[var(--surface)] hover:border-[var(--brand-orange)]/40 hover:shadow-md hover:-translate-y-0.5"}`}
                   onClick={() => setPaymentMethod(option.value)}
                   type="button"
                 >
-                  <p className="text-base font-semibold text-foreground">{option.label}</p>
+                  <p className="text-base font-semibold text-[var(--foreground)]">{option.label}</p>
                 </button>
               ))}
             </div>
 
             <label className="mt-5 block">
-              <span className="mb-2 block text-sm font-semibold text-foreground">
+              <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                 Observacao geral do pedido
               </span>
               <textarea
-                className="min-h-28 w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition placeholder:text-[#b9a490] focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                className="min-h-28 w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition placeholder:text-[var(--muted)]/50 focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                 maxLength={250}
                 onChange={(event) => setOrderNotes(event.target.value)}
                 placeholder="Ex.: enviar guardanapo, troco para 50, tocar interfone..."
@@ -1250,10 +1246,10 @@ export function PedidoCheckout() {
 
           <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
             <p className="eyebrow mb-3">Confirmacao do telefone</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
               Valide seu WhatsApp antes de finalizar
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
               O pedido so e enviado depois que o telefone for confirmado. Assim a
               loja consegue localizar voce e atualizar o status sem erro.
             </p>
@@ -1262,12 +1258,12 @@ export function PedidoCheckout() {
               <span
                 className={`rounded-full px-4 py-2 text-sm font-semibold ${
                   verificationConfirmed
-                    ? "bg-[#eef5e8] text-[#567b35]"
+                    ? "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)]"
                     : verificationPending
-                      ? "bg-[#fff0dd] text-[#a55a20]"
+                      ? "bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]"
                       : verificationRequested
-                        ? "bg-[#f4ead9] text-[#7a664e]"
-                        : "bg-[#f4ead9] text-[#7a664e]"
+                        ? "bg-[var(--muted)]/10 text-[var(--muted)]"
+                        : "bg-[var(--muted)]/10 text-[var(--muted)]"
                 }`}
               >
                 {verificationConfirmed
@@ -1284,7 +1280,7 @@ export function PedidoCheckout() {
 
             <div className="mt-5 grid gap-4 md:grid-cols-[auto_minmax(0,1fr)_auto]">
               <button
-                className="cursor-pointer rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-55"
+                className="cursor-pointer rounded-[1rem] bg-[var(--brand-orange)] px-5 py-3 text-[0.88rem] font-bold text-white transition-all shadow-[0_4px_14px_rgba(242,122,34,0.3)] hover:bg-[var(--brand-orange-dark)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(242,122,34,0.4)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:transform-none"
                 disabled={!canRequestVerification}
                 onClick={handleRequestVerification}
                 type="button"
@@ -1297,7 +1293,7 @@ export function PedidoCheckout() {
               </button>
 
               <input
-                className="rounded-[1rem] border border-line bg-white px-4 py-3 tracking-[0.3em] outline-none transition placeholder:tracking-normal focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                className="rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 tracking-[0.3em] outline-none transition placeholder:tracking-normal focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                 inputMode="numeric"
                 maxLength={6}
                 onChange={(event) =>
@@ -1308,7 +1304,7 @@ export function PedidoCheckout() {
               />
 
               <button
-                className="cursor-pointer rounded-full bg-[#567b35] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#47652b] disabled:cursor-not-allowed disabled:opacity-55"
+                className="cursor-pointer rounded-[1rem] bg-[var(--brand-green)] px-5 py-3 text-[0.88rem] font-bold text-white transition-all shadow-[0_4px_14px_rgba(140,198,63,0.3)] hover:bg-[var(--brand-green-dark)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(140,198,63,0.4)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:transform-none"
                 disabled={verificationCode.length !== 6 || verificationPending}
                 onClick={handleConfirmVerification}
                 type="button"
@@ -1318,7 +1314,7 @@ export function PedidoCheckout() {
             </div>
 
             {devCodePreview ? (
-              <div className="mt-4 rounded-[1.3rem] border border-[#d9e6cb] bg-[#f4f8ef] px-4 py-4 text-sm text-[#47652b]">
+              <div className="mt-4 rounded-[1rem] border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 px-4 py-4 text-[0.88rem] text-[var(--brand-green-dark)] font-medium">
                 <p className="font-semibold">Codigo para desenvolvimento</p>
                 <p className="mt-2">
                   Use <strong>{devCodePreview}</strong> para testar localmente.
@@ -1327,7 +1323,7 @@ export function PedidoCheckout() {
             ) : null}
 
             {verificationMessage ? (
-              <div className="mt-4 rounded-[1.3rem] border border-[#e3d2bc] bg-white px-4 py-4 text-sm text-[#6f5d4a]">
+              <div className="mt-4 rounded-[1rem] border border-[var(--line)] bg-[var(--surface)] px-4 py-4 text-[0.88rem] text-[var(--foreground)]">
                 {verificationMessage}
               </div>
             ) : null}
@@ -1343,26 +1339,26 @@ export function PedidoCheckout() {
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <section className="panel rounded-[2rem] px-6 py-6">
             <p className="eyebrow mb-3">Resumo</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
               Fechamento do pedido
             </h2>
 
-            <div className="mt-5 space-y-3 rounded-[1.5rem] bg-white/88 px-5 py-5">
-              <div className="flex items-center justify-between gap-3 text-sm text-muted">
+            <div className="mt-5 space-y-3 rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] px-5 py-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
                 <span>Modo</span>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold text-[var(--foreground)]">
                   {fulfillmentType === "delivery" ? "Entrega" : "Retirada"}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm text-muted">
+              <div className="flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
                 <span>Subtotal</span>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold text-[var(--foreground)]">
                   {formatMoney(subtotal)}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm text-muted">
+              <div className="flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
                 <span>Frete</span>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold text-[var(--foreground)]">
                   {fulfillmentType === "retirada"
                     ? "Gratis"
                     : deliveryQuoteLoading
@@ -1372,16 +1368,16 @@ export function PedidoCheckout() {
                         : "Aguardando"}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm text-muted">
+              <div className="flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
                 <span>Pagamento</span>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold text-[var(--foreground)]">
                   {paymentOptions.find((option) => option.value === paymentMethod)?.label}
                 </span>
               </div>
               <div className="soft-divider pt-3" />
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-foreground">Total</span>
-                <span className="menu-price text-[2rem] font-bold text-accent">
+                <span className="text-sm font-semibold text-[var(--foreground)]">Total</span>
+                <span className="menu-price text-[2rem] font-bold text-[var(--brand-orange)]">
                   {formatMoney(totalAmount)}
                 </span>
               </div>
@@ -1389,14 +1385,18 @@ export function PedidoCheckout() {
 
             <div className="mt-5 space-y-3">
               <button
-                className="w-full cursor-pointer rounded-full bg-accent px-5 py-4 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-55"
+                className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--brand-green)] px-5 py-4 text-[1rem] font-bold text-white transition-all duration-300 hover:bg-[var(--brand-green-dark)] hover:shadow-[0_8px_25px_rgba(140,198,63,0.4)] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0"
                 disabled={!canSubmit}
                 onClick={handleSubmitOrder}
                 type="button"
               >
-                {submitPending ? "Enviando pedido..." : "Finalizar pedido"}
+                <span className="absolute inset-0 z-0 h-full w-full -translate-x-full animate-[sheen_3s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {submitPending ? "Enviando pedido..." : "Finalizar pedido"}
+                  <svg className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                </span>
               </button>
-              <p className="text-sm leading-6 text-muted">
+              <p className="text-sm leading-6 text-[var(--muted)]">
                 O botao libera quando itens, dados, telefone e frete estiverem
                 validados.
               </p>
@@ -1408,8 +1408,8 @@ export function PedidoCheckout() {
               </div>
             ) : null}
 
-            <div className="mt-5 rounded-[1.4rem] border border-line bg-white/85 px-4 py-4 text-sm leading-6 text-muted">
-              <p className="font-semibold text-foreground">Retirada na loja</p>
+            <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
+              <p className="font-semibold text-[var(--foreground)]">Retirada na loja</p>
               <p className="mt-2">{brandContent.location}</p>
               <p>{brandContent.hours}</p>
             </div>
