@@ -115,27 +115,27 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
   }
 
   return (
-    <main className="space-y-6 text-white">
+    <main className="space-y-6 text-[var(--foreground)]">
       <section className="grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
-        <article className="panel rounded-[2rem] border-white/10 bg-white/7 p-6">
-          <p className="eyebrow mb-3 text-white/60">Canal da loja</p>
+        <article className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6">
+          <p className="eyebrow mb-3 text-[var(--muted)]">Canal da loja</p>
           <h1 className="text-3xl font-semibold tracking-tight">WhatsApp Web</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/72">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
             Conecte o numero da loja por QR code, acompanhe o estado da sessao e veja
             os ultimos eventos do cliente em tempo real.
           </p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
-              <p className="text-sm text-white/56">Status</p>
+            <div className="rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] p-4">
+              <p className="text-sm text-[var(--muted)]">Status</p>
               <p className="mt-3 text-lg font-semibold capitalize">{session.status}</p>
             </div>
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
-              <p className="text-sm text-white/56">Numero conectado</p>
+            <div className="rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] p-4">
+              <p className="text-sm text-[var(--muted)]">Numero conectado</p>
               <p className="mt-3 text-lg font-semibold">{session.connectedPhone || "Sem conexao"}</p>
             </div>
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
-              <p className="text-sm text-white/56">Conta</p>
+            <div className="rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] p-4">
+              <p className="text-sm text-[var(--muted)]">Conta</p>
               <p className="mt-3 text-lg font-semibold">{session.connectedName || "Aguardando leitura"}</p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
               {pendingAction === "connect" ? "Conectando..." : "Conectar / gerar QR"}
             </button>
             <button
-              className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white/86 transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-55"
+              className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white/86 transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-55"
               disabled={pendingAction !== null}
               onClick={() => void runAction("disconnect")}
               type="button"
@@ -180,10 +180,10 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
           ) : null}
         </article>
 
-        <article className="panel rounded-[2rem] border-white/10 bg-white/7 p-6">
-          <p className="eyebrow mb-3 text-white/60">Pareamento</p>
+        <article className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6">
+          <p className="eyebrow mb-3 text-[var(--muted)]">Pareamento</p>
           <h2 className="text-2xl font-semibold tracking-tight">QR code da sessao</h2>
-          <div className="mt-6 flex min-h-[320px] items-center justify-center rounded-[1.6rem] border border-dashed border-white/12 bg-[#120c09] p-5">
+          <div className="mt-6 flex min-h-[320px] items-center justify-center rounded-[1.6rem] border border-dashed border-[var(--line)] bg-[#120c09] p-5">
             {session.qrDataUrl ? (
               <Image
                 alt="QR code do WhatsApp"
@@ -202,7 +202,7 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
             )}
           </div>
 
-          <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-white/6 p-4 text-sm text-white/72">
+          <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
             <p>
               Ultimo evento: {session.lastEventAt ? new Date(session.lastEventAt).toLocaleString("pt-BR") : "—"}
             </p>
@@ -212,41 +212,41 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[.95fr_1.05fr]">
-        <article className="panel rounded-[2rem] border-white/10 bg-white/7 p-6">
-          <p className="eyebrow mb-3 text-white/60">Eventos</p>
+        <article className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6">
+          <p className="eyebrow mb-3 text-[var(--muted)]">Eventos</p>
           <h2 className="text-2xl font-semibold tracking-tight">Linha do tempo</h2>
           <div className="mt-5 space-y-3">
             {session.events.length ? (
               session.events.map((event) => (
                 <div
                   key={`${event.type}-${event.at}`}
-                  className="rounded-[1.3rem] border border-white/10 bg-white/6 px-4 py-4"
+                  className="rounded-[1.3rem] border border-[var(--line)] bg-[var(--surface)] px-4 py-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold capitalize text-white">{event.type}</span>
+                    <span className="text-sm font-semibold capitalize text-[var(--foreground)]">{event.type}</span>
                     <span className="text-xs text-white/50">
                       {new Date(event.at).toLocaleTimeString("pt-BR")}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-white/70">{event.detail}</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{event.detail}</p>
                 </div>
               ))
             ) : (
-              <p className="rounded-[1.3rem] border border-white/10 bg-white/6 px-4 py-4 text-sm text-white/62">
+              <p className="rounded-[1.3rem] border border-[var(--line)] bg-[var(--surface)] px-4 py-4 text-sm text-white/62">
                 Nenhum evento do cliente ainda.
               </p>
             )}
           </div>
         </article>
 
-        <article className="panel rounded-[2rem] border-white/10 bg-white/7 p-6">
+        <article className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="eyebrow mb-3 text-white/60">Inbox</p>
+              <p className="eyebrow mb-3 text-[var(--muted)]">Inbox</p>
               <h2 className="text-2xl font-semibold tracking-tight">Conversas</h2>
             </div>
             <button
-              className="rounded-full border border-white/15 px-4 py-2 text-sm text-white/78 transition hover:bg-white/8"
+              className="rounded-full border border-white/15 px-4 py-2 text-sm text-white/78 transition hover:bg-[var(--surface)]"
               onClick={() => void refresh()}
               type="button"
             >
@@ -261,31 +261,31 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
                 return (
                   <Link
                     key={conversation.id}
-                    className="block rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 transition hover:bg-white/10"
+                    className="block rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] px-4 py-4 transition hover:bg-white/10"
                     href={`/dashboard/whatsapp/${conversation.id}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-medium text-white">
+                        <p className="font-medium text-[var(--foreground)]">
                           {conversation.customerProfile.fullName}
                         </p>
                         <p className="mt-1 text-sm text-white/54">{conversation.phone}</p>
                       </div>
-                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-white/70">
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-[var(--muted)]">
                         {conversation.state}
                       </span>
                     </div>
                     {conversation.order ? (
                       <p className="mt-3 text-xs text-emerald-100/80">Pedido vinculado: {conversation.order.code}</p>
                     ) : null}
-                    <p className="mt-3 text-sm leading-6 text-white/70">
+                    <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
                       {lastMessage ? lastMessage.content : "Sem mensagens registradas ainda."}
                     </p>
                   </Link>
                 );
               })
             ) : (
-              <p className="rounded-[1.3rem] border border-white/10 bg-white/6 px-4 py-4 text-sm text-white/62">
+              <p className="rounded-[1.3rem] border border-[var(--line)] bg-[var(--surface)] px-4 py-4 text-sm text-white/62">
                 Ainda nao chegaram conversas pelo WhatsApp.
               </p>
             )}

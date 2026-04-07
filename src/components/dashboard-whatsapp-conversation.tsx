@@ -61,8 +61,8 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
   }
 
   return (
-    <section className="panel rounded-[2rem] border-white/10 bg-white/7 p-6 text-white">
-      <p className="eyebrow mb-3 text-white/60">Atendimento</p>
+    <section className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6 text-[var(--foreground)]">
+      <p className="eyebrow mb-3 text-[var(--muted)]">Atendimento</p>
       <h2 className="text-2xl font-semibold tracking-tight">Mensagens</h2>
 
       <div className="mt-5 space-y-3">
@@ -71,7 +71,7 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
             key={item.id}
             className={`max-w-[85%] rounded-[1.25rem] px-4 py-3 text-sm leading-6 ${
               item.direction === "outbound"
-                ? "ml-auto bg-accent text-white"
+                ? "ml-auto bg-accent text-[var(--foreground)]"
                 : "bg-white/10 text-white/86"
             }`}
           >
@@ -83,10 +83,10 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
         ))}
       </div>
 
-      <div className="mt-6 rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
+      <div className="mt-6 rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] p-4">
         <label className="block text-sm font-semibold text-white/86">Responder manualmente</label>
         <textarea
-          className="mt-3 min-h-28 w-full rounded-[1rem] border border-white/10 bg-[#120c09] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+          className="mt-3 min-h-28 w-full rounded-[1rem] border border-[var(--line)] bg-[#120c09] px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/50 focus:border-[var(--brand-orange)]/40"
           maxLength={2000}
           onChange={(event) => setMessage(event.target.value)}
           placeholder="Digite a resposta para o cliente..."
