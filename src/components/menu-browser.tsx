@@ -61,7 +61,7 @@ export function MenuBrowser({ categories }: Props) {
     : 0;
 
   return (
-    <section className="pb-18" id="cardapio">
+    <section className="pb-16" id="cardapio">
       <CategoryNav
         activeCategoryId={activeCategoryId}
         categories={categories.map((category) => ({
@@ -72,24 +72,24 @@ export function MenuBrowser({ categories }: Props) {
         onSelect={handleSelectCategory}
       />
 
-      <div className="shell pt-7">
-        <div className="mb-7 flex flex-col gap-4 border-b border-[#ebdbc7] pb-5 lg:flex-row lg:items-end lg:justify-between">
+      <div className="shell pt-8">
+        {/* Section header */}
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[#a06f42]">
-              Cardapio
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#40602f] sm:text-4xl">
-              {activeCategory?.name || "Cardapio"}
+            <p className="eyebrow text-[var(--accent)]">Cardápio</p>
+            <h2 className="mt-1.5 font-display text-[1.75rem] font-bold tracking-tight text-[var(--green-deep)] sm:text-[2rem]">
+              {activeCategory?.name || "Cardápio"}
             </h2>
           </div>
 
-          <div className="rounded-full border border-[#e7d8c4] bg-white px-4 py-3 text-sm text-[#6f654e] shadow-[0_12px_28px_rgba(115,90,58,0.06)]">
-            Mostrando {showingStart} a {showingEnd} de{" "}
-            <strong className="text-[#da7323]">{activeCategory?.menuItems.length || 0}</strong>
+          <p className="text-[0.82rem] text-[var(--muted)]">
+            Mostrando {showingStart}–{showingEnd} de{" "}
+            <span className="font-semibold text-[var(--accent)]">{activeCategory?.menuItems.length || 0}</span>
             {" "}itens
-          </div>
+          </p>
         </div>
 
+        {/* Grid */}
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {paginatedItems.map((item) => (
             <MenuItemCard
@@ -105,20 +105,28 @@ export function MenuBrowser({ categories }: Props) {
           ))}
         </div>
 
+        {/* Empty state */}
         {!paginatedItems.length ? (
-          <div className="mt-6 rounded-[1.5rem] border border-dashed border-[#e6d7c3] bg-white/78 px-5 py-10 text-center text-[#8c6e57]">
+          <div className="mt-8 rounded-[var(--radius-lg)] border border-dashed border-[var(--line)] bg-white/60 px-6 py-12 text-center text-[var(--muted)]">
+            <svg aria-hidden="true" className="mx-auto mb-3 h-10 w-10 text-[var(--line)]" fill="none" stroke="currentColor" strokeWidth={1.2} viewBox="0 0 24 24">
+              <path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             Nenhum item cadastrado nessa categoria ainda.
           </div>
         ) : null}
 
+        {/* Pagination */}
         {totalPages > 1 ? (
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-1.5">
             <button
-              className="rounded-full border border-[#e7d8c4] bg-white px-4 py-2 text-sm font-semibold text-[#6e604d] transition hover:border-[#567b35] hover:text-[#567b35] disabled:cursor-not-allowed disabled:opacity-40"
+              className="cursor-pointer rounded-full border border-[var(--line)] bg-white px-4 py-2 text-[0.82rem] font-semibold text-[var(--muted)] transition-all duration-200 hover:border-[var(--green-rich)] hover:text-[var(--green-rich)] disabled:cursor-not-allowed disabled:opacity-40"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
               type="button"
             >
+              <svg aria-hidden="true" className="inline h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M15.75 19.5L8.25 12l7.5-7.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
               Anterior
             </button>
 
@@ -126,10 +134,10 @@ export function MenuBrowser({ categories }: Props) {
               <button
                 key={page}
                 aria-current={page === currentPage ? "page" : undefined}
-                className={`h-10 min-w-10 rounded-full px-3 text-sm font-bold transition ${
+                className={`h-9 min-w-9 cursor-pointer rounded-full px-3 text-[0.82rem] font-bold transition-all duration-200 ${
                   page === currentPage
-                    ? "bg-[#567b35] text-white shadow-[0_10px_24px_rgba(86,123,53,0.24)]"
-                    : "bg-white text-[#6e604d] hover:bg-[#eef5e8] hover:text-[#567b35]"
+                    ? "bg-[var(--green-rich)] text-white shadow-[0_4px_14px_rgba(74,124,46,0.2)]"
+                    : "bg-white text-[var(--muted)] hover:bg-[var(--success-light)] hover:text-[var(--green-rich)]"
                 }`}
                 onClick={() => setCurrentPage(page)}
                 type="button"
@@ -139,12 +147,15 @@ export function MenuBrowser({ categories }: Props) {
             ))}
 
             <button
-              className="rounded-full border border-[#e7d8c4] bg-white px-4 py-2 text-sm font-semibold text-[#6e604d] transition hover:border-[#567b35] hover:text-[#567b35] disabled:cursor-not-allowed disabled:opacity-40"
+              className="cursor-pointer rounded-full border border-[var(--line)] bg-white px-4 py-2 text-[0.82rem] font-semibold text-[var(--muted)] transition-all duration-200 hover:border-[var(--green-rich)] hover:text-[var(--green-rich)] disabled:cursor-not-allowed disabled:opacity-40"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
               type="button"
             >
-              Proxima
+              Próxima
+              <svg aria-hidden="true" className="inline h-3.5 w-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M8.25 4.5l7.5 7.5-7.5 7.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
         ) : null}

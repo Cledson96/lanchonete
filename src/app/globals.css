@@ -1,23 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff8f0;
+  --background: #fef9f3;
   --background-strong: #f4e6d4;
-  --surface: #fffdf9;
-  --surface-muted: rgba(255, 253, 249, 0.82);
-  --foreground: #2a1d14;
+  --surface: #ffffff;
+  --surface-muted: rgba(255, 255, 255, 0.88);
+  --foreground: #1c1208;
   --muted: #6f5d4a;
-  --line: rgba(125, 95, 61, 0.16);
-  --accent: #db7324;
+  --line: rgba(125, 95, 61, 0.12);
+  --accent: #e07a2f;
   --accent-strong: #c85f16;
-  --success: #567b35;
+  --accent-light: #fdebd4;
+  --success: #4a7c2e;
+  --success-light: #e6f2db;
   --warning: #c4811a;
-  --green-deep: #44612b;
-  --green-rich: #5d8638;
-  --green-soft: #7eb348;
-  --orange-soft: #efb176;
-  --cream: #f7efdf;
-  --shadow: 0 24px 60px rgba(87, 45, 18, 0.08);
+  --green-deep: #3b5a22;
+  --green-rich: #4a7c2e;
+  --green-soft: #6da043;
+  --orange-soft: #f0a860;
+  --orange-glow: rgba(224, 122, 47, 0.18);
+  --cream: #fdf3e4;
+  --shadow-sm: 0 2px 8px rgba(28, 18, 8, 0.04);
+  --shadow-md: 0 8px 24px rgba(28, 18, 8, 0.06);
+  --shadow-lg: 0 20px 50px rgba(28, 18, 8, 0.08);
+  --shadow-glow: 0 8px 30px rgba(224, 122, 47, 0.15);
+  --radius-sm: 0.75rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.75rem;
+  --radius-xl: 2.25rem;
 }
 
 @theme inline {
@@ -43,10 +53,6 @@
 
 html {
   min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(86, 123, 53, 0.09), transparent 20%),
-    radial-gradient(circle at top right, rgba(219, 115, 36, 0.08), transparent 18%),
-    linear-gradient(180deg, #fffaf4 0%, #fff8f0 100%);
   color: var(--foreground);
   scroll-behavior: smooth;
 }
@@ -56,10 +62,7 @@ body {
   margin: 0;
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
-  background:
-    radial-gradient(circle at 88% 10%, rgba(126, 179, 72, 0.08), transparent 18%),
-    radial-gradient(circle at 10% 0%, rgba(239, 177, 118, 0.16), transparent 16%),
-    linear-gradient(180deg, #fffaf4 0%, #fff8f0 100%);
+  background: var(--background);
 }
 
 a {
@@ -75,25 +78,32 @@ select {
 }
 
 ::selection {
-  background: rgba(115, 161, 67, 0.2);
+  background: rgba(74, 124, 46, 0.18);
 }
+
+/* ── Layout ── */
 
 .shell {
   width: min(1180px, calc(100vw - 2rem));
   margin: 0 auto;
 }
 
+/* ── Panel cards ── */
+
 .panel {
   background: var(--surface-muted);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
   backdrop-filter: blur(18px);
 }
 
+/* ── Typography helpers ── */
+
 .eyebrow {
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--muted);
 }
 
@@ -101,29 +111,19 @@ select {
   font-family: var(--font-display), serif;
 }
 
+/* ── Scroll anchors ── */
+
 .section-anchor {
   scroll-margin-top: 7rem;
 }
 
+/* ── Dividers ── */
+
 .soft-divider {
-  border-top: 1px solid rgba(23, 39, 30, 0.08);
+  border-top: 1px solid rgba(23, 39, 30, 0.06);
 }
 
-.grain {
-  position: relative;
-}
-
-.grain::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px),
-    radial-gradient(circle at 70% 65%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px);
-  background-size: 18px 18px, 22px 22px;
-}
+/* ── Sticky tabs ── */
 
 .sticky-tabs {
   scrollbar-width: none;
@@ -133,14 +133,14 @@ select {
   display: none;
 }
 
+/* ── Price typography ── */
+
 .menu-price {
   font-family: var(--font-display), serif;
   font-variant-numeric: lining-nums;
 }
 
-.hero-reveal {
-  animation: fadeIn 0.65s ease-out both;
-}
+/* ── Brand wordmark ── */
 
 .brand-wordmark {
   display: inline-flex;
@@ -181,13 +181,64 @@ select {
 
 .brand-wordmark[data-theme="dark"] {
   color: #f6f0dd;
-  text-shadow: 2px 2px 0 rgba(86, 123, 53, 0.4);
+  text-shadow: 2px 2px 0 rgba(59, 90, 34, 0.4);
 }
 
-@keyframes fadeIn {
+/* ════════════════════════════════════════════
+   HERO SECTION
+   ════════════════════════════════════════════ */
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  min-height: 480px;
+}
+
+@media (min-width: 1024px) {
+  .hero-section {
+    min-height: 560px;
+  }
+}
+
+.hero-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 160px;
+  background: linear-gradient(to top, var(--background) 0%, transparent 100%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(165deg,
+      rgba(28, 18, 8, 0.82) 0%,
+      rgba(28, 18, 8, 0.55) 45%,
+      rgba(28, 18, 8, 0.25) 75%,
+      rgba(28, 18, 8, 0.15) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 4;
+}
+
+/* ── Hero reveal animation ── */
+
+.hero-reveal {
+  animation: heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes heroFadeUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(20px);
   }
 
   to {
@@ -196,39 +247,231 @@ select {
   }
 }
 
-@keyframes floatPulse {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
+/* ════════════════════════════════════════════
+   CTA BUTTONS
+   ════════════════════════════════════════════ */
 
-  50% {
-    transform: translateY(-8px);
-  }
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.8rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  text-decoration: none;
+  letter-spacing: 0.01em;
 }
+
+.cta-btn--primary {
+  background: linear-gradient(135deg, var(--green-rich) 0%, var(--green-soft) 100%);
+  color: #fff;
+  box-shadow:
+    0 6px 20px rgba(74, 124, 46, 0.3),
+    0 2px 6px rgba(74, 124, 46, 0.15);
+}
+
+.cta-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 28px rgba(74, 124, 46, 0.4),
+    0 4px 10px rgba(74, 124, 46, 0.25);
+}
+
+.cta-btn--primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.cta-btn--secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.cta-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: translateY(-2px);
+}
+
+.cta-btn--secondary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ════════════════════════════════════════════
+   INFO CARDS (glassmorphism)
+   ════════════════════════════════════════════ */
+
+.info-strip {
+  position: relative;
+  z-index: 10;
+  margin-top: -3.5rem;
+  padding-bottom: 1rem;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(125, 95, 61, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: default;
+}
+
+.info-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.info-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--success-light) 0%, #d4edc4 100%);
+  margin-bottom: 0.75rem;
+  color: var(--green-rich);
+}
+
+/* ════════════════════════════════════════════
+   MENU CARDS
+   ════════════════════════════════════════════ */
 
 .menu-card {
-  animation: cardIn 0.45s ease-out both;
+  animation: cardSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.orange-glow {
-  box-shadow:
-    0 18px 40px rgba(242, 107, 33, 0.18),
-    0 2px 8px rgba(77, 38, 13, 0.05);
-}
-
-.soft-orange-border {
-  border: 1px solid rgba(242, 107, 33, 0.18);
-}
-
-@keyframes cardIn {
+@keyframes cardSlideUp {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.97);
+    transform: translateY(24px) scale(0.97);
   }
 
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Stagger children ── */
+
+.stagger-in {
+  animation: staggerFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger-in:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stagger-in:nth-child(2) {
+  animation-delay: 100ms;
+}
+
+.stagger-in:nth-child(3) {
+  animation-delay: 200ms;
+}
+
+@keyframes staggerFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ════════════════════════════════════════════
+   ACCENT DECORATORS
+   ════════════════════════════════════════════ */
+
+.orange-glow {
+  box-shadow:
+    0 12px 32px rgba(224, 122, 47, 0.15),
+    0 2px 6px rgba(77, 38, 13, 0.04);
+}
+
+.soft-orange-border {
+  border: 1px solid rgba(224, 122, 47, 0.14);
+}
+
+/* ════════════════════════════════════════════
+   WHATSAPP BUTTON
+   ════════════════════════════════════════════ */
+
+.whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: #25d366;
+  color: #fff;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.whatsapp-btn:hover {
+  background: #1fba58;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ════════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════════ */
+
+.footer-site {
+  background: linear-gradient(180deg, #231710 0%, #161009 100%);
+  color: #c9b49a;
+}
+
+.footer-site a {
+  color: var(--orange-soft);
+  transition: color 0.2s;
+}
+
+.footer-site a:hover {
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════
+   REDUCED MOTION
+   ════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .hero-reveal,
+  .menu-card,
+  .stagger-in {
+    animation: none !important;
+  }
+
+  .cta-btn:hover,
+  .info-card:hover {
+    transform: none !important;
   }
 }

@@ -72,80 +72,87 @@ export function MenuItemCard({
 
   return (
     <>
-      <article className="menu-card group flex h-full flex-col overflow-hidden rounded-[1.65rem] border border-[#ead9c4] bg-white shadow-[0_16px_34px_rgba(77,66,46,0.08)] transition duration-300 hover:-translate-y-1">
+      <article className="menu-card group flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-lg)]"
+        style={{ boxShadow: "var(--shadow-sm)" }}
+      >
+        {/* ── Image area ── */}
         <button
           aria-label={`Ver detalhes de ${name}`}
-          className="relative h-48 cursor-pointer overflow-hidden bg-[#fff0df] text-left"
+          className="relative h-52 cursor-pointer overflow-hidden bg-[var(--cream)] text-left"
           onClick={openDetails}
           type="button"
         >
           <Image
             alt={name}
-            className="object-cover transition duration-500 group-hover:scale-[1.04]"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
             src={resolveMenuItemImage(imageUrl)}
           />
-          <span className="absolute left-4 top-4 rounded-full bg-[#eef5e8] px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#567b35]">
+
+          {/* Gradient overlay at bottom of image */}
+          <span className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
+
+          {/* Category badge */}
+          <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-[var(--green-rich)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
             {categoryName}
           </span>
+
+          {/* Offer badge */}
           {displayCompare ? (
-            <span className="absolute right-4 top-4 rounded-full bg-[#dc7325] px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white">
+            <span className="absolute right-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)]">
               Oferta
             </span>
           ) : null}
         </button>
 
-        <div className="flex flex-1 flex-col p-5">
-          <div className="min-h-[9.25rem]">
-            <button
-              className="cursor-pointer text-left"
-              onClick={openDetails}
-              type="button"
-            >
-              <h3 className="text-[1.35rem] font-display font-semibold leading-tight text-[#2b2013] transition hover:text-[#567b35]">
-                {name}
-              </h3>
-            </button>
+        {/* ── Content area ── */}
+        <div className="flex flex-1 flex-col p-4 pt-3.5">
+          {/* Name */}
+          <button
+            className="cursor-pointer text-left"
+            onClick={openDetails}
+            type="button"
+          >
+            <h3 className="text-[1.15rem] font-display font-bold leading-snug text-[var(--foreground)] transition-colors duration-200 hover:text-[var(--green-rich)]">
+              {name}
+            </h3>
+          </button>
 
-            <div className="mt-3 rounded-[1.2rem] bg-[#fbf5ec] px-3.5 py-3">
-              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#a06f42]">
-                Ingredientes
-              </p>
-              <p className="mt-2 line-clamp-3 text-[0.95rem] leading-6 text-[#6f5f4b]">
-                {displayDescription}
-              </p>
-            </div>
-          </div>
+          {/* Description */}
+          <p className="mt-2 line-clamp-2 text-[0.85rem] leading-relaxed text-[var(--muted)]">
+            {displayDescription}
+          </p>
 
-          <div className="mt-5 flex items-end justify-between gap-3">
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Price row */}
+          <div className="mt-4 flex items-end justify-between gap-3">
             <div>
-              <p className="menu-price text-[2rem] font-bold leading-none text-[#db7324]">
+              <p className="menu-price text-[1.65rem] font-bold leading-none text-[var(--accent)]">
                 {displayPrice}
               </p>
               {displayCompare ? (
-                <p className="mt-1 text-sm text-[#b69b87] line-through">{displayCompare}</p>
+                <p className="mt-0.5 text-xs text-[var(--muted)] line-through">{displayCompare}</p>
               ) : null}
             </div>
           </div>
 
-          <div className="mt-5 flex gap-2.5">
+          {/* Action buttons */}
+          <div className="mt-5">
             <button
-              className="flex-1 cursor-pointer rounded-[1rem] border border-[#d9ceb8] bg-white px-4 py-3.5 text-sm font-bold text-[#5f5443] transition hover:bg-[#f7efdf]"
+              aria-label={`Ver detalhes e adicionar ${name} ao pedido`}
+              className="w-full cursor-pointer rounded-[var(--radius-sm)] bg-[var(--green-rich)] px-4 py-3 text-[0.85rem] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[var(--green-deep)] active:scale-[0.97]"
               onClick={openDetails}
               type="button"
             >
-              Ver item
-            </button>
-            <button
-              aria-label={`Adicionar ${name} ao carrinho`}
-              className={`flex-[1.2] cursor-pointer rounded-[1rem] px-4 py-3.5 text-sm font-bold text-white transition duration-200 active:scale-[0.98] ${
-                added ? "bg-[#6da141]" : "bg-[#567b35] hover:bg-[#47652b]"
-              }`}
-              onClick={openDetails}
-              type="button"
-            >
-              {added ? "Adicionado" : `Adicionar pedido`}
+              <span className="inline-flex items-center justify-center gap-1.5">
+                <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Adicionar ao pedido
+              </span>
             </button>
           </div>
         </div>
