@@ -65,6 +65,7 @@ export async function createMenuItem(input: {
   name: string;
   slug?: string;
   description?: string;
+  kind: "simples" | "combo";
   imageUrl?: string;
   price: number;
   compareAtPrice?: number;
@@ -72,6 +73,10 @@ export async function createMenuItem(input: {
   isFeatured: boolean;
   sortOrder: number;
   optionGroupIds: string[];
+  comboComponents: Array<{
+    componentMenuItemId: string;
+    quantity: number;
+  }>;
 }) {
   return prisma.menuItem.create({
     data: {
@@ -80,6 +85,7 @@ export async function createMenuItem(input: {
       slug: input.slug || slugify(input.name),
       description: optionalNullable(input.description),
       imageUrl: optionalNullable(input.imageUrl),
+      kind: input.kind,
       price: decimal(input.price),
       compareAtPrice:
         typeof input.compareAtPrice === "number"
@@ -94,12 +100,34 @@ export async function createMenuItem(input: {
           sortOrder: index,
         })),
       },
+      comboItems:
+        input.kind === "combo"
+          ? {
+              create: input.comboComponents.map((component, index) => ({
+                componentMenuItemId: component.componentMenuItemId,
+                quantity: component.quantity,
+                sortOrder: index,
+              })),
+            }
+          : undefined,
     },
     include: {
       category: true,
       optionGroups: {
         include: {
           optionGroup: true,
+        },
+      },
+      comboItems: {
+        orderBy: [{ sortOrder: "asc" }, { componentMenuItem: { name: "asc" } }],
+        include: {
+          componentMenuItem: {
+            select: {
+              id: true,
+              name: true,
+              category: true,
+            },
+          },
         },
       },
     },
@@ -112,6 +140,7 @@ export async function updateMenuItem(input: {
   name?: string;
   slug?: string;
   description?: string;
+  kind?: "simples" | "combo";
   imageUrl?: string;
   price?: number;
   compareAtPrice?: number;
@@ -119,6 +148,10 @@ export async function updateMenuItem(input: {
   isFeatured?: boolean;
   sortOrder?: number;
   optionGroupIds?: string[];
+  comboComponents?: Array<{
+    componentMenuItemId: string;
+    quantity: number;
+  }>;
 }) {
   const data: Prisma.MenuItemUpdateInput = {};
 
@@ -136,6 +169,10 @@ export async function updateMenuItem(input: {
 
   if (hasOwn(input, "description")) {
     data.description = optionalNullable(input.description);
+  }
+
+  if (hasOwn(input, "kind")) {
+    data.kind = input.kind;
   }
 
   if (hasOwn(input, "imageUrl")) {
@@ -175,6 +212,20 @@ export async function updateMenuItem(input: {
     };
   }
 
+  if (hasOwn(input, "comboComponents") || input.kind === "simples") {
+    data.comboItems = {
+      deleteMany: {},
+      create:
+        input.kind === "combo"
+          ? (input.comboComponents || []).map((component, index) => ({
+              componentMenuItemId: component.componentMenuItemId,
+              quantity: component.quantity,
+              sortOrder: index,
+            }))
+          : [],
+    };
+  }
+
   return prisma.menuItem.update({
     where: { id: input.id },
     data,
@@ -183,6 +234,18 @@ export async function updateMenuItem(input: {
       optionGroups: {
         include: {
           optionGroup: true,
+        },
+      },
+      comboItems: {
+        orderBy: [{ sortOrder: "asc" }, { componentMenuItem: { name: "asc" } }],
+        include: {
+          componentMenuItem: {
+            select: {
+              id: true,
+              name: true,
+              category: true,
+            },
+          },
         },
       },
     },

@@ -15,6 +15,7 @@ export default async function DashboardCardapioPage() {
       items={items.map((item) => ({
         ...item,
         price: numberFromDecimal(item.price) ?? 0,
+        compareAtPrice: numberFromDecimal(item.compareAtPrice),
       }))}
       optionGroups={optionGroups}
     />

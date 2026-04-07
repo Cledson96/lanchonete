@@ -11,6 +11,12 @@ export async function getPublicMenu() {
         where: { isActive: true },
         orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
         include: {
+          comboItems: {
+            orderBy: [{ sortOrder: "asc" }, { componentMenuItem: { name: "asc" } }],
+            include: {
+              componentMenuItem: true,
+            },
+          },
           optionGroups: {
             orderBy: { sortOrder: "asc" },
             include: {
@@ -49,6 +55,16 @@ export async function getAdminMenuItems() {
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
       category: true,
+      comboItems: {
+        orderBy: [{ sortOrder: "asc" }, { componentMenuItem: { name: "asc" } }],
+        include: {
+          componentMenuItem: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      },
       optionGroups: {
         include: {
           optionGroup: true,

@@ -12,6 +12,8 @@ export const paymentMethodSchema = z.enum([
   "outro",
 ]);
 
+export const menuItemKindSchema = z.enum(["simples", "combo"]);
+
 export const orderTypeSchema = z.enum(["delivery", "retirada", "local"]);
 
 export const orderStatusSchema = z.enum([
@@ -113,6 +115,7 @@ export const createMenuItemSchema = z.object({
   name: stringField.min(2),
   slug: optionalStringField,
   description: optionalStringField,
+  kind: menuItemKindSchema.default("simples"),
   imageUrl: z
     .string()
     .trim()
@@ -128,10 +131,47 @@ export const createMenuItemSchema = z.object({
   isFeatured: z.coerce.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).default(0),
   optionGroupIds: z.array(stringField.min(1)).optional().default([]),
+  comboComponents: z
+    .array(
+      z.object({
+        componentMenuItemId: stringField.min(1),
+        quantity: z.coerce.number().int().min(1).max(99).default(1),
+      }),
+    )
+    .optional()
+    .default([]),
 });
 
-export const updateMenuItemSchema = createMenuItemSchema.partial().extend({
+export const updateMenuItemSchema = z.object({
   id: stringField.min(1),
+  categoryId: stringField.min(1).optional(),
+  name: stringField.min(2).optional(),
+  slug: optionalStringField,
+  description: optionalStringField,
+  kind: menuItemKindSchema.optional(),
+  imageUrl: z
+    .string()
+    .trim()
+    .refine((value) => !value || value.startsWith("/") || z.string().url().safeParse(value).success, {
+      message: "Informe uma URL valida ou um caminho local iniciado com /.",
+    })
+    .optional()
+    .or(z.literal(""))
+    .transform(optionalTrimmed),
+  price: z.coerce.number().min(0).optional(),
+  compareAtPrice: z.coerce.number().min(0).optional(),
+  isActive: z.coerce.boolean().optional(),
+  isFeatured: z.coerce.boolean().optional(),
+  sortOrder: z.coerce.number().int().min(0).optional(),
+  optionGroupIds: z.array(stringField.min(1)).optional(),
+  comboComponents: z
+    .array(
+      z.object({
+        componentMenuItemId: stringField.min(1),
+        quantity: z.coerce.number().int().min(1).max(99),
+      }),
+    )
+    .optional(),
 });
 
 const optionItemInputSchema = z.object({

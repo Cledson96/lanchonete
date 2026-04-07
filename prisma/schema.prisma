@@ -53,6 +53,11 @@ enum PaymentStatus {
   cancelado
 }
 
+enum MenuItemKind {
+  simples
+  combo
+}
+
 enum VerificationPurpose {
   order_checkout
 }
@@ -164,6 +169,7 @@ model MenuItem {
   slug           String                @unique
   description    String?
   imageUrl       String?
+  kind           MenuItemKind          @default(simples)
   price          Decimal               @db.Decimal(10, 2)
   compareAtPrice Decimal?              @db.Decimal(10, 2)
   isActive       Boolean               @default(true)
@@ -173,8 +179,22 @@ model MenuItem {
   updatedAt      DateTime              @updatedAt
   category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   optionGroups   MenuItemOptionGroup[]
+  comboItems     MenuItemComponent[]   @relation("ComboParent")
+  usedInCombos   MenuItemComponent[]   @relation("ComboComponent")
   orderItems     OrderItem[]
   comandaEntries ComandaEntry[]
+}
+
+model MenuItemComponent {
+  comboMenuItemId     String
+  componentMenuItemId String
+  quantity            Int      @default(1)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  comboMenuItem       MenuItem @relation("ComboParent", fields: [comboMenuItemId], references: [id], onDelete: Cascade)
+  componentMenuItem   MenuItem @relation("ComboComponent", fields: [componentMenuItemId], references: [id], onDelete: Restrict)
+
+  @@id([comboMenuItemId, componentMenuItemId])
 }
 
 model OptionGroup {
