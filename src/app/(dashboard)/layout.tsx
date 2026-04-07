@@ -22,19 +22,19 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#1b120e] text-white">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="shell grid gap-6 py-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="panel rounded-[2rem] border-white/10 bg-white/7 p-5 text-white">
-          <p className="eyebrow mb-4 text-white/60">Dashboard</p>
-          <div className="mb-5 rounded-2xl border border-white/10 bg-white/8 px-4 py-4">
-            <p className="text-sm text-white/56">Admin ativo</p>
-            <p className="mt-2 font-medium">{session.email}</p>
+        <aside className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-5 text-[var(--foreground)]">
+          <p className="eyebrow mb-4 text-[var(--muted)]">Dashboard</p>
+          <div className="mb-5 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-4 overflow-hidden">
+            <p className="text-sm text-[var(--muted)]">Admin ativo</p>
+            <p className="mt-2 font-medium truncate" title={session.email}>{session.email}</p>
           </div>
           <nav className="space-y-2">
             {nav.map((item) => (
               <Link
                 key={item.href}
-                className="block rounded-2xl px-4 py-3 text-sm text-white/82 transition hover:bg-white/10"
+                className="block rounded-2xl px-4 py-3 text-sm text-[var(--muted)] transition hover:bg-[var(--brand-orange)]/10 hover:text-[var(--brand-orange-dark)]"
                 href={item.href}
               >
                 {item.label}
@@ -43,7 +43,7 @@ export default async function DashboardLayout({
           </nav>
           <form action="/api/auth/admin/logout" className="mt-5" method="post">
             <button
-              className="w-full rounded-2xl border border-white/10 px-4 py-3 text-left text-sm text-white/82 transition hover:bg-white/10"
+              className="w-full rounded-2xl border border-[var(--line)] px-4 py-3 text-left text-sm text-[var(--muted)] transition hover:bg-[var(--brand-orange)]/10 hover:text-[var(--brand-orange-dark)]"
               type="submit"
             >
               Sair do dashboard
