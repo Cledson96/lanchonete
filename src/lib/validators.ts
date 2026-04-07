@@ -69,11 +69,13 @@ export const verificationConfirmSchema = z.object({
 });
 
 export const deliveryQuoteSchema = z.object({
+  street: stringField.min(2),
+  number: stringField.min(1),
   zipCode: z
     .string()
     .optional()
     .transform((value) => normalizeZipCode(value)),
-  neighborhood: optionalStringField,
+  neighborhood: stringField.min(2),
   city: stringField.min(2),
   state: stringField.min(2).max(2),
   subtotalAmount: z.coerce.number().min(0).optional(),
@@ -173,6 +175,7 @@ export const createDeliveryFeeRuleSchema = z.object({
     .string()
     .optional()
     .transform((value) => normalizeZipCode(value)),
+  maxDistanceKm: z.coerce.number().positive().max(100),
   feeAmount: z.coerce.number().min(0),
   minimumOrderAmount: z.coerce.number().min(0).optional(),
   freeAboveAmount: z.coerce.number().min(0).optional(),

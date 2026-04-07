@@ -902,42 +902,117 @@ async function syncCategoriesAndItems(optionGroupIds: Map<string, string>) {
 }
 
 async function seedDeliveryFeeRules() {
+  await prisma.storeProfile.upsert({
+    where: { slug: "loja-principal" },
+    create: {
+      slug: "loja-principal",
+      name: "Lanchonete Familia",
+      zipCode: "81260-270",
+      street: "Rua Durval Leopoldo Landal",
+      number: "784",
+      neighborhood: "Cidade Industrial",
+      city: "Curitiba",
+      state: "PR",
+      latitude: -25.48523,
+      longitude: -49.3519,
+      maxDeliveryDistanceKm: 5,
+    },
+    update: {
+      name: "Lanchonete Familia",
+      zipCode: "81260-270",
+      street: "Rua Durval Leopoldo Landal",
+      number: "784",
+      neighborhood: "Cidade Industrial",
+      city: "Curitiba",
+      state: "PR",
+      latitude: -25.48523,
+      longitude: -49.3519,
+      maxDeliveryDistanceKm: 5,
+    },
+  });
+
   await prisma.deliveryFeeRule.updateMany({
     data: { isActive: false },
   });
 
-  await prisma.deliveryFeeRule.upsert({
-    where: {
-      id: "cm-default-centro-fee",
-    },
-    create: {
-      id: "cm-default-centro-fee",
-      label: "Centro",
-      neighborhood: "Centro",
-      city: "Sao Paulo",
-      state: "SP",
-      feeAmount: 8,
-      minimumOrderAmount: 20,
-      freeAboveAmount: 60,
-      estimatedMinMinutes: 20,
-      estimatedMaxMinutes: 40,
+  const distanceRules = [
+    {
+      id: "cm-distance-fee-1km",
+      label: "Ate 1 km",
+      maxDistanceKm: 1,
+      feeAmount: 3,
       sortOrder: 1,
-      isActive: true,
     },
-    update: {
-      label: "Centro",
-      neighborhood: "Centro",
-      city: "Sao Paulo",
-      state: "SP",
-      feeAmount: 8,
-      minimumOrderAmount: 20,
-      freeAboveAmount: 60,
-      estimatedMinMinutes: 20,
-      estimatedMaxMinutes: 40,
-      sortOrder: 1,
-      isActive: true,
+    {
+      id: "cm-distance-fee-2km",
+      label: "Ate 2 km",
+      maxDistanceKm: 2,
+      feeAmount: 4,
+      sortOrder: 2,
     },
-  });
+    {
+      id: "cm-distance-fee-3km",
+      label: "Ate 3 km",
+      maxDistanceKm: 3,
+      feeAmount: 3.5,
+      sortOrder: 3,
+    },
+    {
+      id: "cm-distance-fee-4km",
+      label: "Ate 4 km",
+      maxDistanceKm: 4,
+      feeAmount: 4.25,
+      sortOrder: 4,
+    },
+    {
+      id: "cm-distance-fee-5km",
+      label: "Ate 5 km",
+      maxDistanceKm: 5,
+      feeAmount: 5,
+      sortOrder: 5,
+    },
+  ] as const;
+
+  for (const rule of distanceRules) {
+    await prisma.deliveryFeeRule.upsert({
+      where: {
+        id: rule.id,
+      },
+      create: {
+        id: rule.id,
+        label: rule.label,
+        neighborhood: null,
+        city: "Curitiba",
+        state: "PR",
+        zipCodeStart: null,
+        zipCodeEnd: null,
+        maxDistanceKm: rule.maxDistanceKm,
+        feeAmount: rule.feeAmount,
+        minimumOrderAmount: 0,
+        freeAboveAmount: null,
+        estimatedMinMinutes: 20,
+        estimatedMaxMinutes: 60,
+        sortOrder: rule.sortOrder,
+        isActive: true,
+      },
+      update: {
+        label: rule.label,
+        neighborhood: null,
+        city: "Curitiba",
+        state: "PR",
+        zipCodeStart: null,
+        zipCodeEnd: null,
+        maxDistanceKm: rule.maxDistanceKm,
+        feeAmount: rule.feeAmount,
+        minimumOrderAmount: 0,
+        freeAboveAmount: null,
+        estimatedMinMinutes: 20,
+        estimatedMaxMinutes: 60,
+        sortOrder: rule.sortOrder,
+        isActive: true,
+      },
+    });
+  }
 }
 
 async function seedCatalog() {

@@ -19,6 +19,7 @@ type PaymentMethod =
 type DeliveryQuote = {
   serviceable: boolean;
   feeAmount: number;
+  distanceKm: number;
   estimatedMinMinutes?: number | null;
   estimatedMaxMinutes?: number | null;
   rule: {
@@ -30,6 +31,22 @@ type DeliveryQuote = {
     minimumOrderAmount?: number | null;
     freeAboveAmount?: number | null;
   };
+  store: {
+    name: string;
+    city: string;
+    state: string;
+    maxDeliveryDistanceKm: number;
+  };
+};
+
+type ViaCepResponse = {
+  cep?: string;
+  logradouro?: string;
+  complemento?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+  erro?: boolean;
 };
 
 type RequestVerificationResponse = {
@@ -97,6 +114,16 @@ type CreateOrderResponse = {
   };
 };
 
+type ApiErrorPayload = {
+  error?: {
+    message?: string;
+    details?: {
+      fieldErrors?: Record<string, string[] | undefined>;
+      formErrors?: string[];
+    };
+  };
+};
+
 const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
   { value: "pix", label: "Pix" },
   { value: "cartao_credito", label: "Cartao de credito" },
@@ -107,6 +134,36 @@ const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
 
 function digitsOnly(value: string) {
   return value.replace(/\D/g, "");
+}
+
+function formatZipCode(value: string) {
+  const digits = digitsOnly(value).slice(0, 8);
+
+  if (digits.length <= 5) {
+    return digits;
+  }
+
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
+function formatPhoneNumber(value: string) {
+  let digits = digitsOnly(value);
+
+  if (digits.startsWith("55") && digits.length > 11) {
+    digits = digits.slice(2);
+  }
+
+  digits = digits.slice(0, 11);
+
+  if (digits.length <= 2) {
+    return digits.length ? `(${digits}` : "";
+  }
+
+  if (digits.length <= 7) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
 function normalizePhoneForCompare(value: string) {
@@ -131,6 +188,50 @@ function formatMoney(value: number) {
   }).format(value);
 }
 
+function labelField(field: string) {
+  const labels: Record<string, string> = {
+    customerName: "nome",
+    customerPhone: "telefone",
+    type: "tipo do pedido",
+    paymentMethod: "forma de pagamento",
+    items: "itens do pedido",
+    address: "endereco",
+    street: "rua",
+    number: "numero",
+    neighborhood: "bairro",
+    city: "cidade",
+    state: "estado",
+    zipCode: "CEP",
+    code: "codigo",
+    phone: "telefone",
+  };
+
+  return labels[field] || field;
+}
+
+function getErrorMessage(payload: ApiErrorPayload | null) {
+  const fieldErrors = payload?.error?.details?.fieldErrors;
+  const formErrors = payload?.error?.details?.formErrors;
+
+  if (fieldErrors) {
+    const entries = Object.entries(fieldErrors)
+      .flatMap(([field, messages]) =>
+        (messages || []).map((message) => `${labelField(field)}: ${message}`),
+      )
+      .filter(Boolean);
+
+    if (entries.length > 0) {
+      return entries.join(" | ");
+    }
+  }
+
+  if (formErrors?.length) {
+    return formErrors.join(" | ");
+  }
+
+  return payload?.error?.message || "Nao foi possivel concluir a acao.";
+}
+
 async function readJson<T>(input: RequestInfo, init?: RequestInit) {
   const response = await fetch(input, {
     ...init,
@@ -140,10 +241,10 @@ async function readJson<T>(input: RequestInfo, init?: RequestInit) {
     },
   });
 
-  const payload = await response.json().catch(() => null);
+  const payload = (await response.json().catch(() => null)) as ApiErrorPayload | null;
 
   if (!response.ok) {
-    throw new Error(payload?.error?.message || "Nao foi possivel concluir a acao.");
+    throw new Error(getErrorMessage(payload));
   }
 
   return payload as T;
@@ -186,6 +287,13 @@ export function PedidoCheckout() {
   const [stateCode, setStateCode] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [reference, setReference] = useState("");
+  const [zipLookupLoading, setZipLookupLoading] = useState(false);
+  const [zipLookupMessage, setZipLookupMessage] = useState<string | null>(null);
+  const [streetLocked, setStreetLocked] = useState(false);
+  const [complementLocked, setComplementLocked] = useState(false);
+  const [neighborhoodLocked, setNeighborhoodLocked] = useState(false);
+  const [cityLocked, setCityLocked] = useState(false);
+  const [stateLocked, setStateLocked] = useState(false);
 
   const [deliveryQuote, setDeliveryQuote] = useState<DeliveryQuote | null>(null);
   const [deliveryQuoteLoading, setDeliveryQuoteLoading] = useState(false);
@@ -198,6 +306,17 @@ export function PedidoCheckout() {
   const deliveryFeeAmount =
     fulfillmentType === "delivery" ? deliveryQuote?.feeAmount || 0 : 0;
   const totalAmount = subtotal + deliveryFeeAmount;
+  const cleanZipCode = digitsOnly(zipCode);
+  const isZipCodeComplete = cleanZipCode.length === 8;
+  const canEditAddressFields = fulfillmentType === "delivery" && isZipCodeComplete;
+
+  const resetAddressLocks = useCallback(() => {
+    setStreetLocked(false);
+    setComplementLocked(false);
+    setNeighborhoodLocked(false);
+    setCityLocked(false);
+    setStateLocked(false);
+  }, []);
 
   const applyAddress = useCallback((address?: CheckoutAddress | null) => {
     if (!address) return;
@@ -221,7 +340,8 @@ export function PedidoCheckout() {
     setStateCode("");
     setZipCode("");
     setReference("");
-  }, []);
+    resetAddressLocks();
+  }, [resetAddressLocks]);
 
   const applyCustomerSnapshot = useCallback((
     customer: CheckoutCustomerSnapshot,
@@ -334,6 +454,83 @@ export function PedidoCheckout() {
 
   useEffect(() => {
     if (fulfillmentType !== "delivery") {
+      setZipLookupLoading(false);
+      setZipLookupMessage(null);
+      return;
+    }
+
+    if (!cleanZipCode) {
+      setZipLookupLoading(false);
+      setZipLookupMessage(null);
+      resetAddressLocks();
+      return;
+    }
+
+    if (cleanZipCode.length < 8) {
+      setZipLookupLoading(false);
+      setZipLookupMessage("Digite um CEP completo para buscar o endereco.");
+      resetAddressLocks();
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      setZipLookupLoading(true);
+      setZipLookupMessage(null);
+
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanZipCode}/json/`, {
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Nao foi possivel consultar o CEP.");
+        }
+
+        const payload = (await response.json()) as ViaCepResponse;
+
+        if (payload.erro) {
+          throw new Error("CEP nao encontrado.");
+        }
+
+        const nextStreet = payload.logradouro?.trim() || "";
+        const nextComplement = payload.complemento?.trim() || "";
+        const nextNeighborhood = payload.bairro?.trim() || "";
+        const nextCity = payload.localidade?.trim() || "";
+        const nextState = payload.uf?.trim() || "";
+
+        setStreet(nextStreet);
+        setComplement(nextComplement);
+        setNeighborhood(nextNeighborhood);
+        setCity(nextCity);
+        setStateCode(nextState);
+
+        setStreetLocked(Boolean(nextStreet));
+        setComplementLocked(Boolean(nextComplement));
+        setNeighborhoodLocked(Boolean(nextNeighborhood));
+        setCityLocked(Boolean(nextCity));
+        setStateLocked(Boolean(nextState));
+        setZipLookupMessage("Endereco carregado pelo CEP. Edite apenas o que vier em branco.");
+      } catch (error) {
+        resetAddressLocks();
+        setZipLookupMessage(
+          error instanceof Error
+            ? error.message
+            : "Nao foi possivel preencher o endereco pelo CEP.",
+        );
+      } finally {
+        setZipLookupLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [cleanZipCode, fulfillmentType, zipCode, resetAddressLocks]);
+
+  useEffect(() => {
+    if (fulfillmentType !== "delivery") {
       setDeliveryQuote(null);
       setDeliveryQuoteError(null);
       setDeliveryQuoteLoading(false);
@@ -341,9 +538,11 @@ export function PedidoCheckout() {
     }
 
     const hasLocationForQuote =
+      street.trim().length >= 2 &&
+      number.trim().length >= 1 &&
       city.trim().length >= 2 &&
       stateCode.trim().length >= 2 &&
-      (neighborhood.trim().length >= 2 || zipCode.trim().length >= 8);
+      neighborhood.trim().length >= 2;
 
     if (!hasLocationForQuote) {
       setDeliveryQuote(null);
@@ -360,6 +559,8 @@ export function PedidoCheckout() {
         const payload = await readJson<DeliveryQuote>("/api/delivery-fee/quote", {
           method: "POST",
           body: JSON.stringify({
+            street,
+            number,
             zipCode,
             neighborhood,
             city,
@@ -382,7 +583,16 @@ export function PedidoCheckout() {
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [fulfillmentType, city, stateCode, neighborhood, zipCode, subtotal]);
+  }, [
+    fulfillmentType,
+    street,
+    number,
+    city,
+    stateCode,
+    neighborhood,
+    zipCode,
+    subtotal,
+  ]);
 
   const isDeliveryAddressValid = useMemo(() => {
     if (fulfillmentType !== "delivery") return true;
@@ -408,9 +618,7 @@ export function PedidoCheckout() {
   ]);
 
   const canRequestVerification =
-    customerName.trim().length >= 2 &&
-    digitsOnly(customerPhone).length >= 10 &&
-    !verificationPending;
+    digitsOnly(customerPhone).length >= 10 && !verificationPending;
 
   const canSubmit =
     state.items.length > 0 &&
@@ -428,6 +636,7 @@ export function PedidoCheckout() {
     setVerificationError(null);
     setVerificationMessage(null);
     setDevCodePreview(null);
+    setVerificationCode("");
 
     try {
       const payload = await readJson<RequestVerificationResponse>(
@@ -451,6 +660,7 @@ export function PedidoCheckout() {
           : "Nao conseguimos entregar no WhatsApp agora, mas o codigo foi gerado.",
       );
     } catch (error) {
+      setVerificationRequested(false);
       setVerificationError(
         error instanceof Error ? error.message : "Nao foi possivel solicitar o codigo.",
       );
@@ -484,9 +694,17 @@ export function PedidoCheckout() {
     } catch (error) {
       setVerificationConfirmed(false);
       setVerifiedPhone("");
-      setVerificationError(
-        error instanceof Error ? error.message : "Nao foi possivel validar o codigo.",
-      );
+      const message =
+        error instanceof Error ? error.message : "Nao foi possivel validar o codigo.";
+
+      if (message === "Codigo expirado.") {
+        setVerificationRequested(false);
+        setVerificationCode("");
+        setDevCodePreview(null);
+        setVerificationMessage("Codigo expirado. Solicite um novo codigo para continuar.");
+      } else {
+        setVerificationError(message);
+      }
     } finally {
       setVerificationPending(false);
     }
@@ -510,7 +728,7 @@ export function PedidoCheckout() {
           items: state.items.map((item) => ({
             menuItemId: item.menuItemId,
             quantity: item.quantity,
-            notes: item.notes,
+            notes: optionalTrimmed(item.notes || ""),
             optionItemIds: [],
           })),
           address:
@@ -598,7 +816,8 @@ export function PedidoCheckout() {
                 </span>
                 <input
                   className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
-                  onChange={(event) => setCustomerPhone(event.target.value)}
+                  inputMode="numeric"
+                  onChange={(event) => setCustomerPhone(formatPhoneNumber(event.target.value))}
                   placeholder="(11) 99999-0000"
                   value={customerPhone}
                 />
@@ -792,12 +1011,31 @@ export function PedidoCheckout() {
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <label className="block">
                   <span className="mb-2 block text-sm font-semibold text-foreground">
+                    CEP
+                  </span>
+                  <input
+                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    inputMode="numeric"
+                    onChange={(event) => setZipCode(formatZipCode(event.target.value))}
+                    placeholder="00000-000"
+                    value={zipCode}
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-foreground">
                     Rua
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields || streetLocked}
                     onChange={(event) => setStreet(event.target.value)}
-                    placeholder="Rua, avenida..."
+                    placeholder={
+                      !canEditAddressFields
+                        ? "Digite o CEP primeiro"
+                        : streetLocked
+                          ? "Preenchido pelo CEP"
+                          : "Rua, avenida..."
+                    }
                     value={street}
                   />
                 </label>
@@ -807,8 +1045,9 @@ export function PedidoCheckout() {
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields}
                     onChange={(event) => setNumber(event.target.value)}
-                    placeholder="123"
+                    placeholder={!canEditAddressFields ? "Digite o CEP primeiro" : "123"}
                     value={number}
                   />
                 </label>
@@ -818,8 +1057,15 @@ export function PedidoCheckout() {
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields || complementLocked}
                     onChange={(event) => setComplement(event.target.value)}
-                    placeholder="Apto, bloco, casa..."
+                    placeholder={
+                      !canEditAddressFields
+                        ? "Digite o CEP primeiro"
+                        : complementLocked
+                          ? "Preenchido pelo CEP"
+                          : "Apto, bloco, casa..."
+                    }
                     value={complement}
                   />
                 </label>
@@ -829,8 +1075,15 @@ export function PedidoCheckout() {
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields || neighborhoodLocked}
                     onChange={(event) => setNeighborhood(event.target.value)}
-                    placeholder="Centro"
+                    placeholder={
+                      !canEditAddressFields
+                        ? "Digite o CEP primeiro"
+                        : neighborhoodLocked
+                          ? "Preenchido pelo CEP"
+                          : "Centro"
+                    }
                     value={neighborhood}
                   />
                 </label>
@@ -840,8 +1093,15 @@ export function PedidoCheckout() {
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields || cityLocked}
                     onChange={(event) => setCity(event.target.value)}
-                    placeholder="Sao Paulo"
+                    placeholder={
+                      !canEditAddressFields
+                        ? "Digite o CEP primeiro"
+                        : cityLocked
+                          ? "Preenchido pelo CEP"
+                          : "Curitiba"
+                    }
                     value={city}
                   />
                 </label>
@@ -851,21 +1111,17 @@ export function PedidoCheckout() {
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 uppercase outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields || stateLocked}
                     maxLength={2}
                     onChange={(event) => setStateCode(event.target.value.toUpperCase())}
-                    placeholder="SP"
+                    placeholder={
+                      !canEditAddressFields
+                        ? "Digite o CEP primeiro"
+                        : stateLocked
+                          ? "Preenchido pelo CEP"
+                          : "PR"
+                    }
                     value={stateCode}
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-foreground">
-                    CEP
-                  </span>
-                  <input
-                    className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
-                    onChange={(event) => setZipCode(event.target.value)}
-                    placeholder="00000-000"
-                    value={zipCode}
                   />
                 </label>
                 <label className="block md:col-span-2">
@@ -874,11 +1130,19 @@ export function PedidoCheckout() {
                   </span>
                   <input
                     className="w-full rounded-[1rem] border border-line bg-white px-4 py-3 outline-none transition focus:border-[#d97428] focus:ring-2 focus:ring-[#f0b37d]/40"
+                    disabled={!canEditAddressFields}
                     onChange={(event) => setReference(event.target.value)}
-                    placeholder="Perto de..."
+                    placeholder={!canEditAddressFields ? "Digite o CEP primeiro" : "Perto de..."}
                     value={reference}
                   />
                 </label>
+
+                <div className="md:col-span-2 rounded-[1.3rem] border border-line bg-white/88 px-4 py-4 text-sm leading-6 text-muted">
+                  {zipLookupLoading
+                    ? "Buscando endereco pelo CEP..."
+                    : zipLookupMessage ||
+                      "Digite o CEP primeiro. Os campos do endereco ficam bloqueados ate o CEP completar, e so liberamos o que vier em branco."}
+                </div>
               </div>
             ) : (
               <div className="mt-6 rounded-[1.4rem] border border-[#d9e6cb] bg-[#f4f8ef] px-5 py-4 text-sm leading-6 text-[#567b35]">
@@ -898,10 +1162,10 @@ export function PedidoCheckout() {
                       {deliveryQuoteLoading
                         ? "Calculando frete..."
                         : deliveryQuote
-                          ? `${deliveryQuote.rule.label} • ${formatMoney(deliveryQuote.feeAmount)}`
+                          ? `${deliveryQuote.rule.label} • ${formatMoney(deliveryQuote.feeAmount)} • ${deliveryQuote.distanceKm.toFixed(2)} km`
                           : deliveryQuoteError
                             ? deliveryQuoteError
-                            : "Preencha cidade, estado e bairro ou CEP para calcular."}
+                            : "Preencha rua, numero, bairro, cidade e estado para calcular."}
                     </p>
                   </div>
                   {deliveryQuote ? (
@@ -1010,6 +1274,8 @@ export function PedidoCheckout() {
                   ? "Validado"
                   : verificationPending
                     ? "Validando"
+                    : verificationMessage?.includes("expirado")
+                      ? "Codigo expirado"
                     : verificationRequested
                       ? "Codigo solicitado"
                       : "Aguardando envio"}
@@ -1023,7 +1289,11 @@ export function PedidoCheckout() {
                 onClick={handleRequestVerification}
                 type="button"
               >
-                {verificationPending ? "Enviando..." : "Solicitar codigo"}
+                {verificationPending
+                  ? "Enviando..."
+                  : verificationMessage?.includes("expirado")
+                    ? "Solicitar novo codigo"
+                    : "Solicitar codigo"}
               </button>
 
               <input

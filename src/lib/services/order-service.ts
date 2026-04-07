@@ -117,6 +117,8 @@ export async function createOrder(input: CreateOrderInput) {
 
   if (input.type === "delivery" && input.address) {
     const deliveryQuote = await resolveDeliveryFeeRule({
+      street: input.address.street,
+      number: input.address.number,
       zipCode: input.address.zipCode,
       neighborhood: input.address.neighborhood,
       city: input.address.city,

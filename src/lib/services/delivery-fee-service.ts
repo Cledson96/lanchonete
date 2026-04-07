@@ -1,10 +1,13 @@
 import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
-import { digitsOnly, numberFromDecimal } from "@/lib/utils";
+import { geocodeBrazilianAddress, haversineDistanceInKm } from "@/lib/geocoding";
+import { decimal, numberFromDecimal } from "@/lib/utils";
 
 type DeliveryQuoteInput = {
+  street: string;
+  number: string;
   zipCode?: string;
-  neighborhood?: string;
+  neighborhood: string;
   city: string;
   state: string;
   subtotalAmount?: number;
@@ -14,46 +17,137 @@ function normalize(text?: string | null) {
   return (text || "").trim().toLowerCase();
 }
 
+async function getMainStoreProfile() {
+  const storeDelegate = (
+    prisma as typeof prisma & {
+      storeProfile?: {
+        findUnique: typeof prisma.deliveryFeeRule.findUnique;
+        update: typeof prisma.deliveryFeeRule.update;
+      };
+    }
+  ).storeProfile;
+
+  if (!storeDelegate) {
+    throw new ApiError(
+      500,
+      "Configuracao de loja indisponivel no runtime. Rode npm run prisma:generate e reinicie o servidor.",
+    );
+  }
+
+  const store = await storeDelegate.findUnique({
+    where: { slug: "loja-principal" },
+  });
+
+  if (!store) {
+    throw new ApiError(500, "Loja principal nao configurada para calculo de entrega.");
+  }
+
+  return store;
+}
+
+async function resolveStoreCoordinates() {
+  const store = await getMainStoreProfile();
+  const latitude = numberFromDecimal(store.latitude);
+  const longitude = numberFromDecimal(store.longitude);
+
+  if (latitude !== null && longitude !== null) {
+    return {
+      store,
+      latitude,
+      longitude,
+    };
+  }
+
+  const geocoded = await geocodeBrazilianAddress({
+    street: store.street,
+    number: store.number,
+    neighborhood: store.neighborhood,
+    city: store.city,
+    state: store.state,
+    zipCode: store.zipCode,
+  });
+
+  const storeDelegate = (
+    prisma as typeof prisma & {
+      storeProfile?: {
+        update: typeof prisma.deliveryFeeRule.update;
+      };
+    }
+  ).storeProfile;
+
+  if (!storeDelegate) {
+    throw new ApiError(
+      500,
+      "Configuracao de loja indisponivel no runtime. Rode npm run prisma:generate e reinicie o servidor.",
+    );
+  }
+
+  await storeDelegate.update({
+    where: { id: store.id },
+    data: {
+      latitude: decimal(geocoded.latitude),
+      longitude: decimal(geocoded.longitude),
+    },
+  });
+
+  return {
+    store,
+    latitude: geocoded.latitude,
+    longitude: geocoded.longitude,
+  };
+}
+
 export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
-  const zipCode = digitsOnly(input.zipCode);
-  const city = normalize(input.city);
-  const state = normalize(input.state);
-  const neighborhood = normalize(input.neighborhood);
+  const { store, latitude, longitude } = await resolveStoreCoordinates();
+
+  const customerCoordinates = await geocodeBrazilianAddress({
+    street: input.street,
+    number: input.number,
+    neighborhood: input.neighborhood,
+    city: input.city,
+    state: input.state,
+    zipCode: input.zipCode,
+  });
+
+  const distanceKm = haversineDistanceInKm(
+    { latitude, longitude },
+    {
+      latitude: customerCoordinates.latitude,
+      longitude: customerCoordinates.longitude,
+    },
+  );
+
+  const maxDeliveryDistanceKm = numberFromDecimal(store.maxDeliveryDistanceKm) ?? 5;
+
+  if (distanceKm > maxDeliveryDistanceKm) {
+    throw new ApiError(
+      422,
+      `Area de entrega nao atendida. Entregamos ate ${maxDeliveryDistanceKm.toFixed(0)} km da loja.`,
+    );
+  }
 
   const rules = await prisma.deliveryFeeRule.findMany({
     where: {
       isActive: true,
       city: {
-        equals: city,
+        equals: normalize(store.city),
         mode: "insensitive",
       },
       state: {
-        equals: state,
+        equals: normalize(store.state),
         mode: "insensitive",
       },
     },
-    orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
+    orderBy: [{ maxDistanceKm: "asc" }, { sortOrder: "asc" }, { label: "asc" }],
   });
 
-  const byZip = rules.find((rule) => {
-    const start = digitsOnly(rule.zipCodeStart);
-    const end = digitsOnly(rule.zipCodeEnd);
-
-    if (!zipCode || !start || !end) {
-      return false;
-    }
-
-    return zipCode >= start && zipCode <= end;
+  const matchedRule = rules.find((rule) => {
+    const maxDistanceRuleKm = numberFromDecimal(rule.maxDistanceKm);
+    return maxDistanceRuleKm !== null && distanceKm <= maxDistanceRuleKm;
   });
-
-  const byNeighborhood = rules.find(
-    (rule) => normalize(rule.neighborhood) === neighborhood,
-  );
-
-  const matchedRule = byZip || byNeighborhood || null;
 
   if (!matchedRule) {
-    throw new ApiError(422, "Area de entrega nao atendida.");
+    throw new ApiError(422, "Nao encontramos uma faixa de frete para essa distancia.");
   }
 
   const minimumOrderAmount = numberFromDecimal(matchedRule.minimumOrderAmount);
@@ -83,6 +177,7 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
     feeAmount,
     estimatedMinMinutes: matchedRule.estimatedMinMinutes,
     estimatedMaxMinutes: matchedRule.estimatedMaxMinutes,
+    distanceKm: Number(distanceKm.toFixed(2)),
     rule: {
       id: matchedRule.id,
       label: matchedRule.label,
@@ -92,14 +187,21 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
       zipCodeStart: matchedRule.zipCodeStart,
       zipCodeEnd: matchedRule.zipCodeEnd,
       feeAmount,
+      maxDistanceKm: numberFromDecimal(matchedRule.maxDistanceKm),
       minimumOrderAmount,
       freeAboveAmount,
+    },
+    store: {
+      name: store.name,
+      city: store.city,
+      state: store.state,
+      maxDeliveryDistanceKm,
     },
   };
 }
 
 export async function getDeliveryFeeRules() {
   return prisma.deliveryFeeRule.findMany({
-    orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
+    orderBy: [{ maxDistanceKm: "asc" }, { sortOrder: "asc" }, { label: "asc" }],
   });
 }

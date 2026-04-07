@@ -325,6 +325,7 @@ export async function createDeliveryFeeRule(input: {
   state: string;
   zipCodeStart?: string;
   zipCodeEnd?: string;
+  maxDistanceKm: number;
   feeAmount: number;
   minimumOrderAmount?: number;
   freeAboveAmount?: number;
@@ -341,6 +342,7 @@ export async function createDeliveryFeeRule(input: {
       state: input.state,
       zipCodeStart: input.zipCodeStart || null,
       zipCodeEnd: input.zipCodeEnd || null,
+      maxDistanceKm: decimal(input.maxDistanceKm),
       feeAmount: decimal(input.feeAmount),
       minimumOrderAmount:
         typeof input.minimumOrderAmount === "number"
@@ -366,6 +368,7 @@ export async function updateDeliveryFeeRule(input: {
   state?: string;
   zipCodeStart?: string;
   zipCodeEnd?: string;
+  maxDistanceKm?: number;
   feeAmount?: number;
   minimumOrderAmount?: number;
   freeAboveAmount?: number;
@@ -398,6 +401,13 @@ export async function updateDeliveryFeeRule(input: {
 
   if (hasOwn(input, "zipCodeEnd")) {
     data.zipCodeEnd = input.zipCodeEnd || null;
+  }
+
+  if (hasOwn(input, "maxDistanceKm")) {
+    data.maxDistanceKm =
+      typeof input.maxDistanceKm === "number"
+        ? decimal(input.maxDistanceKm)
+        : null;
   }
 
   if (hasOwn(input, "feeAmount") && typeof input.feeAmount === "number") {

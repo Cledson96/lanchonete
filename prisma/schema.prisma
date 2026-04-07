@@ -128,6 +128,23 @@ model Address {
   orders              Order[]
 }
 
+model StoreProfile {
+  id                    String   @id @default(cuid())
+  slug                  String   @unique
+  name                  String
+  zipCode               String?
+  street                String
+  number                String
+  neighborhood          String?
+  city                  String
+  state                 String
+  latitude              Decimal? @db.Decimal(9, 6)
+  longitude             Decimal? @db.Decimal(9, 6)
+  maxDeliveryDistanceKm Decimal  @default(5) @db.Decimal(5, 2)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
 model Category {
   id          String     @id @default(cuid())
   name        String
@@ -214,6 +231,7 @@ model DeliveryFeeRule {
   state               String
   zipCodeStart        String?
   zipCodeEnd          String?
+  maxDistanceKm       Decimal? @db.Decimal(5, 2)
   feeAmount           Decimal  @db.Decimal(10, 2)
   minimumOrderAmount  Decimal? @db.Decimal(10, 2)
   freeAboveAmount     Decimal? @db.Decimal(10, 2)
