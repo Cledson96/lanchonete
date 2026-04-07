@@ -15,6 +15,14 @@ const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
   cancelado: [],
 };
 
+const dashboardOrderViewStatuses = {
+  kitchen: ["novo", "aceito", "em_preparo"],
+  dispatch: ["pronto", "saiu_para_entrega"],
+  archive: ["entregue", "fechado", "cancelado"],
+} satisfies Record<string, OrderStatus[]>;
+
+export type DashboardOrderView = keyof typeof dashboardOrderViewStatuses;
+
 function getStatusMessage(code: string, status: OrderStatus) {
   if (status === "aceito") {
     return `Pedido ${code} aceito. Ja estamos preparando tudo por aqui.`;
@@ -91,14 +99,22 @@ export async function listOrders(filters?: {
   status?: OrderStatus;
   channel?: "web" | "whatsapp" | "local";
   type?: "delivery" | "retirada" | "local";
+  view?: DashboardOrderView;
 }) {
+  const statusFilter =
+    filters?.status ??
+    (filters?.view ? { in: dashboardOrderViewStatuses[filters.view] } : undefined);
+
   return prisma.order.findMany({
     where: {
-      status: filters?.status,
+      status: statusFilter,
       channel: filters?.channel,
       type: filters?.type,
     },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy:
+      filters?.view === "archive"
+        ? [{ updatedAt: "desc" }]
+        : [{ createdAt: "asc" }],
     include: {
       customerProfile: true,
       acceptedBy: true,
@@ -143,12 +159,78 @@ export async function getOrderById(id: string) {
 }
 
 export async function getDashboardMetrics() {
-  const [newOrders, preparingOrders, dispatchingOrders, openCommandas] =
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const completedStatuses: OrderStatus[] = ["entregue", "fechado"];
+
+  const [
+    newOrders,
+    preparingOrders,
+    dispatchingOrders,
+    openCommandas,
+    completedToday,
+    cancelledToday,
+    revenueToday,
+    channelBreakdown,
+    typeBreakdown,
+  ] =
     await Promise.all([
       prisma.order.count({ where: { status: "novo" } }),
       prisma.order.count({ where: { status: { in: ["aceito", "em_preparo"] } } }),
       prisma.order.count({ where: { status: "saiu_para_entrega" } }),
       prisma.comanda.count({ where: { status: { notIn: ["fechado", "cancelado"] } } }),
+      prisma.order.count({
+        where: {
+          status: { in: completedStatuses },
+          OR: [
+            { deliveredAt: { gte: startOfDay } },
+            { updatedAt: { gte: startOfDay } },
+          ],
+        },
+      }),
+      prisma.order.count({
+        where: {
+          status: "cancelado",
+          cancelledAt: { gte: startOfDay },
+        },
+      }),
+      prisma.order.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: { in: completedStatuses },
+          OR: [
+            { deliveredAt: { gte: startOfDay } },
+            { updatedAt: { gte: startOfDay } },
+          ],
+        },
+      }),
+      prisma.order.groupBy({
+        by: ["channel"],
+        where: {
+          createdAt: { gte: startOfDay },
+        },
+        _count: {
+          _all: true,
+        },
+        _sum: {
+          totalAmount: true,
+        },
+      }),
+      prisma.order.groupBy({
+        by: ["type"],
+        where: {
+          createdAt: { gte: startOfDay },
+        },
+        _count: {
+          _all: true,
+        },
+        _sum: {
+          totalAmount: true,
+        },
+      }),
     ]);
 
   return {
@@ -156,6 +238,11 @@ export async function getDashboardMetrics() {
     preparingOrders,
     dispatchingOrders,
     openCommandas,
+    completedToday,
+    cancelledToday,
+    revenueToday: revenueToday._sum.totalAmount,
+    channelBreakdown,
+    typeBreakdown,
   };
 }
 

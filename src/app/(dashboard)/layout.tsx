@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/auth/session";
 
 const nav = [
-  { href: "/dashboard", label: "Resumo" },
-  { href: "/dashboard/pedidos", label: "Pedidos" },
+  { href: "/dashboard", label: "Metricas" },
+  { href: "/dashboard/cozinha", label: "Cozinha" },
+  { href: "/dashboard/expedicao", label: "Expedicao" },
+  { href: "/dashboard/pedidos", label: "Arquivo" },
   { href: "/dashboard/comandas", label: "Comandas" },
   { href: "/dashboard/cardapio", label: "Cardapio" },
   { href: "/dashboard/whatsapp", label: "WhatsApp" },
