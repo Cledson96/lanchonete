@@ -221,8 +221,36 @@ async function ensureCustomer(phone: string, customerName?: string) {
   });
 }
 
-async function getOrCreateConversation(phone: string, customerName?: string) {
+async function getOrCreateConversation(
+  phone: string,
+  customerName?: string,
+  externalThreadId?: string,
+) {
   const customer = await ensureCustomer(phone, customerName);
+  const threadId = externalThreadId || `${phone}@c.us`;
+
+  const byThread = await prisma.whatsAppConversation.findUnique({
+    where: {
+      externalThreadId: threadId,
+    },
+  });
+
+  if (byThread) {
+    const conversation = await prisma.whatsAppConversation.update({
+      where: { id: byThread.id },
+      data: {
+        customerProfileId: customer.id,
+        phone,
+        lastMessageAt: new Date(),
+      },
+    });
+
+    return {
+      customer,
+      conversation,
+    };
+  }
+
   const existing = await prisma.whatsAppConversation.findFirst({
     where: {
       customerProfileId: customer.id,
@@ -233,22 +261,62 @@ async function getOrCreateConversation(phone: string, customerName?: string) {
   });
 
   if (existing) {
+    const conversation = await prisma.whatsAppConversation.update({
+      where: { id: existing.id },
+      data: {
+        phone,
+        externalThreadId: existing.externalThreadId || threadId,
+        lastMessageAt: new Date(),
+      },
+    });
+
     return {
       customer,
-      conversation: existing,
+      conversation,
     };
   }
 
-  const conversation = await prisma.whatsAppConversation.create({
-    data: {
-      customerProfileId: customer.id,
-      phone,
-      externalThreadId: `${phone}@c.us`,
-      state: "idle",
-      botContext: serializeBotContext(getDefaultContext()),
-      lastMessageAt: new Date(),
-    },
-  });
+  let conversation;
+  try {
+    conversation = await prisma.whatsAppConversation.create({
+      data: {
+        customerProfileId: customer.id,
+        phone,
+        externalThreadId: threadId,
+        state: "idle",
+        botContext: serializeBotContext(getDefaultContext()),
+        lastMessageAt: new Date(),
+      },
+    });
+  } catch (error) {
+    const prismaErrorCode =
+      error && typeof error === "object" && "code" in error
+        ? String((error as { code?: unknown }).code)
+        : null;
+
+    if (prismaErrorCode === "P2002") {
+      const recovered = await prisma.whatsAppConversation.findUnique({
+        where: {
+          externalThreadId: threadId,
+        },
+      });
+
+      if (recovered) {
+        conversation = await prisma.whatsAppConversation.update({
+          where: { id: recovered.id },
+          data: {
+            customerProfileId: customer.id,
+            phone,
+            lastMessageAt: new Date(),
+          },
+        });
+      } else {
+        throw error;
+      }
+    } else {
+      throw error;
+    }
+  }
 
   return {
     customer,
@@ -816,7 +884,11 @@ async function handleBotMessage(message: Message) {
     return;
   }
 
-  const { customer, conversation } = await getOrCreateConversation(phone, name);
+  const { customer, conversation } = await getOrCreateConversation(
+    phone,
+    name,
+    message.from,
+  );
 
   await recordInboundMessage({
     conversationId: conversation.id,

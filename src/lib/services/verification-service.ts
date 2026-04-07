@@ -60,7 +60,10 @@ export async function requestPhoneVerification(input: {
     expiresAt: expiresAt.toISOString(),
     delivered: delivery.delivered,
     provider: delivery.provider,
-    devCodePreview: process.env.NODE_ENV === "production" ? undefined : code,
+    devCodePreview:
+      process.env.NODE_ENV === "production" || delivery.provider !== "development"
+        ? undefined
+        : code,
   };
 }
 

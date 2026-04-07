@@ -53,7 +53,7 @@ type RequestVerificationResponse = {
   phone: string;
   expiresAt: string;
   delivered: boolean;
-  provider: "meta" | "development";
+  provider: "whatsapp-web" | "development";
   devCodePreview?: string;
 };
 
@@ -655,9 +655,9 @@ export function PedidoCheckout() {
       setVerifiedPhone("");
       setDevCodePreview(payload.devCodePreview || null);
       setVerificationMessage(
-        payload.delivered
-          ? "Codigo enviado para o WhatsApp informado."
-          : "Nao conseguimos entregar no WhatsApp agora, mas o codigo foi gerado.",
+        payload.provider === "whatsapp-web" && payload.delivered
+          ? "Codigo enviado pelo WhatsApp conectado da loja."
+          : "WhatsApp real indisponivel no momento. Use o codigo de desenvolvimento abaixo para testar localmente.",
       );
     } catch (error) {
       setVerificationRequested(false);

@@ -68,6 +68,25 @@ function buildClientOptions(): ClientOptions {
   } satisfies ClientOptions;
 }
 
+function buildPhoneVariants(phone: string) {
+  const variants = [phone];
+
+  if (
+    phone.startsWith(config.whatsappAllowedCountryCode) &&
+    phone.length === config.whatsappAllowedCountryCode.length + 2 + 9
+  ) {
+    const country = config.whatsappAllowedCountryCode;
+    const areaCode = phone.slice(country.length, country.length + 2);
+    const subscriber = phone.slice(country.length + 2);
+
+    if (subscriber.startsWith("9") && subscriber.length === 9) {
+      variants.push(`${country}${areaCode}${subscriber.slice(1)}`);
+    }
+  }
+
+  return variants;
+}
+
 class WhatsAppClientManager {
   private client: Client | null = null;
   private status: WhatsAppClientStatus = "desconectado";
@@ -96,6 +115,30 @@ class WhatsAppClientManager {
     if (type === "error" || type === "auth_failure") {
       this.lastError = detail;
     }
+  }
+
+  private runInboundListener(listener: InboundListener, message: Message) {
+    Promise.resolve(listener(message)).catch((error) => {
+      this.recordEvent(
+        "error",
+        error instanceof Error
+          ? error.message
+          : "Erro inesperado ao processar mensagem recebida.",
+      );
+      console.error("[whatsapp:inbound-listener]", error);
+    });
+  }
+
+  private runAckListener(listener: AckListener, message: Message, ack: MessageAck) {
+    Promise.resolve(listener(message, ack)).catch((error) => {
+      this.recordEvent(
+        "error",
+        error instanceof Error
+          ? error.message
+          : "Erro inesperado ao processar status da mensagem.",
+      );
+      console.error("[whatsapp:ack-listener]", error);
+    });
   }
 
   private ensureClient() {
@@ -149,14 +192,14 @@ class WhatsAppClientManager {
     client.on("message", (message) => {
       this.recordEvent("message", `Mensagem recebida de ${message.from || "contato"}.`);
       for (const listener of this.inboundListeners) {
-        void listener(message);
+        this.runInboundListener(listener, message);
       }
     });
 
     client.on("message_ack", (message, ack) => {
       this.recordEvent("message_ack", `Atualizacao de entrega ${ack} para ${message.id.id}.`);
       for (const listener of this.ackListeners) {
-        void listener(message, ack);
+        this.runAckListener(listener, message, ack);
       }
     });
 
@@ -238,13 +281,42 @@ class WhatsAppClientManager {
       );
     }
 
-    const chatId = `${phone}@c.us`;
-    const sent = await this.client.sendMessage(chatId, body);
-    this.recordEvent("send", `Mensagem enviada para ${phone}.`);
+    const variants = buildPhoneVariants(phone);
+    let lastError: unknown = null;
 
-    return {
-      externalMessageId: sent.id.id,
-    };
+    for (const variant of variants) {
+      try {
+        const isRegistered = await this.client.isRegisteredUser(`${variant}@c.us`);
+
+        if (!isRegistered) {
+          throw new Error(
+            "Esse numero nao foi encontrado no WhatsApp. Confira o DDD e os digitos do celular.",
+          );
+        }
+
+        const numberId = await this.client.getNumberId(variant);
+        const chatId = numberId?._serialized || `${variant}@c.us`;
+        const sent = await this.client.sendMessage(chatId, body);
+        const detail =
+          variant === phone
+            ? `Mensagem enviada para ${phone}.`
+            : `Mensagem enviada para ${phone} usando fallback ${variant}.`;
+
+        this.recordEvent("send", detail);
+
+        return {
+          externalMessageId: sent.id.id,
+        };
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw (
+      lastError instanceof Error
+        ? lastError
+        : new Error("Nao foi possivel enviar a mensagem pelo WhatsApp.")
+    );
   }
 
   async getSessionInfo(): Promise<WhatsAppSessionInfo> {
