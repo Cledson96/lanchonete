@@ -52,14 +52,14 @@ export function CategoryNav({
   activeCategoryId,
   onSelect,
 }: CategoryNavProps) {
-  const activeClasses = "bg-[var(--success-light)] text-[var(--green-rich)] shadow-[0_4px_14px_rgba(74,124,46,0.1)]";
-  const inactiveClasses = "bg-white text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--green-rich)]";
+  const activeClasses = "bg-[var(--brand-green)] text-white shadow-[0_6px_20px_rgba(140,198,63,0.35)] -translate-y-0.5 border border-transparent";
+  const inactiveClasses = "bg-white text-[var(--foreground)] border border-[var(--line)] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_16px_rgba(242,122,34,0.08)] hover:border-[var(--brand-orange)]/40 hover:text-[var(--brand-orange-dark)] hover:-translate-y-0.5";
 
   return (
-    <div className="sticky top-[59px] z-30 border-b border-[var(--line)] bg-[var(--background)]/92 backdrop-blur-xl">
-      <div className="shell py-2.5">
+    <div className="sticky top-[59px] z-30 border-b border-[var(--line)] bg-[var(--background)]/90 backdrop-blur-xl">
+      <div className="shell py-4">
         {/* Desktop: flex-wrap shows ALL categories */}
-        <div className="hidden flex-wrap items-center gap-2 lg:flex">
+        <div className="hidden flex-wrap items-center gap-3 lg:flex">
           {categories.map((category) => {
             const isActive = category.id === activeCategoryId;
 
@@ -67,25 +67,22 @@ export function CategoryNav({
               <button
                 key={category.id}
                 aria-current={isActive ? "true" : undefined}
-                className={`relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3.5 py-2 text-[0.82rem] font-semibold transition-all duration-200 ${
+                className={`relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 text-[0.88rem] font-bold transition-all duration-300 ${
                   isActive ? activeClasses : inactiveClasses
                 }`}
                 onClick={() => onSelect(category.id)}
                 type="button"
               >
                 <CategoryIcon name={category.name} />
-                <span>{category.name}</span>
-                {isActive ? (
-                  <span className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-[var(--accent)]" />
-                ) : null}
+                <span className="tracking-wide">{category.name}</span>
               </button>
             );
           })}
         </div>
 
         {/* Mobile: horizontal scroll */}
-        <div className="relative overflow-x-auto lg:hidden [scrollbar-width:none]">
-          <div className="flex min-w-max items-center gap-2 pr-12">
+        <div className="relative overflow-x-auto lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex min-w-max items-center gap-2.5 pr-12">
             {categories.map((category) => {
               const isActive = category.id === activeCategoryId;
 
@@ -93,19 +90,19 @@ export function CategoryNav({
                 <button
                   key={category.id}
                   aria-current={isActive ? "true" : undefined}
-                  className={`relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-[0.8rem] font-semibold transition-all duration-200 ${
+                  className={`relative flex shrink-0 cursor-pointer items-center gap-2.5 rounded-full px-4 py-3 text-[0.85rem] font-bold transition-all duration-300 ${
                     isActive ? activeClasses : inactiveClasses
                   }`}
                   onClick={() => onSelect(category.id)}
                   type="button"
                 >
                   <CategoryIcon name={category.name} />
-                  <span>{category.name}</span>
+                  <span className="tracking-wide">{category.name}</span>
                 </button>
               );
             })}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[var(--background)] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[var(--background)] via-[var(--background)]/80 to-transparent" />
         </div>
       </div>
     </div>
