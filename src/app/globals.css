@@ -1,29 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fef9f3;
-  --background-strong: #f4e6d4;
+  --background: #fdfaf6;
+  --background-strong: #faecdf;
   --surface: #ffffff;
-  --surface-muted: rgba(255, 255, 255, 0.88);
-  --foreground: #1c1208;
-  --muted: #6f5d4a;
-  --line: rgba(125, 95, 61, 0.12);
-  --accent: #e07a2f;
-  --accent-strong: #c85f16;
-  --accent-light: #fdebd4;
-  --success: #4a7c2e;
+  --surface-muted: rgba(255, 255, 255, 0.94);
+  --foreground: #2d180b;
+  --muted: #8b674b;
+  --line: rgba(242, 122, 34, 0.15);
+
+  /* Lanchonete Brand */
+  --brand-orange: #f27a22;
+  /* Vibrant Orange from physical menu */
+  --brand-orange-dark: #db6511;
+  --brand-green: #8cc63f;
+  /* Lime Green from physical menu */
+  --brand-green-dark: #6c9e31;
+
+  --accent: var(--brand-orange);
+  --accent-strong: var(--brand-orange-dark);
+  --accent-light: #ffebd4;
+  --success: var(--brand-green);
   --success-light: #e6f2db;
   --warning: #c4811a;
-  --green-deep: #3b5a22;
-  --green-rich: #4a7c2e;
-  --green-soft: #6da043;
-  --orange-soft: #f0a860;
-  --orange-glow: rgba(224, 122, 47, 0.18);
+  --green-deep: var(--brand-green-dark);
+  --green-rich: var(--brand-green);
+  --green-soft: #a3d85a;
+  --orange-soft: #f9a464;
+  --orange-glow: rgba(242, 122, 34, 0.2);
   --cream: #fdf3e4;
-  --shadow-sm: 0 2px 8px rgba(28, 18, 8, 0.04);
-  --shadow-md: 0 8px 24px rgba(28, 18, 8, 0.06);
-  --shadow-lg: 0 20px 50px rgba(28, 18, 8, 0.08);
-  --shadow-glow: 0 8px 30px rgba(224, 122, 47, 0.15);
+  --shadow-sm: 0 2px 8px rgba(242, 122, 34, 0.05);
+  --shadow-md: 0 8px 24px rgba(242, 122, 34, 0.08);
+  --shadow-lg: 0 20px 50px rgba(242, 122, 34, 0.12);
+  --shadow-glow: 0 8px 30px rgba(140, 198, 63, 0.2);
   --radius-sm: 0.75rem;
   --radius-md: 1.25rem;
   --radius-lg: 1.75rem;
@@ -42,6 +51,10 @@
   --color-accent-strong: var(--accent-strong);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-dark: var(--brand-orange-dark);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-dark: var(--brand-green-dark);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-display: var(--font-display);
@@ -170,18 +183,24 @@ select {
 }
 
 .brand-wordmark[data-theme="light"] {
-  color: var(--green-soft);
-  text-shadow: 2px 2px 0 #f6e8c8;
+  color: var(--brand-green);
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
 }
 
 .brand-wordmark[data-theme="orange"] {
-  color: #8fd051;
-  text-shadow: 2px 2px 0 #f6e8c8;
+  color: var(--brand-green);
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
 }
 
 .brand-wordmark[data-theme="dark"] {
-  color: #f6f0dd;
-  text-shadow: 2px 2px 0 rgba(59, 90, 34, 0.4);
+  color: #fff;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.brand-wordmark[data-theme="menu-style"] {
+  color: var(--brand-green);
+  -webkit-text-stroke: 1.8px white;
+  text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ════════════════════════════════════════════
@@ -268,11 +287,11 @@ select {
 }
 
 .cta-btn--primary {
-  background: linear-gradient(135deg, var(--green-rich) 0%, var(--green-soft) 100%);
+  background: var(--brand-green);
   color: #fff;
   box-shadow:
-    0 6px 20px rgba(74, 124, 46, 0.3),
-    0 2px 6px rgba(74, 124, 46, 0.15);
+    0 6px 20px rgba(140, 198, 63, 0.3),
+    0 2px 6px rgba(140, 198, 63, 0.15);
 }
 
 .cta-btn--primary:hover {

@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 type BrandLogoProps = {
-  theme?: "light" | "dark" | "orange";
+  theme?: "light" | "dark" | "orange" | "menu-style";
   compact?: boolean;
   className?: string;
 };
@@ -11,7 +11,7 @@ export function BrandLogo({
   compact = false,
   className = "",
 }: BrandLogoProps) {
-  const markSize = compact ? 42 : 58;
+  const markSize = compact ? 42 : 80;
 
   return (
     <div className={`inline-flex items-center gap-3 ${className}`.trim()}>

@@ -82,52 +82,64 @@ export default async function HomePage() {
     <>
       <main className="min-h-screen">
         {/* ─── Hero ─── */}
-        <section className="hero-section">
-          <Image
-            alt="Lanches artesanais da Lanchonete Família"
-            className="object-cover object-[center_35%]"
-            fill
-            priority
-            quality={85}
-            sizes="100vw"
-            src="/landing/hero-burger.jpg"
-          />
-          <div className="hero-overlay" />
-
-          <div className="hero-content shell flex min-h-[480px] items-end pb-20 pt-12 lg:min-h-[560px] lg:items-center lg:pb-12">
-            <div className="max-w-[34rem]">
-              <div className="hero-reveal">
-                <BrandLogo theme="dark" />
+        <section className="relative overflow-hidden bg-[var(--brand-orange)] flex flex-col lg:flex-row min-h-[550px] lg:min-h-[640px]">
+          {/* Text Content Block */}
+          <div className="relative z-10 flex-1 flex items-center justify-center lg:justify-end px-6 pb-20 pt-16 lg:px-16 lg:py-24">
+            <div className="w-full max-w-xl xl:mr-10">
+              <div className="hero-reveal inline-block mb-8">
+                <BrandLogo theme="menu-style" />
               </div>
 
-              <p className="hero-reveal mt-5 text-[0.68rem] font-bold uppercase tracking-[0.26em] text-[#f0c78a] [animation-delay:80ms]">
-                {brandContent.eyebrow}
-              </p>
-
-              <h1 className="hero-reveal mt-3.5 text-[2.2rem] font-black leading-[1.05] tracking-tight text-white sm:text-[3rem] lg:text-[3.4rem] [animation-delay:140ms]">
-                {brandContent.headline}
+              <h1 className="hero-reveal text-[2.8rem] font-black leading-[1.05] tracking-tight text-white sm:text-[4rem] lg:text-[4.5rem] drop-shadow-md">
+                <span 
+                  className="block text-[var(--brand-green)]" 
+                  style={{ WebkitTextStroke: '2px white', textShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
+                >
+                  LANCHES
+                </span>
+                ARTESANAIS
               </h1>
 
-              <p className="hero-reveal mt-4 max-w-md text-[0.95rem] leading-relaxed text-[#dcc8ac] [animation-delay:180ms]">
-                {brandContent.subheadline}
+              <p className="hero-reveal mt-6 max-w-md text-[1.05rem] font-medium leading-relaxed text-white/95">
+                Pão selado na manteiga, maionese caseira e o verdadeiro hambúrguer artesanal. {brandContent.subheadline}
               </p>
 
-              <div className="hero-reveal mt-7 flex flex-wrap gap-3 [animation-delay:230ms]">
-                <a className="cta-btn cta-btn--primary" href="#cardapio">
+              <div className="hero-reveal mt-8 flex flex-col sm:flex-row flex-wrap gap-4">
+                <a className="cta-btn shadow-[0_8px_24px_rgba(108,158,49,0.3)] hover:scale-[1.02] active:scale-[0.98] !bg-white !text-[var(--brand-orange-dark)] hover:!bg-[var(--brand-green-glow)] transition-all duration-300" href="#cardapio">
                   Ver cardápio
                   <ChevronDownIcon />
                 </a>
                 <a
-                  className="cta-btn cta-btn--secondary"
+                  className="cta-btn !bg-[var(--brand-green)] !text-white hover:!bg-[var(--brand-green-dark)] shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                   href={brandContent.whatsappUrl}
                   rel="noopener noreferrer"
                   target="_blank"
                 >
-                  <WhatsAppIcon className="h-[18px] w-[18px]" />
+                  <WhatsAppIcon className="h-5 w-5" />
                   Pedir pelo WhatsApp
                 </a>
               </div>
             </div>
+            
+            {/* Playful background shape */}
+            <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none"></div>
+          </div>
+
+          {/* Image Block */}
+          <div className="relative h-[360px] w-full lg:h-auto lg:flex-1 lg:max-w-[50%]">
+             <Image
+              alt="Lanches artesanais"
+              className="object-cover object-center lg:object-[left_center]"
+              fill
+              priority
+              quality={90}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              src="/landing/hero-burger.jpg"
+            />
+            {/* Gradient to blend with orange on mobile */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-orange)] to-transparent opacity-95 lg:hidden pointer-events-none"></div>
+            {/* Subtle shadow on desktop between blocks */}
+            <div className="hidden lg:block absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[var(--brand-orange)] to-transparent pointer-events-none z-10"></div>
           </div>
         </section>
 
