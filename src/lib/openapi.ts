@@ -28,7 +28,7 @@ export function getOpenApiDocument(baseUrl?: string) {
       title: "Lanchonete API",
       version: "1.0.0",
       description:
-        "Backend da lanchonete em Next.js App Router, com pedidos web, comandas, dashboard operacional e integracao com WhatsApp.",
+        "Backend da lanchonete em Next.js App Router, com pedidos web, comandas, dashboard operacional e integracao direta com WhatsApp Web.",
     },
     servers: [
       {
@@ -44,7 +44,7 @@ export function getOpenApiDocument(baseUrl?: string) {
       { name: "Dashboard", description: "Operacao interna e gestao." },
       { name: "Menu", description: "Catalogo e estruturas do cardapio." },
       { name: "Frete", description: "Regras e cotacao de entrega." },
-      { name: "WhatsApp", description: "Webhook e envio transacional." },
+      { name: "WhatsApp", description: "Sessao, inbox e envio transacional via whatsapp-web.js." },
       { name: "Auth", description: "Autenticacao do admin." },
     ],
     components: {
@@ -120,6 +120,31 @@ export function getOpenApiDocument(baseUrl?: string) {
             customerName: { type: "string", example: "Cliente Teste" },
           },
           required: ["phone", "code"],
+        },
+        WhatsAppSession: {
+          type: "object",
+          properties: {
+            status: { type: "string" },
+            connectedPhone: { type: ["string", "null"] },
+            connectedName: { type: ["string", "null"] },
+            qrAvailable: { type: "boolean" },
+            qrDataUrl: { type: ["string", "null"] },
+            lastEventAt: { type: ["string", "null"], format: "date-time" },
+            lastError: { type: ["string", "null"] },
+            events: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  type: { type: "string" },
+                  at: { type: "string", format: "date-time" },
+                  detail: { type: "string" },
+                },
+                required: ["type", "at", "detail"],
+              },
+            },
+          },
+          required: ["status", "qrAvailable", "events"],
         },
         VerificationRequestResponse: {
           type: "object",
@@ -521,7 +546,7 @@ export function getOpenApiDocument(baseUrl?: string) {
       "/api/customer/verification/request": {
         post: {
           tags: ["Cliente"],
-          summary: "Solicita codigo de verificacao via WhatsApp",
+          summary: "Solicita codigo de verificacao via WhatsApp Web conectado",
           requestBody: {
             required: true,
             ...jsonContent(schemaRef("VerificationRequestInput")),
@@ -1195,63 +1220,83 @@ export function getOpenApiDocument(baseUrl?: string) {
           },
         },
       },
+      "/api/whatsapp/session": {
+        get: {
+          tags: ["WhatsApp", "Dashboard"],
+          summary: "Consulta o estado atual da sessao do WhatsApp",
+          security: [{ adminCookieAuth: [] }],
+          responses: {
+            "200": jsonResponse("Estado da sessao.", {
+              type: "object",
+              properties: {
+                session: schemaRef("WhatsAppSession"),
+              },
+              required: ["session"],
+            }),
+          },
+        },
+      },
+      "/api/whatsapp/session/connect": {
+        post: {
+          tags: ["WhatsApp", "Dashboard"],
+          summary: "Inicializa o cliente do WhatsApp e gera QR se necessario",
+          security: [{ adminCookieAuth: [] }],
+          responses: {
+            "200": jsonResponse("Sessao inicializada.", {
+              type: "object",
+              properties: {
+                session: schemaRef("WhatsAppSession"),
+              },
+              required: ["session"],
+            }),
+          },
+        },
+      },
+      "/api/whatsapp/session/disconnect": {
+        post: {
+          tags: ["WhatsApp", "Dashboard"],
+          summary: "Desconecta a sessao atual do WhatsApp",
+          security: [{ adminCookieAuth: [] }],
+          responses: {
+            "200": jsonResponse("Sessao desconectada.", {
+              type: "object",
+              properties: {
+                session: schemaRef("WhatsAppSession"),
+              },
+              required: ["session"],
+            }),
+          },
+        },
+      },
+      "/api/whatsapp/session/reset": {
+        post: {
+          tags: ["WhatsApp", "Dashboard"],
+          summary: "Apaga a sessao local do WhatsApp e exige novo QR",
+          security: [{ adminCookieAuth: [] }],
+          responses: {
+            "200": jsonResponse("Sessao resetada.", {
+              type: "object",
+              properties: {
+                session: schemaRef("WhatsAppSession"),
+              },
+              required: ["session"],
+            }),
+          },
+        },
+      },
       "/api/whatsapp/webhook": {
         get: {
           tags: ["WhatsApp"],
-          summary: "Verificacao do webhook da Meta",
-          parameters: [
-            {
-              name: "hub.mode",
-              in: "query",
-              required: true,
-              schema: { type: "string" },
-            },
-            {
-              name: "hub.verify_token",
-              in: "query",
-              required: true,
-              schema: { type: "string" },
-            },
-            {
-              name: "hub.challenge",
-              in: "query",
-              required: true,
-              schema: { type: "string" },
-            },
-          ],
+          summary: "Rota legada que informa a troca para WhatsApp Web",
           responses: {
-            "200": {
-              description: "Webhook validado.",
-              content: {
-                "text/plain": {
-                  schema: { type: "string" },
-                },
-              },
-            },
-            "403": {
-              description: "Token invalido.",
-            },
+            "200": jsonResponse("Canal legado desativado.", schemaRef("WebhookAck")),
           },
         },
         post: {
           tags: ["WhatsApp"],
-          summary: "Recebe eventos da Meta WhatsApp Cloud API",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  additionalProperties: true,
-                },
-              },
-            },
-          },
+          summary: "Rota legada sem recebimento externo",
           responses: {
             "200": jsonResponse("Evento processado.", schemaRef("WebhookAck")),
-            "401": {
-              description: "Assinatura invalida.",
-            },
           },
         },
       },

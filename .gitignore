@@ -43,3 +43,5 @@ yarn-error.log*
 next-env.d.ts
 
 .codex/config.toml
+.runtime/
+.wwebjs_cache/

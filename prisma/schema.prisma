@@ -374,6 +374,7 @@ model WhatsAppConversation {
   phone             String
   externalThreadId  String?             @unique
   state             String
+  botContext        Json?
   startedAt         DateTime            @default(now())
   lastMessageAt     DateTime?
   createdAt         DateTime            @default(now())

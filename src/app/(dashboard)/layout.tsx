@@ -7,6 +7,7 @@ const nav = [
   { href: "/dashboard/pedidos", label: "Pedidos" },
   { href: "/dashboard/comandas", label: "Comandas" },
   { href: "/dashboard/cardapio", label: "Cardapio" },
+  { href: "/dashboard/whatsapp", label: "WhatsApp" },
 ];
 
 export default async function DashboardLayout({

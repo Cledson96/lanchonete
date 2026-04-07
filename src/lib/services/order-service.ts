@@ -13,6 +13,7 @@ type CreateOrderItemInput = {
 type CreateOrderInput = {
   customerName: string;
   customerPhone: string;
+  channel?: "web" | "whatsapp" | "local";
   type: "delivery" | "retirada" | "local";
   paymentMethod: "dinheiro" | "cartao_credito" | "cartao_debito" | "pix" | "outro";
   notes?: string;
@@ -193,7 +194,7 @@ export async function createOrder(input: CreateOrderInput) {
         addressId: address?.id,
         deliveryFeeRuleId,
         code: generateOrderCode(),
-        channel: "web",
+        channel: input.channel || "web",
         type: input.type,
         status: "novo",
         customerName: input.customerName,
@@ -223,7 +224,10 @@ export async function createOrder(input: CreateOrderInput) {
         statusEvents: {
           create: {
             toStatus: "novo",
-            note: "Pedido criado via web.",
+            note:
+              input.channel === "whatsapp"
+                ? "Pedido criado via WhatsApp."
+                : "Pedido criado via web.",
           },
         },
       },

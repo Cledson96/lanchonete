@@ -203,3 +203,7 @@ export const updateOrderStatusSchema = z.object({
   toStatus: orderStatusSchema,
   note: optionalStringField,
 });
+
+export const sendWhatsAppConversationMessageSchema = z.object({
+  content: stringField.min(1).max(2000),
+});
