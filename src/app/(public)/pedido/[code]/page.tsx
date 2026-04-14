@@ -9,7 +9,6 @@ type PedidoStatusPageProps = {
 
 const statusLabels: Record<string, string> = {
   novo: "Pedido recebido",
-  aceito: "Pedido aceito",
   em_preparo: "Em preparo",
   pronto: "Pronto",
   saiu_para_entrega: "Saiu para entrega",

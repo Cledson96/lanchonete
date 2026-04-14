@@ -5,7 +5,7 @@ import { orderStatusSchema, orderTypeSchema } from "@/lib/validators";
 import { z } from "zod";
 
 const channelSchema = z.enum(["web", "whatsapp", "local"]);
-const viewSchema = z.enum(["kitchen", "dispatch", "archive"]);
+const viewSchema = z.enum(["operation", "kitchen", "dispatch", "archive"]);
 
 export async function GET(request: Request) {
   try {

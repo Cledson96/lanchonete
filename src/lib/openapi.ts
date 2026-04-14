@@ -95,7 +95,6 @@ export function getOpenApiDocument(baseUrl?: string) {
           type: "string",
           enum: [
             "novo",
-            "aceito",
             "em_preparo",
             "pronto",
             "saiu_para_entrega",

@@ -12,7 +12,6 @@ export default async function DashboardHomePage() {
   const summaryCards = [
     { label: "Novos agora", value: metrics.newOrders, tone: "text-amber-700 bg-amber-50 border-amber-200" },
     { label: "Em preparo", value: metrics.preparingOrders, tone: "text-[var(--brand-green-dark)] bg-[var(--brand-green)]/10 border-[var(--brand-green)]/20" },
-    { label: "Na expedicao", value: metrics.dispatchingOrders, tone: "text-sky-700 bg-sky-50 border-sky-200" },
     { label: "Comandas abertas", value: metrics.openCommandas, tone: "text-[var(--brand-orange-dark)] bg-[var(--brand-orange)]/10 border-[var(--brand-orange)]/20" },
     { label: "Concluidos hoje", value: metrics.completedToday, tone: "text-[var(--brand-green-dark)] bg-[var(--brand-green)]/10 border-[var(--brand-green)]/20" },
     { label: "Cancelados hoje", value: metrics.cancelledToday, tone: "text-red-700 bg-red-50 border-red-200" },
@@ -33,15 +32,15 @@ export default async function DashboardHomePage() {
           <div className="flex flex-wrap gap-3">
             <Link
               className="rounded-full bg-[var(--brand-orange)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
-              href="/dashboard/cozinha"
+              href="/dashboard/operacao"
             >
-              Ir para cozinha
+              Ir para operacao
             </Link>
             <Link
               className="rounded-full border border-[var(--line)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]"
-              href="/dashboard/expedicao"
+              href="/dashboard/comandas"
             >
-              Ver expedicao
+              Ver comandas
             </Link>
           </div>
         </div>
@@ -71,7 +70,7 @@ export default async function DashboardHomePage() {
             </p>
           </div>
           <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-            Soma dos pedidos finalizados hoje. Use a cozinha e a expedicao para operar; esta tela fica como leitura de resultado.
+            Soma dos pedidos finalizados hoje. Use a operacao para acompanhar pedidos em tempo real; esta tela fica como leitura de resultado.
           </p>
         </article>
 
@@ -79,8 +78,8 @@ export default async function DashboardHomePage() {
           <p className="eyebrow text-[var(--muted)]">Rotas rapidas</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
             {[
-              { href: "/dashboard/cozinha", label: "Cozinha", text: "Receber, aceitar e preparar pedidos." },
-              { href: "/dashboard/expedicao", label: "Expedicao", text: "Organizar prontos, entregas e fechamento." },
+              { href: "/dashboard/operacao", label: "Operacao", text: "Novos, em preparo, prontos e saindo em um so fluxo." },
+              { href: "/dashboard/comandas", label: "Comandas", text: "Comandas abertas e fechamento de contas." },
               { href: "/dashboard/pedidos", label: "Arquivo", text: "Consultar pedidos concluidos e cancelados." },
             ].map((item) => (
               <Link

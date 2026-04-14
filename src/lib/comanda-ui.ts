@@ -1,6 +1,5 @@
 export type ComandaStatus =
   | "novo"
-  | "aceito"
   | "em_preparo"
   | "pronto"
   | "saiu_para_entrega"
@@ -99,8 +98,6 @@ export function humanizeComandaStatus(status: ComandaStatus) {
   switch (status) {
     case "novo":
       return "Aberta";
-    case "aceito":
-      return "Aceita";
     case "em_preparo":
       return "Em preparo";
     case "pronto":
@@ -139,7 +136,6 @@ export function statusTone(status: ComandaStatus) {
   switch (status) {
     case "novo":
       return "border-[var(--brand-orange)]/20 bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]";
-    case "aceito":
     case "em_preparo":
     case "pronto":
       return "border-[var(--brand-green)]/20 bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)]";

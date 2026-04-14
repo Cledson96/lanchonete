@@ -100,7 +100,7 @@ export default async function PedidoSuccessPage({
           <div className="mt-8 rounded-[1.6rem] border border-[#e3d2bc] bg-white/88 px-5 py-5 text-sm leading-7 text-muted">
             <p className="font-semibold text-foreground">Proximos passos</p>
             <p className="mt-2">
-              Assim que o pedido for aceito, o time da {brandContent.shortName} vai
+              Assim que o pedido entrar em preparo, o time da {brandContent.shortName} vai
               atualizar voce pelo WhatsApp. Se precisar acompanhar manualmente,
               use o codigo do pedido.
             </p>

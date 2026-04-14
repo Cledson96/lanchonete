@@ -29,7 +29,6 @@ enum OrderType {
 
 enum OrderStatus {
   novo
-  aceito
   em_preparo
   pronto
   saiu_para_entrega

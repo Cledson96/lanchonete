@@ -190,7 +190,8 @@ lanchonete/
 - **UserRole**: `admin`, `atendimento`, `cozinha`, `entrega`, `caixa`, `cliente`
 - **OrderChannel**: `web`, `whatsapp`, `local`
 - **OrderType**: `delivery`, `retirada`, `local`
-- **OrderStatus**: `novo` → `aceito` → `em_preparo` → `pronto` → `saiu_para_entrega` → `entregue` → `fechado` / `cancelado`
+- **OrderStatus**: `novo` → `em_preparo` → `pronto` → `saiu_para_entrega` → `entregue` → `fechado` / `cancelado`
+  - Nota: o status `aceito` foi removido do fluxo. Pedidos novos vão direto para `em_preparo` quando aceitos pela equipe.
 - **PaymentMethod**: `dinheiro`, `cartao_credito`, `cartao_debito`, `pix`, `outro`
 - **PaymentStatus**: `pendente`, `combinado`, `pago`, `cancelado`
 - **MenuItemKind**: `simples`, `combo`
@@ -214,8 +215,7 @@ lanchonete/
 | Rota | Descrição |
 |------|-----------|
 | `/dashboard` | Métricas gerais (pedidos hoje, faturamento, canais) |
-| `/dashboard/cozinha` | Fila de preparo em tempo real |
-| `/dashboard/expedicao` | Pedidos prontos e saída para entrega |
+| `/dashboard/operacao` | Operação unificada (novos, em preparo, prontos, saindo) |
 | `/dashboard/pedidos` | Arquivo de pedidos concluídos/cancelados |
 | `/dashboard/comandas` | Comandas abertas e fechamento |
 | `/dashboard/cardapio` | CRUD de categorias, itens, opções e imagens |

@@ -4,8 +4,7 @@ import { getAdminSession } from "@/lib/auth/session";
 
 const nav = [
   { href: "/dashboard", label: "Metricas" },
-  { href: "/dashboard/cozinha", label: "Cozinha" },
-  { href: "/dashboard/expedicao", label: "Expedicao" },
+  { href: "/dashboard/operacao", label: "Operacao" },
   { href: "/dashboard/pedidos", label: "Arquivo" },
   { href: "/dashboard/comandas", label: "Comandas" },
   { href: "/dashboard/cardapio", label: "Cardapio" },

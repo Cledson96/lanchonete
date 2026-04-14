@@ -7,7 +7,7 @@ import {
   type DashboardOrderDetail,
 } from "@/components/dashboard-order-detail-sheet";
 
-type DashboardOrderView = "kitchen" | "dispatch" | "archive";
+type DashboardOrderView = "operation" | "kitchen" | "dispatch" | "archive";
 
 type OrderStatus = DashboardOrderDetail["status"];
 
@@ -40,25 +40,30 @@ type Props = {
 };
 
 type ColumnConfig = {
-  status: OrderStatus;
+  statuses: OrderStatus[];
   label: string;
   tone: string;
 };
 
 const columnsByView: Record<DashboardOrderView, ColumnConfig[]> = {
+  operation: [
+    { statuses: ["novo"], label: "Novos", tone: "bg-amber-50 text-amber-700 border-amber-200" },
+    { statuses: ["em_preparo"], label: "Em preparo", tone: "bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)] border-[var(--brand-orange)]/20" },
+    { statuses: ["pronto"], label: "Prontos", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
+    { statuses: ["saiu_para_entrega"], label: "Saindo", tone: "bg-sky-50 text-sky-700 border-sky-200" },
+  ],
   kitchen: [
-    { status: "novo", label: "Novos", tone: "bg-amber-50 text-amber-700 border-amber-200" },
-    { status: "aceito", label: "Aceitos", tone: "bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)] border-[var(--brand-orange)]/20" },
-    { status: "em_preparo", label: "Em preparo", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
+    { statuses: ["novo"], label: "Novos", tone: "bg-amber-50 text-amber-700 border-amber-200" },
+    { statuses: ["em_preparo"], label: "Em preparo", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
   ],
   dispatch: [
-    { status: "pronto", label: "Prontos", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
-    { status: "saiu_para_entrega", label: "Saindo", tone: "bg-sky-50 text-sky-700 border-sky-200" },
+    { statuses: ["pronto"], label: "Prontos", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
+    { statuses: ["saiu_para_entrega"], label: "Saindo", tone: "bg-sky-50 text-sky-700 border-sky-200" },
   ],
   archive: [
-    { status: "entregue", label: "Entregues", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
-    { status: "fechado", label: "Fechados", tone: "bg-[var(--background-strong)] text-[var(--foreground)] border-[var(--line)]" },
-    { status: "cancelado", label: "Cancelados", tone: "bg-red-50 text-red-700 border-red-200" },
+    { statuses: ["entregue"], label: "Entregues", tone: "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)] border-[var(--brand-green)]/20" },
+    { statuses: ["fechado"], label: "Fechados", tone: "bg-[var(--background-strong)] text-[var(--foreground)] border-[var(--line)]" },
+    { statuses: ["cancelado"], label: "Cancelados", tone: "bg-red-50 text-red-700 border-red-200" },
   ],
 };
 
@@ -201,7 +206,7 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
     return currentColumns.map((column) => ({
       ...column,
       orders: orders
-        .filter((order) => order.status === column.status)
+        .filter((order) => column.statuses.includes(order.status))
         .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()),
     }));
   }, [orders, view]);
@@ -307,16 +312,16 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
         </div>
       ) : null}
 
-      <section className={`grid gap-4 ${columns.length === 2 ? "xl:grid-cols-2" : "xl:grid-cols-3"}`}>
+      <section className={`grid gap-4 ${columns.length <= 2 ? "xl:grid-cols-2" : columns.length === 3 ? "xl:grid-cols-3" : columns.length === 4 ? "xl:grid-cols-4" : "xl:grid-cols-5 xl:gap-3"}`}>
         {columns.map((column) => (
-          <article key={column.status} className="panel min-h-[22rem] rounded-[1.8rem] bg-[var(--surface)] p-4 shadow-sm">
+          <article key={column.statuses.join("-")} className="panel min-h-[22rem] rounded-[1.8rem] bg-[var(--surface)] p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-1 pb-4">
               <div>
                 <p className="text-lg font-semibold tracking-tight">{column.label}</p>
                 <p className="mt-1 text-sm text-[var(--muted)]">{column.orders.length} pedidos</p>
               </div>
               <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${column.tone}`}>
-                {humanize(column.status)}
+                {column.statuses.length > 1 ? humanize(column.label) : humanize(column.statuses[0])}
               </span>
             </div>
 

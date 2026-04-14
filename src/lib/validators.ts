@@ -18,7 +18,6 @@ export const orderTypeSchema = z.enum(["delivery", "retirada", "local"]);
 
 export const orderStatusSchema = z.enum([
   "novo",
-  "aceito",
   "em_preparo",
   "pronto",
   "saiu_para_entrega",

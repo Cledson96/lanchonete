@@ -1,11 +1,5 @@
-import { DashboardOrdersWorkspace } from "@/components/dashboard-orders-workspace";
+import { redirect } from "next/navigation";
 
-export default function DashboardKitchenPage() {
-  return (
-    <DashboardOrdersWorkspace
-      description="Receba os pedidos novos, acompanhe os aceitos e organize o preparo sem misturar a fila quente com relatorios."
-      title="Cozinha"
-      view="kitchen"
-    />
-  );
+export default function DashboardCozinhaPage() {
+  redirect("/dashboard/operacao");
 }

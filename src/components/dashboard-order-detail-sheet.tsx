@@ -4,7 +4,6 @@ import { formatMoney } from "@/lib/utils";
 
 type OrderStatus =
   | "novo"
-  | "aceito"
   | "em_preparo"
   | "pronto"
   | "saiu_para_entrega"
@@ -165,12 +164,7 @@ function getActions(order: DashboardOrderDetail): OrderAction[] {
   switch (order.status) {
     case "novo":
       return [
-        { toStatus: "aceito", label: "Aceitar pedido", tone: "primary" },
-        { toStatus: "cancelado", label: "Cancelar", tone: "danger" },
-      ];
-    case "aceito":
-      return [
-        { toStatus: "em_preparo", label: "Marcar em preparo", tone: "success" },
+        { toStatus: "em_preparo", label: "Iniciar preparo", tone: "primary" },
         { toStatus: "cancelado", label: "Cancelar", tone: "danger" },
       ];
     case "em_preparo":

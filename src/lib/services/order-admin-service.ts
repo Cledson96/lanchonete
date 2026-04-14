@@ -5,8 +5,7 @@ import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { normalizePhone } from "@/lib/utils";
 
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
-  novo: ["aceito", "cancelado"],
-  aceito: ["em_preparo", "cancelado"],
+  novo: ["em_preparo", "cancelado"],
   em_preparo: ["pronto", "cancelado"],
   pronto: ["saiu_para_entrega", "fechado"],
   saiu_para_entrega: ["entregue", "cancelado"],
@@ -16,7 +15,8 @@ const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
 };
 
 const dashboardOrderViewStatuses = {
-  kitchen: ["novo", "aceito", "em_preparo"],
+  operation: ["novo", "em_preparo", "pronto", "saiu_para_entrega"],
+  kitchen: ["novo", "em_preparo"],
   dispatch: ["pronto", "saiu_para_entrega"],
   archive: ["entregue", "fechado", "cancelado"],
 } satisfies Record<string, OrderStatus[]>;
@@ -24,7 +24,7 @@ const dashboardOrderViewStatuses = {
 export type DashboardOrderView = keyof typeof dashboardOrderViewStatuses;
 
 function getStatusMessage(code: string, status: OrderStatus) {
-  if (status === "aceito") {
+  if (status === "em_preparo") {
     return `Pedido ${code} aceito. Ja estamos preparando tudo por aqui.`;
   }
 
@@ -177,7 +177,7 @@ export async function getDashboardMetrics() {
   ] =
     await Promise.all([
       prisma.order.count({ where: { status: "novo" } }),
-      prisma.order.count({ where: { status: { in: ["aceito", "em_preparo"] } } }),
+      prisma.order.count({ where: { status: "em_preparo" } }),
       prisma.order.count({ where: { status: "saiu_para_entrega" } }),
       prisma.comanda.count({ where: { status: { notIn: ["fechado", "cancelado"] } } }),
       prisma.order.count({
@@ -276,10 +276,10 @@ export async function transitionOrderStatus(input: {
       data: {
         status: input.toStatus,
         acceptedById:
-          input.toStatus === "aceito"
+          input.toStatus === "em_preparo"
             ? input.changedById || order.acceptedById
             : order.acceptedById,
-        acceptedAt: input.toStatus === "aceito" ? now : order.acceptedAt,
+        acceptedAt: input.toStatus === "em_preparo" ? now : order.acceptedAt,
         preparedAt: input.toStatus === "pronto" ? now : order.preparedAt,
         dispatchedAt:
           input.toStatus === "saiu_para_entrega" ? now : order.dispatchedAt,
