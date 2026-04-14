@@ -1,0 +1,344 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "ING",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "horizontal",
+      "width": 1440,
+      "height": 1024,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "side",
+          "type": "frame",
+          "layout": "vertical",
+          "width": 260,
+          "gap": 16,
+          "padding": 24,
+          "fill": "#2B1B12",
+          "children": [
+            {
+              "id": "brand",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "id": "a",
+                  "type": "text",
+                  "content": "Lanchonete Família",
+                  "fill": "#FFFFFF",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "b",
+                  "type": "text",
+                  "content": "Painel administrativo",
+                  "fill": "#F4C7B0",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "nav",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "i1",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "i1t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "i2",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "i2t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "i3",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "i3t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "i4",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#F27A22",
+                  "children": [
+                    {
+                      "id": "i4t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "main",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 32,
+          "width": "fill_container",
+          "fill": "#FFF7F0",
+          "children": [
+            {
+              "id": "t",
+              "type": "text",
+              "content": "Ingredientes",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "id": "s",
+              "type": "text",
+              "content": "CRUD de grupos e ingredientes com preços fictícios.",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "id": "stats",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 16,
+              "children": [
+                {
+                  "id": "a",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "a1",
+                      "type": "text",
+                      "content": "4",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "a2",
+                      "type": "text",
+                      "content": "Grupos",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "b",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "b1",
+                      "type": "text",
+                      "content": "43",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b2",
+                      "type": "text",
+                      "content": "Ingredientes",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "c",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "c1",
+                      "type": "text",
+                      "content": "296",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "c2",
+                      "type": "text",
+                      "content": "Vínculos",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "body",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 24,
+              "children": [
+                {
+                  "id": "list",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 24,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "l1",
+                      "type": "text",
+                      "content": "Grupos cadastrados",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "l2",
+                      "type": "text",
+                      "content": "Adicionais de lanche",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "id": "l3",
+                      "type": "text",
+                      "content": "Adicionais artesanal",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "editor",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 24,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "e1",
+                      "type": "text",
+                      "content": "Editor do grupo",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "e2",
+                      "type": "text",
+                      "content": "Nome, slug, min/max e opções.",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

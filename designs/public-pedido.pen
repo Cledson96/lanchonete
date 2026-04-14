@@ -1,0 +1,336 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "0igiY",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "vertical",
+      "width": 1440,
+      "height": 1024,
+      "padding": 32,
+      "gap": 24,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "yXay6",
+          "type": "frame",
+          "layout": "horizontal",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "padding": [
+            20,
+            24
+          ],
+          "fill": "#FFFFFF",
+          "children": [
+            {
+              "id": "logo",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "id": "logo1",
+                  "type": "text",
+                  "content": "Lanchonete Família",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "logo2",
+                  "type": "text",
+                  "content": "Carrinho • Verificação • Entrega • Pagamento",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "steps",
+              "type": "frame",
+              "layout": "horizontal",
+              "padding": [
+                10,
+                16
+              ],
+              "fill": "#F7E4D4",
+              "children": [
+                {
+                  "id": "st",
+                  "type": "text",
+                  "content": "Checkout",
+                  "fill": "#B14B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "yvs3P",
+          "type": "frame",
+          "layout": "horizontal",
+          "gap": 24,
+          "width": "fill_container",
+          "children": [
+            {
+              "id": "sum",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "width": 420,
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "sumT",
+                  "type": "text",
+                  "content": "Resumo do pedido",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "item1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "i1",
+                      "type": "text",
+                      "content": "X-Burguer",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "i1b",
+                      "type": "text",
+                      "content": "1x • sem alface • + queijo extra",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "id": "i1p",
+                      "type": "text",
+                      "content": "R$ 18,00",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "item2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "i2",
+                      "type": "text",
+                      "content": "X-Salada",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "i2b",
+                      "type": "text",
+                      "content": "2x • + bacon • + ovo",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "id": "i2p",
+                      "type": "text",
+                      "content": "R$ 34,00",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "total",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    16,
+                    18
+                  ],
+                  "fill": "#2B1B12",
+                  "children": [
+                    {
+                      "id": "tot1",
+                      "type": "text",
+                      "content": "Total",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "id": "tot2",
+                      "type": "text",
+                      "content": "R$ 52,00",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "tot3",
+                      "type": "text",
+                      "content": "Frete e taxas calculadas no próximo passo",
+                      "fill": "#F4C7B0",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "form",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 24,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "fT",
+                  "type": "text",
+                  "content": "Dados para finalizar",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "customer",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 18,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "cT",
+                      "type": "text",
+                      "content": "Cliente e entrega",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "payment",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 18,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "pT",
+                      "type": "text",
+                      "content": "Pagamento",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "actions",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "id": "back",
+                      "type": "frame",
+                      "layout": "horizontal",
+                      "padding": [
+                        12,
+                        18
+                      ],
+                      "fill": "#F7E4D4",
+                      "children": [
+                        {
+                          "id": "backt",
+                          "type": "text",
+                          "content": "Voltar",
+                          "fill": "#B14B12",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "confirm",
+                      "type": "frame",
+                      "layout": "horizontal",
+                      "padding": [
+                        12,
+                        18
+                      ],
+                      "fill": "#F27A22",
+                      "children": [
+                        {
+                          "id": "cont",
+                          "type": "text",
+                          "content": "Confirmar pedido",
+                          "fill": "#FFFFFF",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

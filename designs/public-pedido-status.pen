@@ -1,0 +1,402 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "F3nrH",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "vertical",
+      "width": 1440,
+      "height": 1280,
+      "padding": 32,
+      "gap": 24,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "bjqat",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 8,
+          "children": [
+            {
+              "id": "h1",
+              "type": "text",
+              "content": "Acompanhar pedido",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 32,
+              "fontWeight": "700"
+            },
+            {
+              "id": "h2",
+              "type": "text",
+              "content": "Pedido #1042 • X-Burguer + bebida",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "id": "FMFaF",
+          "type": "frame",
+          "layout": "horizontal",
+          "gap": 16,
+          "children": [
+            {
+              "id": "st1",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "a",
+                  "type": "text",
+                  "content": "Novo",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "b",
+                  "type": "text",
+                  "content": "Pedido recebido",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "st2",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "c",
+                  "type": "text",
+                  "content": "Em preparo",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "d",
+                  "type": "text",
+                  "content": "Na cozinha",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "st3",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "e",
+                  "type": "text",
+                  "content": "Pronto",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "f",
+                  "type": "text",
+                  "content": "Saiu para entrega",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "st4",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "g",
+                  "type": "text",
+                  "content": "Fechado",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "h",
+                  "type": "text",
+                  "content": "Pedido concluído",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "UxXiG",
+          "type": "frame",
+          "layout": "horizontal",
+          "gap": 24,
+          "children": [
+            {
+              "id": "left",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "width": 520,
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "lt",
+                  "type": "text",
+                  "content": "Resumo do pedido",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "r1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "r1a",
+                      "type": "text",
+                      "content": "X-Burguer",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "r1b",
+                      "type": "text",
+                      "content": "1x • sem alface • + queijo extra",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "r2a",
+                      "type": "text",
+                      "content": "Açaí 500ml",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "r2b",
+                      "type": "text",
+                      "content": "2x • morango • leite condensado",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    16,
+                    18
+                  ],
+                  "fill": "#2B1B12",
+                  "children": [
+                    {
+                      "id": "r3a",
+                      "type": "text",
+                      "content": "Total",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "id": "r3b",
+                      "type": "text",
+                      "content": "R$ 52,00",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "right",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "rt",
+                  "type": "text",
+                  "content": "Próximos passos",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "p1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "p1a",
+                      "type": "text",
+                      "content": "Pedido recebido",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "p1b",
+                      "type": "text",
+                      "content": "Aguarde a confirmação da cozinha.",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "p2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "p2a",
+                      "type": "text",
+                      "content": "Em preparo",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "p2b",
+                      "type": "text",
+                      "content": "Estamos montando seu pedido.",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "p3",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "p3a",
+                      "type": "text",
+                      "content": "Pronto para envio",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "p3b",
+                      "type": "text",
+                      "content": "Seu pedido já saiu da cozinha.",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

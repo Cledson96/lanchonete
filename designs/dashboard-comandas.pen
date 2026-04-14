@@ -1,0 +1,364 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "COM",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "horizontal",
+      "width": 1440,
+      "height": 1024,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "side",
+          "type": "frame",
+          "layout": "vertical",
+          "width": 260,
+          "gap": 16,
+          "padding": 24,
+          "fill": "#2B1B12",
+          "children": [
+            {
+              "id": "brand",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "id": "a",
+                  "type": "text",
+                  "content": "Lanchonete Família",
+                  "fill": "#FFFFFF",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "b",
+                  "type": "text",
+                  "content": "Painel administrativo",
+                  "fill": "#F4C7B0",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "nav",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "c1",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "c1t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "c2",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "c2t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "c3",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "c3t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "c4",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#F27A22",
+                  "children": [
+                    {
+                      "id": "c4t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "main",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 32,
+          "width": "fill_container",
+          "fill": "#FFF7F0",
+          "children": [
+            {
+              "id": "t",
+              "type": "text",
+              "content": "Comandas",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "id": "s",
+              "type": "text",
+              "content": "Contas de mesa, itens lançados e fechamento.",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "id": "stats",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 16,
+              "children": [
+                {
+                  "id": "a",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "a1",
+                      "type": "text",
+                      "content": "12",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "a2",
+                      "type": "text",
+                      "content": "Abertas",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "b",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "b1",
+                      "type": "text",
+                      "content": "4",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b2",
+                      "type": "text",
+                      "content": "Fechadas hoje",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "c",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "c1",
+                      "type": "text",
+                      "content": "R$ 648",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "c2",
+                      "type": "text",
+                      "content": "Total em aberto",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "cards",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 24,
+              "children": [
+                {
+                  "id": "mesa1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 20,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "m1",
+                      "type": "text",
+                      "content": "Mesa 12",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "m2",
+                      "type": "text",
+                      "content": "X-Burguer + Açaí",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "mesa2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 20,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "m3",
+                      "type": "text",
+                      "content": "Mesa 08",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "m4",
+                      "type": "text",
+                      "content": "Pastel + refrigerante",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "mesa3",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 20,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "m5",
+                      "type": "text",
+                      "content": "Mesa 03",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "m6",
+                      "type": "text",
+                      "content": "Tapioca doce",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,366 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "43gLl",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "horizontal",
+      "width": 1440,
+      "height": 1024,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "side",
+          "type": "frame",
+          "layout": "vertical",
+          "width": 260,
+          "gap": 16,
+          "padding": 24,
+          "fill": "#2B1B12",
+          "children": [
+            {
+              "id": "b",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "content": "Lanchonete Família",
+                  "fill": "#FFFFFF",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "content": "Painel administrativo",
+                  "fill": "#F4C7B0",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "nav",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "o1",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "o1t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "o2",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#F27A22",
+                  "children": [
+                    {
+                      "id": "o2t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "o3",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "o3t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "o4",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "o4t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "main",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 32,
+          "width": "fill_container",
+          "fill": "#FFF7F0",
+          "children": [
+            {
+              "id": "mt",
+              "type": "text",
+              "content": "Operação",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "id": "ms",
+              "type": "text",
+              "content": "Pedidos em tempo real.",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "id": "stats",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 16,
+              "children": [
+                {
+                  "id": "st1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "a",
+                      "type": "text",
+                      "content": "18",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b",
+                      "type": "text",
+                      "content": "Novos",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "st2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "c",
+                      "type": "text",
+                      "content": "11",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "d",
+                      "type": "text",
+                      "content": "Em preparo",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "st3",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "e",
+                      "type": "text",
+                      "content": "7",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "f",
+                      "type": "text",
+                      "content": "Prontos",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "board",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 12,
+              "fill": "#FFFFFF",
+              "padding": 20,
+              "children": [
+                {
+                  "id": "col1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "width": "fill_container",
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "h1",
+                      "type": "text",
+                      "content": "Novos",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "h2",
+                      "type": "text",
+                      "content": "#1042 X-Burguer",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "col2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "width": "fill_container",
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "i1",
+                      "type": "text",
+                      "content": "Em preparo",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "i2",
+                      "type": "text",
+                      "content": "#1045 X-Salada",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "col3",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "width": "fill_container",
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "j1",
+                      "type": "text",
+                      "content": "Prontos",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "j2",
+                      "type": "text",
+                      "content": "#1046 Açaí 500ml",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

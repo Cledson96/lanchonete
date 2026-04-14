@@ -1,0 +1,384 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "72GKP",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "horizontal",
+      "width": 1440,
+      "height": 1024,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "w0ZOd",
+          "type": "frame",
+          "layout": "vertical",
+          "width": 260,
+          "gap": 16,
+          "padding": 24,
+          "fill": "#2B1B12",
+          "children": [
+            {
+              "id": "brand",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "content": "Lanchonete Família",
+                  "fill": "#FFFFFF",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "content": "Painel administrativo",
+                  "fill": "#F4C7B0",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "nav",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "a1",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "a1t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "a2",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "a2t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "a3",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#F27A22",
+                  "children": [
+                    {
+                      "id": "a3t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "id": "a4",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "fill": "#3C2A20",
+                  "children": [
+                    {
+                      "id": "a4t",
+                      "type": "text",
+                      "content": "Item",
+                      "fill": "#FFFFFF",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "znFUT",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 32,
+          "width": "fill_container",
+          "fill": "#FFF7F0",
+          "children": [
+            {
+              "id": "tt",
+              "type": "text",
+              "content": "Arquivo de pedidos",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "id": "ts",
+              "type": "text",
+              "content": "Pedidos finalizados, cancelados e históricos da operação.",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "id": "stats",
+              "type": "frame",
+              "layout": "horizontal",
+              "gap": 16,
+              "children": [
+                {
+                  "id": "s1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "x",
+                      "type": "text",
+                      "content": "41",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "y",
+                      "type": "text",
+                      "content": "Entregues hoje",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "s2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "x2",
+                      "type": "text",
+                      "content": "9",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "y2",
+                      "type": "text",
+                      "content": "Cancelados",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "s3",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 18,
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "children": [
+                    {
+                      "id": "x3",
+                      "type": "text",
+                      "content": "R$ 1.428",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "y3",
+                      "type": "text",
+                      "content": "Faturamento histórico",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "list",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 24,
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "lt",
+                  "type": "text",
+                  "content": "Últimos pedidos encerrados",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "r1",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "r1a",
+                      "type": "text",
+                      "content": "#1021 • X-Burguer",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "r1b",
+                      "type": "text",
+                      "content": "Entregue • R$ 34,00",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "r2a",
+                      "type": "text",
+                      "content": "#1018 • Combo Artesanal",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "r2b",
+                      "type": "text",
+                      "content": "Cancelado • R$ 59,00",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "type": "frame",
+                  "layout": "horizontal",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "r3a",
+                      "type": "text",
+                      "content": "#1012 • Açaí 500ml",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "r3b",
+                      "type": "text",
+                      "content": "Entregue • R$ 22,00",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

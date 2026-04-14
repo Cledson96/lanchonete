@@ -1,0 +1,133 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "GEFnX",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "none",
+      "width": 1440,
+      "height": 1024,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "F9VsC",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": 32,
+          "width": 420,
+          "x": 510,
+          "y": 160,
+          "fill": "#FFFFFF",
+          "children": [
+            {
+              "id": "brand",
+              "type": "text",
+              "content": "Lanchonete Família",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "id": "sub",
+              "type": "text",
+              "content": "Acesse o painel administrativo",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "id": "field1",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 6,
+              "fill": "#FFF7F0",
+              "padding": 16,
+              "children": [
+                {
+                  "id": "f1",
+                  "type": "text",
+                  "content": "E-mail",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "f1v",
+                  "type": "text",
+                  "content": "admin@lanchonete.com",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "field2",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 6,
+              "fill": "#FFF7F0",
+              "padding": 16,
+              "children": [
+                {
+                  "id": "f2",
+                  "type": "text",
+                  "content": "Senha",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "f2v",
+                  "type": "text",
+                  "content": "••••••••",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "btn",
+              "type": "frame",
+              "layout": "horizontal",
+              "padding": [
+                12,
+                18
+              ],
+              "fill": "#F27A22",
+              "children": [
+                {
+                  "id": "btnt",
+                  "type": "text",
+                  "content": "Entrar no painel",
+                  "fill": "#FFFFFF",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "id": "help",
+              "type": "text",
+              "content": "Se precisar, peça acesso ao gerente.",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

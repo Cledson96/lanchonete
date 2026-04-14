@@ -1,0 +1,252 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "mPdEG",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "vertical",
+      "width": 1440,
+      "height": 1024,
+      "padding": 32,
+      "gap": 24,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "osiFJ",
+          "type": "frame",
+          "layout": "horizontal",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "padding": [
+            20,
+            24
+          ],
+          "fill": "#FFFFFF",
+          "children": [
+            {
+              "id": "brand",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "id": "b1",
+                  "type": "text",
+                  "content": "Lanchonete Família",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "b2",
+                  "type": "text",
+                  "content": "Comanda da mesa / cliente",
+                  "fill": "#7A5A47",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "id": "status",
+              "type": "frame",
+              "layout": "horizontal",
+              "padding": [
+                10,
+                16
+              ],
+              "fill": "#F7E4D4",
+              "children": [
+                {
+                  "id": "s",
+                  "type": "text",
+                  "content": "Comanda aberta",
+                  "fill": "#B14B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zOCI8",
+          "type": "frame",
+          "layout": "horizontal",
+          "gap": 24,
+          "width": "fill_container",
+          "children": [
+            {
+              "id": "sum",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "width": 420,
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "content": "Resumo da comanda",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "card1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "a",
+                      "type": "text",
+                      "content": "Mesa 08",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b",
+                      "type": "text",
+                      "content": "Aberta há 24 min",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "card2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "c",
+                      "type": "text",
+                      "content": "Total parcial",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "d",
+                      "type": "text",
+                      "content": "R$ 52,00",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "items",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "i",
+                  "type": "text",
+                  "content": "Itens lançados",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "it1",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "i1",
+                      "type": "text",
+                      "content": "X-Burguer • 1x",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "i1b",
+                      "type": "text",
+                      "content": "Sem alface • + queijo extra",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "it2",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "i2",
+                      "type": "text",
+                      "content": "Açaí 500ml • 2x",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "i2b",
+                      "type": "text",
+                      "content": "Morango • leite condensado",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

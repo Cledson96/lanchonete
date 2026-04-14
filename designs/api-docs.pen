@@ -1,0 +1,280 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "id": "x2JMy",
+      "type": "frame",
+      "placeholder": true,
+      "layout": "vertical",
+      "width": 1440,
+      "height": 1200,
+      "padding": 32,
+      "gap": 24,
+      "fill": "#FFF7F0",
+      "children": [
+        {
+          "id": "uTgMz",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": 32,
+          "fill": "#FFFFFF",
+          "children": [
+            {
+              "id": "h1",
+              "type": "text",
+              "content": "API Docs",
+              "fill": "#2B1B12",
+              "fontFamily": "Inter",
+              "fontSize": 32,
+              "fontWeight": "700"
+            },
+            {
+              "id": "h2",
+              "type": "text",
+              "content": "Especificação OpenAPI e endpoints principais do sistema.",
+              "fill": "#7A5A47",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "id": "CYTxD",
+          "type": "frame",
+          "layout": "horizontal",
+          "gap": 24,
+          "children": [
+            {
+              "id": "wOB8A",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 24,
+              "width": 420,
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "a1",
+                  "type": "text",
+                  "content": "Autenticação",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "aa",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "gap": 6,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "a2",
+                      "type": "text",
+                      "content": "POST /api/auth/admin/login",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "a3",
+                      "type": "text",
+                      "content": "Login administrativo",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "ab",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "gap": 6,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "a4",
+                      "type": "text",
+                      "content": "POST /api/orders",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "a5",
+                      "type": "text",
+                      "content": "Cria pedido",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "ac",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "gap": 6,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "a6",
+                      "type": "text",
+                      "content": "GET /api/menu",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "a7",
+                      "type": "text",
+                      "content": "Cardápio público",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "cT2ho",
+              "type": "frame",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 24,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "children": [
+                {
+                  "id": "b1",
+                  "type": "text",
+                  "content": "Pedidos e Comandas",
+                  "fill": "#2B1B12",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "id": "ba",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "gap": 6,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "b2",
+                      "type": "text",
+                      "content": "GET /api/dashboard/orders",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b3",
+                      "type": "text",
+                      "content": "Lista pedidos do admin",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "bb",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "gap": 6,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "b4",
+                      "type": "text",
+                      "content": "GET /api/dashboard/comandas",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b5",
+                      "type": "text",
+                      "content": "Lista comandas do admin",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "id": "bc",
+                  "type": "frame",
+                  "layout": "vertical",
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "gap": 6,
+                  "fill": "#FFF7F0",
+                  "children": [
+                    {
+                      "id": "b6",
+                      "type": "text",
+                      "content": "GET /api/openapi.json",
+                      "fill": "#2B1B12",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "b7",
+                      "type": "text",
+                      "content": "Especificação JSON",
+                      "fill": "#7A5A47",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
