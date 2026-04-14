@@ -5,8 +5,16 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
+function shouldUseLocalDbOnStart() {
+  return process.env.USE_LOCAL_DB_ON_START === "true";
+}
+
 function getRuntimeDatabaseUrl() {
   if (process.env.NODE_ENV === "production") {
+    if (shouldUseLocalDbOnStart()) {
+      return process.env.DATABASE_URL || process.env.DATABASE_REMOTE_URL;
+    }
+
     return process.env.DATABASE_REMOTE_URL || process.env.DATABASE_URL;
   }
 

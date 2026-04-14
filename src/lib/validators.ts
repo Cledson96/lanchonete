@@ -235,6 +235,11 @@ export const addComandaItemsSchema = z.object({
   items: z.array(orderItemSchema).min(1),
 });
 
+export const createComandaSchema = z.object({
+  name: stringField.min(2, "Informe o nome do cliente."),
+  notes: optionalStringField,
+});
+
 export const closeComandaSchema = z.object({
   paymentMethod: paymentMethodSchema,
 });

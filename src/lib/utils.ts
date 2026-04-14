@@ -47,7 +47,7 @@ export function numberFromDecimal(value?: Prisma.Decimal | null) {
   return value ? Number(value) : null;
 }
 
-export function formatMoney(value?: Prisma.Decimal | number | null) {
+export function formatMoney(value?: Prisma.Decimal | number | string | null) {
   const numeric =
     value instanceof Prisma.Decimal ? Number(value) : Number(value ?? 0);
 

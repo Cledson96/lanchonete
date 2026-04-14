@@ -1,6 +1,6 @@
 import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
-import { decimal, optionalNullable } from "@/lib/utils";
+import { decimal, optionalNullable, slugify } from "@/lib/utils";
 
 type ComandaItemInput = {
   menuItemId: string;
@@ -9,58 +9,103 @@ type ComandaItemInput = {
   optionItemIds?: string[];
 };
 
-export async function getComandaBySlug(slug: string) {
-  return prisma.comanda.findUnique({
-    where: { qrCodeSlug: slug },
+const comandaInclude = {
+  customerProfile: true,
+  openedBy: {
+    select: {
+      id: true,
+      email: true,
+    },
+  },
+  entries: {
+    orderBy: { createdAt: "asc" as const },
     include: {
-      customerProfile: true,
-      entries: {
-        orderBy: { createdAt: "asc" },
+      menuItem: true,
+      selectedOptions: {
         include: {
-          menuItem: true,
-          selectedOptions: {
-            include: {
-              optionItem: true,
-            },
-          },
+          optionItem: true,
         },
       },
     },
+  },
+};
+
+async function generateUniqueComandaCode() {
+  while (true) {
+    const code = `CM-${Math.random().toString(36).slice(2, 5).toUpperCase()}${Date.now()
+      .toString(36)
+      .slice(-4)
+      .toUpperCase()}`;
+
+    const existing = await prisma.comanda.findUnique({
+      where: { code },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return code;
+    }
+  }
+}
+
+async function generateUniqueQrSlug(name: string) {
+  const base = slugify(name) || "comanda";
+
+  while (true) {
+    const suffix = Math.random().toString(36).slice(2, 7);
+    const qrCodeSlug = `${base}-${suffix}`;
+    const existing = await prisma.comanda.findUnique({
+      where: { qrCodeSlug },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return qrCodeSlug;
+    }
+  }
+}
+
+export async function createComanda(input: {
+  name: string;
+  notes?: string;
+  openedById?: string;
+}) {
+  const code = await generateUniqueComandaCode();
+  const qrCodeSlug = await generateUniqueQrSlug(input.name);
+
+  return prisma.comanda.create({
+    data: {
+      code,
+      qrCodeSlug,
+      name: input.name.trim(),
+      notes: optionalNullable(input.notes),
+      openedById: input.openedById,
+      status: "novo",
+      subtotalAmount: decimal(0),
+      totalAmount: decimal(0),
+    },
+    include: comandaInclude,
+  });
+}
+
+export async function getComandaBySlug(slug: string) {
+  return prisma.comanda.findUnique({
+    where: { qrCodeSlug: slug },
+    include: comandaInclude,
   });
 }
 
 export async function getComandaById(id: string) {
   return prisma.comanda.findUnique({
     where: { id },
-    include: {
-      customerProfile: true,
-      entries: {
-        orderBy: { createdAt: "asc" },
-        include: {
-          menuItem: true,
-          selectedOptions: {
-            include: {
-              optionItem: true,
-            },
-          },
-        },
-      },
-    },
+    include: comandaInclude,
   });
 }
 
 export async function listCommandas() {
   return prisma.comanda.findMany({
     orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
-    include: {
-      customerProfile: true,
-      entries: {
-        orderBy: { createdAt: "asc" },
-        include: {
-          menuItem: true,
-        },
-      },
-    },
+    include: comandaInclude,
   });
 }
 
@@ -176,20 +221,7 @@ export async function addItemsToComanda(
         subtotalAmount: decimal(newSubtotal),
         totalAmount: decimal(newTotal),
       },
-      include: {
-        customerProfile: true,
-        entries: {
-          orderBy: { createdAt: "asc" },
-          include: {
-            menuItem: true,
-            selectedOptions: {
-              include: {
-                optionItem: true,
-              },
-            },
-          },
-        },
-      },
+      include: comandaInclude,
     });
   });
 }
@@ -206,13 +238,6 @@ export async function closeComanda(
       paymentStatus: "pago",
       closedAt: new Date(),
     },
-    include: {
-      customerProfile: true,
-      entries: {
-        include: {
-          menuItem: true,
-        },
-      },
-    },
+    include: comandaInclude,
   });
 }
