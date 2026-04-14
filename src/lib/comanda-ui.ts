@@ -60,6 +60,13 @@ export type ComandaDetail = {
       quantity: number;
       unitPriceDelta: number | string;
     }>;
+    ingredientCustomizations: Array<{
+      ingredient: {
+        id: string;
+        name: string;
+      };
+      quantity: number;
+    }>;
   }>;
 };
 
@@ -86,6 +93,11 @@ export type PublicMenuCategory = {
         description?: string | null;
         priceDelta: number | string;
       }>;
+    }>;
+    ingredients: Array<{
+      id: string;
+      name: string;
+      quantity: number;
     }>;
   }>;
 };

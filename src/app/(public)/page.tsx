@@ -63,7 +63,7 @@ function PhoneIcon() {
 export default async function HomePage() {
   const categories = await getPublicMenu();
 
-  const browserCategories = categories.map((category) => ({
+  const browserCategories = categories.map((category: { id: string; name: string; slug: string; description: string | null; menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number }> }> }) => ({
     id: category.id,
     name: category.name,
     slug: category.slug,
@@ -88,6 +88,11 @@ export default async function HomePage() {
           description: option.description,
           priceDelta: Number(option.priceDelta),
         })),
+      })),
+      ingredients: (item.ingredients || []).map((ing) => ({
+        id: ing.id,
+        name: ing.name,
+        quantity: ing.quantity,
       })),
     })),
   }));

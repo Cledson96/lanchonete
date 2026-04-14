@@ -68,6 +68,12 @@ export type DashboardOrderDetail = {
         name: string;
       };
     }>;
+    ingredientCustomizations: Array<{
+      quantity: number;
+      ingredient: {
+        name: string;
+      };
+    }>;
   }>;
   statusEvents: Array<{
     id: string;
@@ -343,6 +349,26 @@ export function DashboardOrderDetailSheet({
                                 : ""}
                             </li>
                           ))}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    {item.ingredientCustomizations && item.ingredientCustomizations.length > 0 ? (
+                      <div className="mt-3 rounded-[1.1rem] bg-[var(--background)] px-3 py-3 text-sm text-[var(--muted)]">
+                        <p className="font-semibold text-[var(--foreground)]">Ingredientes</p>
+                        <ul className="mt-2 space-y-1.5">
+                          {item.ingredientCustomizations.map((ing, index) => (
+                            <li key={`${item.id}-ing-${index}`}>
+                              {ing.quantity === 0 ? (
+                                <span className="line-through text-red-500">Sem {ing.ingredient.name}</span>
+                              ) : ing.quantity > 1 ? (
+                                <span>{ing.quantity}x {ing.ingredient.name}</span>
+                              ) : null}
+                            </li>
+                          ))}
+                          {item.ingredientCustomizations.every((ing) => ing.quantity === 1) ? (
+                            <li className="text-[var(--muted)] italic">Padrão</li>
+                          ) : null}
                         </ul>
                       </div>
                     ) : null}

@@ -146,6 +146,11 @@ export async function getOrderById(id: string) {
               optionItem: true,
             },
           },
+          ingredientCustomizations: {
+            include: {
+              ingredient: true,
+            },
+          },
         },
       },
       statusEvents: {

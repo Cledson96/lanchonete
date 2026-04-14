@@ -7,6 +7,7 @@ type ComandaItemInput = {
   quantity: number;
   notes?: string;
   optionItemIds?: string[];
+  ingredients?: Array<{ ingredientId: string; quantity: number }>;
 };
 
 const comandaInclude = {
@@ -24,6 +25,11 @@ const comandaInclude = {
       selectedOptions: {
         include: {
           optionItem: true,
+        },
+      },
+      ingredientCustomizations: {
+        include: {
+          ingredient: true,
         },
       },
     },
@@ -145,6 +151,10 @@ export async function addItemsToComanda(
           },
         },
       },
+      ingredients: {
+        where: { ingredient: { isActive: true } },
+        include: { ingredient: { select: { id: true } } },
+      },
     },
   });
 
@@ -163,6 +173,18 @@ export async function addItemsToComanda(
         },
       })
     : [];
+
+  const ingredientIds = items.flatMap((item) => (item.ingredients || []).map((ing) => ing.ingredientId));
+  const ingredientRecords = ingredientIds.length
+    ? await prisma.ingredient.findMany({
+        where: {
+          id: { in: ingredientIds },
+          isActive: true,
+        },
+      })
+    : [];
+
+  const ingredientSet = new Set(ingredientRecords.map((i) => i.id));
 
   const menuMap = new Map(menuItems.map((item) => [item.id, item]));
   const optionMap = new Map(optionItems.map((item) => [item.id, item]));
@@ -197,6 +219,26 @@ export async function addItemsToComanda(
       }
     }
 
+    const validIngredientIds = new Set(
+      menuItem.ingredients.map((link) => link.ingredientId),
+    );
+
+    for (const ing of item.ingredients || []) {
+      if (!validIngredientIds.has(ing.ingredientId)) {
+        throw new ApiError(422, `O ingrediente nao pertence a este item.`);
+      }
+      if (!ingredientSet.has(ing.ingredientId)) {
+        throw new ApiError(404, `Ingrediente nao encontrado.`);
+      }
+      if (ing.quantity < 0 || ing.quantity > 10) {
+        throw new ApiError(422, `Quantidade de ingrediente invalida.`);
+      }
+    }
+
+    const ingredientCustomizations = (item.ingredients || []).map((ing) => ({
+      ...ing,
+    }));
+
     const optionDelta = selectedOptions.reduce(
       (sum, option) => sum + Number(option.priceDelta),
       0,
@@ -209,6 +251,7 @@ export async function addItemsToComanda(
       item,
       menuItem,
       selectedOptions,
+      ingredientCustomizations,
       unitPrice,
       subtotalAmount,
     };
@@ -219,7 +262,7 @@ export async function addItemsToComanda(
 
   return prisma.$transaction(async (tx) => {
     await Promise.all(
-      normalizedItems.map(({ item, menuItem, selectedOptions, unitPrice, subtotalAmount }) =>
+      normalizedItems.map(({ item, menuItem, selectedOptions, ingredientCustomizations, unitPrice, subtotalAmount }) =>
         tx.comandaEntry.create({
           data: {
             comandaId,
@@ -234,6 +277,12 @@ export async function addItemsToComanda(
                 optionItemId: option.id,
                 quantity: 1,
                 unitPriceDelta: option.priceDelta,
+              })),
+            },
+            ingredientCustomizations: {
+              create: ingredientCustomizations.map((ing) => ({
+                ingredientId: ing.ingredientId,
+                quantity: ing.quantity,
               })),
             },
           },

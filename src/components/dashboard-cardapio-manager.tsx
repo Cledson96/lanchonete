@@ -16,6 +16,13 @@ type OptionGroupSummary = {
   name: string;
 };
 
+type IngredientSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+};
+
 type ComboComponentSummary = {
   quantity: number;
   componentMenuItem: {
@@ -50,6 +57,12 @@ type MenuItemSummary = {
       name: string;
     };
   }>;
+  ingredients: Array<{
+    ingredient: {
+      id: string;
+      name: string;
+    };
+  }>;
   comboItems?: ComboComponentSummary[];
 };
 
@@ -57,6 +70,7 @@ type Props = {
   categories: CategorySummary[];
   items: MenuItemSummary[];
   optionGroups: OptionGroupSummary[];
+  ingredients: IngredientSummary[];
 };
 
 type ToastState = {
@@ -77,6 +91,7 @@ type EditorState = {
   isFeatured: boolean;
   sortOrder: string;
   optionGroupIds: string[];
+  ingredientIds: string[];
   comboComponents: Array<{
     componentMenuItemId: string;
     quantity: string;
@@ -96,6 +111,7 @@ const emptyEditorState: EditorState = {
   isFeatured: false,
   sortOrder: "0",
   optionGroupIds: [],
+  ingredientIds: [],
   comboComponents: [],
 };
 
@@ -138,6 +154,7 @@ function createEditorStateFromItem(item: ReturnType<typeof normalizeItem>): Edit
     isFeatured: item.isFeatured,
     sortOrder: String(item.sortOrder ?? 0),
     optionGroupIds: item.optionGroups.map((group) => group.optionGroup.id),
+    ingredientIds: item.ingredients.map((link) => link.ingredient.id),
     comboComponents: (item.comboItems || []).map((component) => ({
       componentMenuItemId: component.componentMenuItem.id,
       quantity: String(component.quantity),
@@ -152,7 +169,7 @@ function createNewEditorState(categories: CategorySummary[]) {
   } satisfies EditorState;
 }
 
-export function DashboardCardapioManager({ categories, items, optionGroups }: Props) {
+export function DashboardCardapioManager({ categories, items, optionGroups, ingredients }: Props) {
   const [menuItems, setMenuItems] = useState(items.map(normalizeItem));
   const [editor, setEditor] = useState<EditorState>(() => createNewEditorState(categories));
   const [search, setSearch] = useState("");
@@ -228,6 +245,15 @@ export function DashboardCardapioManager({ categories, items, optionGroups }: Pr
     }));
   }
 
+  function toggleIngredient(ingredientId: string) {
+    setEditor((current) => ({
+      ...current,
+      ingredientIds: current.ingredientIds.includes(ingredientId)
+        ? current.ingredientIds.filter((id) => id !== ingredientId)
+        : [...current.ingredientIds, ingredientId],
+    }));
+  }
+
   function toggleComboComponent(componentMenuItemId: string) {
     setEditor((current) => {
       const exists = current.comboComponents.some(
@@ -277,6 +303,7 @@ export function DashboardCardapioManager({ categories, items, optionGroups }: Pr
         isFeatured: editor.isFeatured,
         sortOrder: Number(editor.sortOrder || 0),
         optionGroupIds: editor.optionGroupIds,
+        ingredientIds: editor.ingredientIds,
         comboComponents:
           editor.kind === "combo"
             ? editor.comboComponents.map((component) => ({
@@ -507,6 +534,7 @@ export function DashboardCardapioManager({ categories, items, optionGroups }: Pr
           <div className="space-y-4">
             {visibleItems.map((item) => {
               const optionLabels = item.optionGroups.map((group) => group.optionGroup.name);
+              const ingredientLabels = item.ingredients.map((link) => link.ingredient.name);
               const comboSummary = (item.comboItems || []).map((component) => `${component.quantity}x ${component.componentMenuItem.name}`);
               return (
                 <article key={item.id} className="group flex flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] shadow-[0_8px_24px_rgba(45,24,11,0.04)] transition hover:border-[var(--brand-orange)]/30 hover:shadow-[0_14px_30px_rgba(242,122,34,0.1)] sm:flex-row">
@@ -539,6 +567,9 @@ export function DashboardCardapioManager({ categories, items, optionGroups }: Pr
 
                     {optionLabels.length ? (
                       <p className="mt-4 text-sm text-[var(--muted)]">Adicionais: {optionLabels.join(", ")}</p>
+                    ) : null}
+                    {ingredientLabels.length ? (
+                      <p className="mt-1 text-sm text-[var(--muted)]">Ingredientes: {ingredientLabels.join(", ")}</p>
                     ) : null}
                     {comboSummary.length ? (
                       <p className="mt-2 text-sm text-[var(--muted)]">Combo: {comboSummary.join(" • ")}</p>
@@ -738,6 +769,19 @@ export function DashboardCardapioManager({ categories, items, optionGroups }: Pr
                         <label key={group.id} className="flex items-center gap-3 rounded-[1rem] bg-white px-3 py-2 text-sm text-[var(--foreground)]">
                           <input checked={editor.optionGroupIds.includes(group.id)} onChange={() => toggleOptionGroup(group.id)} type="checkbox" />
                           {group.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--background)] p-4">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">Ingredientes (composicao)</p>
+                    <p className="mt-1 text-xs text-[var(--muted)]">Selecione os ingredientes que vem no item. O cliente podera remover ou pedir mais.</p>
+                    <div className="mt-3 grid gap-2">
+                      {ingredients.map((ing) => (
+                        <label key={ing.id} className="flex items-center gap-3 rounded-[1rem] bg-white px-3 py-2 text-sm text-[var(--foreground)]">
+                          <input checked={editor.ingredientIds.includes(ing.id)} onChange={() => toggleIngredient(ing.id)} type="checkbox" />
+                          {ing.name}
                         </label>
                       ))}
                     </div>

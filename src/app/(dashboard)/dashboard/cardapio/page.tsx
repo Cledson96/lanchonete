@@ -1,12 +1,13 @@
-import { getAdminCategories, getAdminMenuItems, getAdminOptionGroups } from "@/lib/services/menu-service";
+import { getAdminCategories, getAdminMenuItems, getAdminOptionGroups, getAdminIngredients } from "@/lib/services/menu-service";
 import { DashboardCardapioManager } from "@/components/dashboard-cardapio-manager";
 import { numberFromDecimal } from "@/lib/utils";
 
 export default async function DashboardCardapioPage() {
-  const [categories, items, optionGroups] = await Promise.all([
+  const [categories, items, optionGroups, ingredients] = await Promise.all([
     getAdminCategories(),
     getAdminMenuItems(),
     getAdminOptionGroups(),
+    getAdminIngredients(),
   ]);
 
   return (
@@ -18,6 +19,7 @@ export default async function DashboardCardapioPage() {
         compareAtPrice: numberFromDecimal(item.compareAtPrice),
       }))}
       optionGroups={optionGroups}
+      ingredients={ingredients}
     />
   );
 }

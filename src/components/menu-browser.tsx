@@ -25,6 +25,11 @@ type MenuBrowserItem = {
       priceDelta: number;
     }>;
   }>;
+  ingredients?: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+  }>;
 };
 
 type MenuBrowserCategory = {
@@ -111,9 +116,10 @@ export function MenuBrowser({ categories }: Props) {
               categoryName={activeCategory?.name || ""}
               compareAtPrice={item.compareAtPrice}
               description={item.description}
-              id={item.id}
-              imageUrl={item.imageUrl}
-              name={item.name}
+id={item.id}
+               imageUrl={item.imageUrl}
+               ingredients={item.ingredients}
+               name={item.name}
               optionGroups={item.optionGroups}
               price={item.price}
             />

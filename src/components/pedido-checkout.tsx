@@ -730,6 +730,11 @@ export function PedidoCheckout() {
             quantity: item.quantity,
             notes: optionalTrimmed(item.notes || ""),
             optionItemIds: item.optionItemIds || [],
+            ingredients: item.ingredientCustomizations
+              ? Object.entries(item.ingredientCustomizations)
+                  .filter(([, qty]) => qty > 0)
+                  .map(([ingredientId, quantity]) => ({ ingredientId, quantity }))
+              : undefined,
           })),
           address:
             fulfillmentType === "delivery"
@@ -896,13 +901,27 @@ export function PedidoCheckout() {
                           <p className="mt-1 text-[0.72rem] uppercase tracking-[0.18em] text-[var(--muted)]">
                             {item.categoryName}
                           </p>
-                          {item.optionNames && item.optionNames.length > 0 ? (
-                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+{item.optionNames && item.optionNames.length > 0 ? (
+                             <div className="mt-1.5 flex flex-wrap gap-1.5">
                               {item.optionNames.map((name, i) => (
                                 <span key={i} className="inline-flex rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[0.68rem] font-medium text-[var(--brand-green-dark)]">
                                   {name}
                                 </span>
                               ))}
+                            </div>
+                           ) : null}
+                          {item.ingredientCustomizations && item.ingredientNames ? (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {Object.entries(item.ingredientCustomizations)
+                                .filter(([, qty]) => qty !== 1)
+                                .map(([ingId, qty]) => {
+                                  const ingName = item.ingredientNames?.[ingId] || ingId;
+                                  return (
+                                    <span key={ingId} className={`inline-flex rounded-full px-2 py-0.5 text-[0.68rem] font-medium ${qty === 0 ? "bg-red-50 text-red-600 line-through" : "bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]"}`}>
+                                      {qty === 0 ? `Sem ${ingName}` : `${qty}x ${ingName}`}
+                                    </span>
+                                  );
+                                })}
                             </div>
                           ) : null}
                         </div>

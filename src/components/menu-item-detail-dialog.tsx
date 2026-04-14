@@ -19,10 +19,16 @@ type OptionGroupForDialog = {
   }>;
 };
 
+type IngredientForDialog = {
+  id: string;
+  name: string;
+  quantity: number;
+};
+
 type MenuItemDetailDialogProps = {
   open: boolean;
   onClose: () => void;
-  onAdd: (notes?: string, quantity?: number, selectedOptions?: Record<string, string[]>) => void;
+  onAdd: (notes?: string, quantity?: number, selectedOptions?: Record<string, string[]>, ingredientCustomizations?: Record<string, number>) => void;
   added: boolean;
   name: string;
   categoryName: string;
@@ -32,6 +38,7 @@ type MenuItemDetailDialogProps = {
   priceLabel: string;
   compareAtPriceLabel?: string | null;
   optionGroups?: OptionGroupForDialog[];
+  ingredients?: IngredientForDialog[];
 };
 
 function formatMoney(value: number) {
@@ -51,10 +58,14 @@ export function MenuItemDetailDialog({
   priceLabel,
   compareAtPriceLabel,
   optionGroups = [],
+  ingredients = [],
 }: MenuItemDetailDialogProps) {
   const notesRef = useRef<HTMLTextAreaElement>(null);
   const [quantity, setQuantity] = useState(1);
   const [showNotes, setShowNotes] = useState(false);
+  const [ingredientQtys, setIngredientQtys] = useState<Record<string, number>>(
+    () => Object.fromEntries(ingredients.map((ing) => [ing.id, ing.quantity])),
+  );
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>(() => {
     const initial: Record<string, string[]> = {};
     for (const group of optionGroups) {
@@ -203,6 +214,60 @@ export function MenuItemDetailDialog({
                 </p>
               </div>
 
+              {ingredients.length > 0 && (
+                <div className="mt-3 border-t border-[var(--line)] pt-3 space-y-2">
+                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">Monte seu lanche</p>
+                  <p className="text-[0.72rem] text-[var(--muted)]">Remova ou adicione mais dos ingredientes abaixo.</p>
+                  <div className="space-y-1.5">
+                    {ingredients.map((ing) => {
+                      const qty = ingredientQtys[ing.id] ?? ing.quantity;
+                      return (
+                        <div key={ing.id} className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-[0.82rem] bg-white/60 border border-[var(--line)]">
+                          <span className={`${qty === 0 ? "line-through text-[var(--muted)]/50" : "text-[var(--foreground)]"}`}>
+                            {ing.name}
+                          </span>
+                          <div className="inline-flex items-center gap-1">
+                            <button
+                              aria-label={`Remover ${ing.name}`}
+                              className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[var(--line)]/50 text-[var(--foreground)] transition hover:bg-red-100 hover:text-red-600"
+                              onClick={() =>
+                                setIngredientQtys((prev) => ({
+                                  ...prev,
+                                  [ing.id]: Math.max(0, (prev[ing.id] ?? ing.quantity) - 1),
+                                }))
+                              }
+                              type="button"
+                            >
+                              <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                            <span className="min-w-[1.2rem] text-center text-[0.78rem] font-bold text-[var(--foreground)]">
+                              {qty}
+                            </span>
+                            <button
+                              aria-label={`Adicionar ${ing.name}`}
+                              className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[var(--brand-green)]/20 text-[var(--green-rich)] transition hover:bg-[var(--brand-green)]/30"
+                              onClick={() =>
+                                setIngredientQtys((prev) => ({
+                                  ...prev,
+                                  [ing.id]: Math.min(10, (prev[ing.id] ?? ing.quantity) + 1),
+                                }))
+                              }
+                              type="button"
+                            >
+                              <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {optionGroups.length > 0 && (
                 <div className="mt-3 border-t border-[var(--line)] pt-3 space-y-3">
                   <p className="text-[0.6rem] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">Adicionais</p>
@@ -345,7 +410,7 @@ export function MenuItemDetailDialog({
                       ? "bg-[var(--green-soft)]"
                       : "bg-[var(--green-rich)] hover:bg-[var(--green-deep)]"
                   }`}
-                  onClick={() => onAdd(notesRef.current?.value, quantity, selectedOptions)}
+                  onClick={() => onAdd(notesRef.current?.value, quantity, selectedOptions, ingredientQtys)}
                   type="button"
                 >
                   {added ? (

@@ -73,6 +73,7 @@ export async function createMenuItem(input: {
   isFeatured: boolean;
   sortOrder: number;
   optionGroupIds: string[];
+  ingredientIds?: string[];
   comboComponents: Array<{
     componentMenuItemId: string;
     quantity: number;
@@ -97,6 +98,13 @@ export async function createMenuItem(input: {
       optionGroups: {
         create: input.optionGroupIds.map((optionGroupId, index) => ({
           optionGroupId,
+          sortOrder: index,
+        })),
+      },
+      ingredients: {
+        create: (input.ingredientIds || []).map((ingredientId, index) => ({
+          ingredientId,
+          quantity: 1,
           sortOrder: index,
         })),
       },
@@ -148,6 +156,7 @@ export async function updateMenuItem(input: {
   isFeatured?: boolean;
   sortOrder?: number;
   optionGroupIds?: string[];
+  ingredientIds?: string[];
   comboComponents?: Array<{
     componentMenuItemId: string;
     quantity: number;
@@ -207,6 +216,17 @@ export async function updateMenuItem(input: {
       deleteMany: {},
       create: (input.optionGroupIds || []).map((optionGroupId, index) => ({
         optionGroupId,
+        sortOrder: index,
+      })),
+    };
+  }
+
+  if (hasOwn(input, "ingredientIds")) {
+    data.ingredients = {
+      deleteMany: {},
+      create: (input.ingredientIds || []).map((ingredientId, index) => ({
+        ingredientId,
+        quantity: 1,
         sortOrder: index,
       })),
     };
@@ -525,4 +545,65 @@ export async function updateDeliveryFeeRule(input: {
     where: { id: input.id },
     data,
   });
+}
+
+export async function createIngredient(input: {
+  name: string;
+  slug?: string;
+  isActive?: boolean;
+  sortOrder?: number;
+}) {
+  return prisma.ingredient.create({
+    data: {
+      name: input.name,
+      slug: input.slug || slugify(input.name),
+      isActive: input.isActive ?? true,
+      sortOrder: input.sortOrder ?? 0,
+    },
+  });
+}
+
+export async function updateIngredient(input: {
+  id: string;
+  name?: string;
+  slug?: string;
+  isActive?: boolean;
+  sortOrder?: number;
+}) {
+  const data: Prisma.IngredientUpdateInput = {};
+
+  if (hasOwn(input, "name")) {
+    data.name = input.name;
+  }
+
+  if (hasOwn(input, "slug")) {
+    data.slug = input.slug || slugify(input.name || "");
+  }
+
+  if (hasOwn(input, "isActive")) {
+    data.isActive = input.isActive;
+  }
+
+  if (hasOwn(input, "sortOrder")) {
+    data.sortOrder = input.sortOrder;
+  }
+
+  return prisma.ingredient.update({
+    where: { id: input.id },
+    data,
+  });
+}
+
+export async function deleteIngredient(id: string) {
+  const ingredient = await prisma.ingredient.findUnique({
+    where: { id },
+    include: { menuItems: true },
+  });
+
+  if (!ingredient) {
+    throw new Error("Ingrediente nao encontrado.");
+  }
+
+  await prisma.ingredient.delete({ where: { id } });
+  return ingredient;
 }

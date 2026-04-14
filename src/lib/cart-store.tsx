@@ -20,6 +20,8 @@ export type CartItem = {
   optionItemIds?: string[];
   optionNames?: string[];
   optionDelta?: number;
+  ingredientCustomizations?: Record<string, number>;
+  ingredientNames?: Record<string, string>;
 };
 
 type CartState = {
@@ -47,7 +49,13 @@ function normalizeOptions(options?: string[]): string {
 }
 
 function cartLineKey(item: Omit<CartItem, "id">): string {
-  return `${item.menuItemId}|${normalizeNotes(item.notes)}|${normalizeOptions(item.optionItemIds)}`;
+  const ingredientKey = item.ingredientCustomizations
+    ? Object.entries(item.ingredientCustomizations)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([k, v]) => `${k}:${v}`)
+        .join(",")
+    : "";
+  return `${item.menuItemId}|${normalizeNotes(item.notes)}|${normalizeOptions(item.optionItemIds)}|${ingredientKey}`;
 }
 
 function createCartLineId(menuItemId: string) {
@@ -192,6 +200,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   ? item.optionNames.filter((n: unknown) => typeof n === "string")
                   : [],
                 optionDelta: typeof item.optionDelta === "number" ? item.optionDelta : 0,
+                ingredientCustomizations:
+                  item.ingredientCustomizations &&
+                  typeof item.ingredientCustomizations === "object"
+                    ? (Object.fromEntries(
+                        Object.entries(item.ingredientCustomizations).filter(
+                          ([k, v]) => typeof k === "string" && typeof v === "number",
+                        ),
+                      ) as Record<string, number>)
+                    : undefined,
+                ingredientNames:
+                  item.ingredientNames &&
+                  typeof item.ingredientNames === "object"
+                    ? (Object.fromEntries(
+                        Object.entries(item.ingredientNames).filter(
+                          ([k, v]) => typeof k === "string" && typeof v === "string",
+                        ),
+                      ) as Record<string, string>)
+                    : undefined,
               } satisfies CartItem;
             })
             .filter(Boolean) as CartItem[];

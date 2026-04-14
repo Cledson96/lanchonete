@@ -21,6 +21,12 @@ type OptionGroupForCard = {
   }>;
 };
 
+type IngredientForCard = {
+  id: string;
+  name: string;
+  quantity: number;
+};
+
 type MenuItemCardProps = {
   id: string;
   name: string;
@@ -30,6 +36,7 @@ type MenuItemCardProps = {
   imageUrl?: string | null;
   categoryName: string;
   optionGroups?: OptionGroupForCard[];
+  ingredients?: IngredientForCard[];
 };
 
 export function MenuItemCard({
@@ -41,6 +48,7 @@ export function MenuItemCard({
   imageUrl,
   categoryName,
   optionGroups = [],
+  ingredients = [],
 }: MenuItemCardProps) {
   const { addItem, openCart } = useCart();
   const [added, setAdded] = useState(false);
@@ -53,7 +61,7 @@ export function MenuItemCard({
   }, []);
 
   const handleAdd = useCallback(
-    (notes?: string, quantity = 1, selectedOptions?: Record<string, string[]>) => {
+    (notes?: string, quantity = 1, selectedOptions?: Record<string, string[]>, ingredientCustomizations?: Record<string, number>) => {
       const optionItemIds = selectedOptions
         ? Object.values(selectedOptions).flat()
         : [];
@@ -73,6 +81,13 @@ export function MenuItemCard({
         }
       }
 
+      const ingredientNames: Record<string, string> = {};
+      if (ingredientCustomizations && ingredients.length > 0) {
+        for (const ing of ingredients) {
+          ingredientNames[ing.id] = ing.name;
+        }
+      }
+
       addItem({
         menuItemId: id,
         name,
@@ -84,12 +99,14 @@ export function MenuItemCard({
         optionItemIds,
         optionNames,
         optionDelta,
+        ingredientCustomizations: ingredientCustomizations && ingredients.length > 0 ? ingredientCustomizations : undefined,
+        ingredientNames: Object.keys(ingredientNames).length > 0 ? ingredientNames : undefined,
       });
       openCart();
       setAdded(true);
       window.setTimeout(() => setAdded(false), 1300);
     },
-    [addItem, openCart, id, name, price, imageUrl, categoryName, optionGroups],
+    [addItem, openCart, id, name, price, imageUrl, categoryName, optionGroups, ingredients],
   );
 
   const displayPrice = new Intl.NumberFormat("pt-BR", {
@@ -108,13 +125,14 @@ export function MenuItemCard({
     description?.trim() || "Ingredientes sob consulta no atendimento.";
 
   const handleAddFromDetails = useCallback(
-    (notes?: string, quantity = 1, selectedOptions?: Record<string, string[]>) => {
+    (notes?: string, quantity = 1, selectedOptions?: Record<string, string[]>, ingredientCustomizations?: Record<string, number>) => {
       setDetailsOpen(false);
-      handleAdd(notes, quantity, selectedOptions);
+      handleAdd(notes, quantity, selectedOptions, ingredientCustomizations);
     },
     [handleAdd],
   );
 
+  const hasIngredients = ingredients.length > 0;
   const hasOptions = optionGroups.length > 0;
 
   return (
@@ -148,7 +166,7 @@ export function MenuItemCard({
             </span>
           ) : null}
 
-          {hasOptions ? (
+          {hasOptions || hasIngredients ? (
             <span className="absolute bottom-3 right-3 rounded-full bg-[var(--brand-orange)]/90 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)] backdrop-blur-sm">
               +Adicionais
             </span>
@@ -207,6 +225,7 @@ export function MenuItemCard({
         compareAtPriceLabel={displayCompare}
         description={displayDescription}
         imageUrl={imageUrl}
+        ingredients={ingredients}
         key={`${id}-${detailsVersion}`}
         name={name}
         onAdd={handleAddFromDetails}

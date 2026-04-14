@@ -178,6 +178,7 @@ model MenuItem {
   updatedAt      DateTime              @updatedAt
   category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   optionGroups   MenuItemOptionGroup[]
+  ingredients    MenuItemIngredient[]
   comboItems     MenuItemComponent[]   @relation("ComboParent")
   usedInCombos   MenuItemComponent[]   @relation("ComboComponent")
   orderItems     OrderItem[]
@@ -240,6 +241,50 @@ model MenuItemOptionGroup {
   optionGroup   OptionGroup @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
 
   @@id([menuItemId, optionGroupId])
+}
+
+model Ingredient {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  menuItems         MenuItemIngredient[]
+  orderItemLinks    OrderItemIngredient[]
+  comandaEntryLinks ComandaEntryIngredient[]
+}
+
+model MenuItemIngredient {
+  id            String    @id @default(cuid())
+  menuItemId    String
+  ingredientId  String
+  quantity      Int       @default(1)
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+
+  @@unique([menuItemId, ingredientId])
+}
+
+model OrderItemIngredient {
+  id            String    @id @default(cuid())
+  orderItemId   String
+  ingredientId  String
+  quantity      Int       @default(1)
+  orderItem     OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+}
+
+model ComandaEntryIngredient {
+  id             String         @id @default(cuid())
+  comandaEntryId String
+  ingredientId  String
+  quantity      Int             @default(1)
+  comandaEntry  ComandaEntry    @relation(fields: [comandaEntryId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient      @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
 }
 
 model DeliveryFeeRule {
@@ -311,6 +356,7 @@ model OrderItem {
   order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItem        MenuItem          @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
   selectedOptions OrderItemOption[]
+  ingredientCustomizations OrderItemIngredient[]
 }
 
 model OrderItemOption {
@@ -360,6 +406,7 @@ model ComandaEntry {
   comanda         Comanda              @relation(fields: [comandaId], references: [id], onDelete: Cascade)
   menuItem        MenuItem             @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
   selectedOptions ComandaEntryOption[]
+  ingredientCustomizations ComandaEntryIngredient[]
 }
 
 model ComandaEntryOption {

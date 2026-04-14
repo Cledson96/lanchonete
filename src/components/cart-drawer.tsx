@@ -190,6 +190,20 @@ export function CartDrawer() {
                             ))}
                           </div>
                         ) : null}
+                        {item.ingredientCustomizations && item.ingredientNames ? (
+                          <div className="mt-0.5 flex flex-wrap gap-1">
+                            {Object.entries(item.ingredientCustomizations)
+                              .filter(([, qty]) => qty !== 1)
+                              .map(([ingId, qty]) => {
+                                const ingName = item.ingredientNames?.[ingId] || ingId;
+                                return (
+                                  <span key={ingId} className={`inline-flex rounded-full px-1.5 py-0.5 text-[0.6rem] font-medium ${qty === 0 ? "bg-red-50 text-red-600 line-through" : "bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]"}`}>
+                                    {qty === 0 ? `Sem ${ingName}` : `${qty}x ${ingName}`}
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        ) : null}
                     </div>
 
                     {editingItemId === item.id ? (

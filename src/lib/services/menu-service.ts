@@ -30,6 +30,12 @@ export async function getPublicMenu() {
               },
             },
           },
+          ingredients: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              ingredient: true,
+            },
+          },
         },
       },
     },
@@ -40,6 +46,13 @@ export async function getPublicMenu() {
     menuItems: category.menuItems.map((item) => ({
       ...item,
       optionGroups: item.optionGroups.map((link) => link.optionGroup),
+      ingredients: item.ingredients
+        .filter((link) => link.ingredient?.isActive)
+        .map((link) => ({
+          id: link.ingredient.id,
+          name: link.ingredient.name,
+          quantity: link.quantity,
+        })),
     })),
   }));
 }
@@ -70,7 +83,19 @@ export async function getAdminMenuItems() {
           optionGroup: true,
         },
       },
+      ingredients: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          ingredient: true,
+        },
+      },
     },
+  });
+}
+
+export async function getAdminIngredients() {
+  return prisma.ingredient.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   });
 }
 

@@ -33,11 +33,17 @@ export const phoneSchema = stringField
     message: "Telefone invalido.",
   });
 
+export const ingredientCustomizationSchema = z.object({
+  ingredientId: stringField.min(1),
+  quantity: z.coerce.number().int().min(0).max(10),
+});
+
 export const orderItemSchema = z.object({
   menuItemId: stringField.min(1),
   quantity: z.coerce.number().int().min(1).max(99),
   notes: optionalStringField,
   optionItemIds: z.array(stringField.min(1)).optional().default([]),
+  ingredients: z.array(ingredientCustomizationSchema).optional().default([]),
 });
 
 export const addressSchema = z.object({
@@ -130,6 +136,7 @@ export const createMenuItemSchema = z.object({
   isFeatured: z.coerce.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).default(0),
   optionGroupIds: z.array(stringField.min(1)).optional().default([]),
+  ingredientIds: z.array(stringField.min(1)).optional().default([]),
   comboComponents: z
     .array(
       z.object({
@@ -163,6 +170,7 @@ export const updateMenuItemSchema = z.object({
   isFeatured: z.coerce.boolean().optional(),
   sortOrder: z.coerce.number().int().min(0).optional(),
   optionGroupIds: z.array(stringField.min(1)).optional(),
+  ingredientIds: z.array(stringField.min(1)).optional(),
   comboComponents: z
     .array(
       z.object({

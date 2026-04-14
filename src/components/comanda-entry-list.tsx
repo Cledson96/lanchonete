@@ -70,6 +70,21 @@ export function ComandaEntryList({
                 </div>
               ) : null}
 
+              {entry.ingredientCustomizations && entry.ingredientCustomizations.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {entry.ingredientCustomizations
+                    .filter((ing) => ing.quantity !== 1)
+                    .map((ing) => (
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${ing.quantity === 0 ? "border border-red-200 bg-red-50 text-red-600 line-through" : "border border-[var(--brand-orange)]/20 bg-[var(--brand-orange)]/8 text-[var(--brand-orange-dark)]"}`}
+                        key={`${entry.id}-ing-${ing.ingredient.id}`}
+                      >
+                        {ing.quantity === 0 ? `Sem ${ing.ingredient.name}` : `${ing.quantity}x ${ing.ingredient.name}`}
+                      </span>
+                    ))}
+                </div>
+              ) : null}
+
               {entry.notes ? (
                 <div className="mt-3 rounded-[1.1rem] border border-[var(--brand-orange)]/12 bg-[var(--surface)] px-3 py-3 text-sm text-[var(--muted)]">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[var(--brand-orange-dark)]">
