@@ -75,6 +75,20 @@ export default async function HomePage() {
       imageUrl: item.imageUrl,
       price: Number(item.price),
       compareAtPrice: item.compareAtPrice ? Number(item.compareAtPrice) : null,
+      optionGroups: (item.optionGroups || []).map((group) => ({
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        minSelections: group.minSelections,
+        maxSelections: group.maxSelections,
+        isRequired: group.isRequired,
+        options: group.options.map((option) => ({
+          id: option.id,
+          name: option.name,
+          description: option.description,
+          priceDelta: Number(option.priceDelta),
+        })),
+      })),
     })),
   }));
 

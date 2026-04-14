@@ -381,6 +381,20 @@ export async function updateOptionGroup(input: {
   });
 }
 
+export async function deleteOptionGroup(id: string) {
+  const group = await prisma.optionGroup.findUnique({
+    where: { id },
+    include: { menuItems: true },
+  });
+
+  if (!group) {
+    throw new Error("Grupo nao encontrado.");
+  }
+
+  await prisma.optionGroup.delete({ where: { id } });
+  return group;
+}
+
 export async function createDeliveryFeeRule(input: {
   label: string;
   neighborhood?: string;

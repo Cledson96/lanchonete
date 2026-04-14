@@ -8,6 +8,7 @@ const nav = [
   { href: "/dashboard/pedidos", label: "Arquivo" },
   { href: "/dashboard/comandas", label: "Comandas" },
   { href: "/dashboard/cardapio", label: "Cardapio" },
+  { href: "/dashboard/ingredientes", label: "Ingredientes" },
   { href: "/dashboard/whatsapp", label: "WhatsApp" },
 ];
 

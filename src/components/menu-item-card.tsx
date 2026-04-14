@@ -6,6 +6,21 @@ import { MenuItemDetailDialog } from "@/components/menu-item-detail-dialog";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
 
+type OptionGroupForCard = {
+  id: string;
+  name: string;
+  description?: string | null;
+  minSelections: number;
+  maxSelections?: number | null;
+  isRequired: boolean;
+  options: Array<{
+    id: string;
+    name: string;
+    description?: string | null;
+    priceDelta: number;
+  }>;
+};
+
 type MenuItemCardProps = {
   id: string;
   name: string;
@@ -14,6 +29,7 @@ type MenuItemCardProps = {
   compareAtPrice?: number | null;
   imageUrl?: string | null;
   categoryName: string;
+  optionGroups?: OptionGroupForCard[];
 };
 
 export function MenuItemCard({
@@ -24,6 +40,7 @@ export function MenuItemCard({
   compareAtPrice,
   imageUrl,
   categoryName,
+  optionGroups = [],
 }: MenuItemCardProps) {
   const { addItem, openCart } = useCart();
   const [added, setAdded] = useState(false);
@@ -35,20 +52,45 @@ export function MenuItemCard({
     setDetailsOpen(true);
   }, []);
 
-  const handleAdd = useCallback((notes?: string, quantity = 1) => {
-    addItem({
-      menuItemId: id,
-      name,
-      price,
-      imageUrl,
-      categoryName,
-      notes,
-      quantity,
-    });
-    openCart();
-    setAdded(true);
-    window.setTimeout(() => setAdded(false), 1300);
-  }, [addItem, openCart, id, name, price, imageUrl, categoryName]);
+  const handleAdd = useCallback(
+    (notes?: string, quantity = 1, selectedOptions?: Record<string, string[]>) => {
+      const optionItemIds = selectedOptions
+        ? Object.values(selectedOptions).flat()
+        : [];
+
+      let optionDelta = 0;
+      const optionNames: string[] = [];
+      if (selectedOptions) {
+        for (const group of optionGroups) {
+          const selected = selectedOptions[group.id] || [];
+          for (const optionId of selected) {
+            const option = group.options.find((o) => o.id === optionId);
+            if (option) {
+              optionDelta += option.priceDelta;
+              optionNames.push(option.name);
+            }
+          }
+        }
+      }
+
+      addItem({
+        menuItemId: id,
+        name,
+        price,
+        imageUrl,
+        categoryName,
+        notes,
+        quantity,
+        optionItemIds,
+        optionNames,
+        optionDelta,
+      });
+      openCart();
+      setAdded(true);
+      window.setTimeout(() => setAdded(false), 1300);
+    },
+    [addItem, openCart, id, name, price, imageUrl, categoryName, optionGroups],
+  );
 
   const displayPrice = new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -65,17 +107,21 @@ export function MenuItemCard({
   const displayDescription =
     description?.trim() || "Ingredientes sob consulta no atendimento.";
 
-  const handleAddFromDetails = useCallback((notes?: string, quantity = 1) => {
-    setDetailsOpen(false);
-    handleAdd(notes, quantity);
-  }, [handleAdd]);
+  const handleAddFromDetails = useCallback(
+    (notes?: string, quantity = 1, selectedOptions?: Record<string, string[]>) => {
+      setDetailsOpen(false);
+      handleAdd(notes, quantity, selectedOptions);
+    },
+    [handleAdd],
+  );
+
+  const hasOptions = optionGroups.length > 0;
 
   return (
     <>
       <article className="menu-card group flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-lg)]"
         style={{ boxShadow: "var(--shadow-sm)" }}
       >
-        {/* ── Image area ── */}
         <button
           aria-label={`Ver detalhes de ${name}`}
           className="relative h-52 cursor-pointer overflow-hidden bg-[var(--cream)] text-left"
@@ -90,25 +136,26 @@ export function MenuItemCard({
             src={resolveMenuItemImage(imageUrl)}
           />
 
-          {/* Gradient overlay at bottom of image */}
           <span className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
 
-          {/* Category badge */}
           <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-[var(--green-rich)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
             {categoryName}
           </span>
 
-          {/* Offer badge */}
           {displayCompare ? (
             <span className="absolute right-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)]">
               Oferta
             </span>
           ) : null}
+
+          {hasOptions ? (
+            <span className="absolute bottom-3 right-3 rounded-full bg-[var(--brand-orange)]/90 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)] backdrop-blur-sm">
+              +Adicionais
+            </span>
+          ) : null}
         </button>
 
-        {/* ── Content area ── */}
         <div className="flex flex-1 flex-col p-4 pt-3.5">
-          {/* Name */}
           <button
             className="cursor-pointer text-left"
             onClick={openDetails}
@@ -119,15 +166,12 @@ export function MenuItemCard({
             </h3>
           </button>
 
-          {/* Description */}
           <p className="mt-2 line-clamp-2 text-[0.85rem] leading-relaxed text-[var(--muted)]">
             {displayDescription}
           </p>
 
-          {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Price row */}
           <div className="mt-4 flex items-end justify-between gap-3">
             <div>
               <p className="menu-price text-[1.65rem] font-bold leading-none text-[var(--accent)]">
@@ -139,7 +183,6 @@ export function MenuItemCard({
             </div>
           </div>
 
-          {/* Action buttons */}
           <div className="mt-5">
             <button
               aria-label={`Ver detalhes e adicionar ${name} ao pedido`}
@@ -169,6 +212,7 @@ export function MenuItemCard({
         onAdd={handleAddFromDetails}
         onClose={() => setDetailsOpen(false)}
         open={detailsOpen}
+        optionGroups={optionGroups}
         price={price}
         priceLabel={displayPrice}
       />

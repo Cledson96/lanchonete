@@ -28,6 +28,13 @@ export function fail(status: number, message: string, details?: unknown) {
   );
 }
 
+export function notFound(message = "Recurso nao encontrado.") {
+  return NextResponse.json(
+    { error: { message } },
+    { status: 404 },
+  );
+}
+
 export function handleRouteError(error: unknown) {
   if (error instanceof ApiError) {
     return fail(error.status, error.message, error.details);

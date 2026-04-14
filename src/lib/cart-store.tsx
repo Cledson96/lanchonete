@@ -17,6 +17,9 @@ export type CartItem = {
   categoryName: string;
   quantity: number;
   notes?: string | null;
+  optionItemIds?: string[];
+  optionNames?: string[];
+  optionDelta?: number;
 };
 
 type CartState = {
@@ -38,6 +41,15 @@ function normalizeNotes(notes?: string | null) {
   return trimmed ? trimmed : null;
 }
 
+function normalizeOptions(options?: string[]): string {
+  if (!options || options.length === 0) return "";
+  return [...options].sort().join(",");
+}
+
+function cartLineKey(item: Omit<CartItem, "id">): string {
+  return `${item.menuItemId}|${normalizeNotes(item.notes)}|${normalizeOptions(item.optionItemIds)}`;
+}
+
 function createCartLineId(menuItemId: string) {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -53,10 +65,9 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "ADD_ITEM": {
       const incomingNotes = normalizeNotes(action.item.notes);
       const incomingQuantity = Math.min(Math.max(action.item.quantity, 1), 99);
+      const incomingKey = cartLineKey(action.item);
       const existing = state.items.find(
-        (i) =>
-          i.menuItemId === action.item.menuItemId &&
-          normalizeNotes(i.notes) === incomingNotes,
+        (i) => cartLineKey(i) === incomingKey,
       );
 
       if (existing) {
@@ -174,6 +185,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 notes: normalizeNotes(
                   typeof item.notes === "string" ? item.notes : null,
                 ),
+                optionItemIds: Array.isArray(item.optionItemIds)
+                  ? item.optionItemIds.filter((id: unknown) => typeof id === "string")
+                  : [],
+                optionNames: Array.isArray(item.optionNames)
+                  ? item.optionNames.filter((n: unknown) => typeof n === "string")
+                  : [],
+                optionDelta: typeof item.optionDelta === "number" ? item.optionDelta : 0,
               } satisfies CartItem;
             })
             .filter(Boolean) as CartItem[];
@@ -224,7 +242,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + (item.price + (item.optionDelta || 0)) * item.quantity,
     0,
   );
 

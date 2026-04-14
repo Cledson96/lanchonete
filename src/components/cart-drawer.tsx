@@ -178,9 +178,18 @@ export function CartDrawer() {
                       <p className="text-[0.95rem] font-bold leading-snug text-[var(--foreground)]">
                         {item.name}
                       </p>
-                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--brand-green-dark)] mt-0.5">
-                        {item.categoryName}
-                      </p>
+<p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--brand-green-dark)] mt-0.5">
+                          {item.categoryName}
+                        </p>
+                        {item.optionNames && item.optionNames.length > 0 ? (
+                          <div className="mt-0.5 flex flex-wrap gap-1">
+                            {item.optionNames.map((name, i) => (
+                              <span key={i} className="inline-flex rounded-full bg-[var(--brand-orange)]/10 px-1.5 py-0.5 text-[0.6rem] font-medium text-[var(--brand-orange-dark)]">
+                                +{name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
                     </div>
 
                     {editingItemId === item.id ? (
@@ -250,7 +259,7 @@ export function CartDrawer() {
                         {new Intl.NumberFormat("pt-BR", {
                           style: "currency",
                           currency: "BRL",
-                        }).format(item.price * item.quantity)}
+                        }).format((item.price + (item.optionDelta || 0)) * item.quantity)}
                       </p>
                       {/* Qty controls */}
                       <div className="flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--background-strong)] p-1 shadow-sm">

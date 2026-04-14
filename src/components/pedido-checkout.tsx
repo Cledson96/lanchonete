@@ -729,7 +729,7 @@ export function PedidoCheckout() {
             menuItemId: item.menuItemId,
             quantity: item.quantity,
             notes: optionalTrimmed(item.notes || ""),
-            optionItemIds: [],
+            optionItemIds: item.optionItemIds || [],
           })),
           address:
             fulfillmentType === "delivery"
@@ -896,11 +896,26 @@ export function PedidoCheckout() {
                           <p className="mt-1 text-[0.72rem] uppercase tracking-[0.18em] text-[var(--muted)]">
                             {item.categoryName}
                           </p>
+                          {item.optionNames && item.optionNames.length > 0 ? (
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {item.optionNames.map((name, i) => (
+                                <span key={i} className="inline-flex rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[0.68rem] font-medium text-[var(--brand-green-dark)]">
+                                  {name}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
                         </div>
                         <p className="menu-price text-xl font-bold text-[var(--brand-orange)]">
-                          {formatMoney(item.price * item.quantity)}
+                          {formatMoney((item.price + (item.optionDelta || 0)) * item.quantity)}
                         </p>
                       </div>
+
+                      {(item.optionDelta || 0) > 0 ? (
+                        <p className="mt-1 text-xs text-[var(--muted)]">
+                          {formatMoney(item.price)} cada + {formatMoney(item.optionDelta || 0)} adicionais
+                        </p>
+                      ) : null}
 
                       <div className="mt-3 rounded-[1rem] bg-[var(--brand-orange)]/5 px-4 py-3 border border-[var(--brand-orange)]/10">
                         <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[var(--brand-orange-dark)]">

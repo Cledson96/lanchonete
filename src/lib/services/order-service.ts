@@ -57,6 +57,20 @@ export async function createOrder(input: CreateOrderInput) {
       },
       isActive: true,
     },
+    include: {
+      optionGroups: {
+        include: {
+          optionGroup: {
+            include: {
+              options: {
+                where: { isActive: true },
+                select: { id: true },
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   if (menuItems.length !== input.items.length) {
@@ -95,6 +109,18 @@ export async function createOrder(input: CreateOrderInput) {
 
       return option;
     });
+
+    const validOptionIds = new Set(
+      menuItem.optionGroups.flatMap((link) =>
+        link.optionGroup.options.map((o) => o.id),
+      ),
+    );
+
+    for (const option of selectedOptions) {
+      if (!validOptionIds.has(option.id)) {
+        throw new ApiError(422, `O adicional "${option.name}" nao pertence a este item.`);
+      }
+    }
 
     const optionDelta = selectedOptions.reduce(
       (sum, option) => sum + Number(option.priceDelta),

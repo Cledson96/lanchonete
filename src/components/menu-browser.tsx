@@ -11,6 +11,20 @@ type MenuBrowserItem = {
   imageUrl: string | null;
   price: number;
   compareAtPrice: number | null;
+  optionGroups?: Array<{
+    id: string;
+    name: string;
+    description?: string | null;
+    minSelections: number;
+    maxSelections?: number | null;
+    isRequired: boolean;
+    options: Array<{
+      id: string;
+      name: string;
+      description?: string | null;
+      priceDelta: number;
+    }>;
+  }>;
 };
 
 type MenuBrowserCategory = {
@@ -100,6 +114,7 @@ export function MenuBrowser({ categories }: Props) {
               id={item.id}
               imageUrl={item.imageUrl}
               name={item.name}
+              optionGroups={item.optionGroups}
               price={item.price}
             />
           ))}
