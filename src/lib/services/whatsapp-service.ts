@@ -53,7 +53,6 @@ type SendResult = {
   externalMessageId?: string;
 };
 
-const WELCOME_KEYWORDS = new Set(["oi", "ola", "olá", "menu", "cardapio", "cardápio"]);
 const PAYMENT_OPTIONS = [
   { key: "1", value: "pix", label: "Pix" },
   { key: "2", value: "cartao_credito", label: "Cartao de credito" },
@@ -61,6 +60,8 @@ const PAYMENT_OPTIONS = [
   { key: "4", value: "dinheiro", label: "Dinheiro" },
   { key: "5", value: "outro", label: "Outro" },
 ] as const;
+
+const WHATSAPP_REENGAGEMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
 
 let listenersBound = false;
 
@@ -165,6 +166,18 @@ function getSelectionNumber(text: string) {
   }
 
   return Number.parseInt(digits, 10);
+}
+
+function shouldSendPublicSiteReply(previousInboundAt: Date | null | undefined) {
+  if (!previousInboundAt) {
+    return true;
+  }
+
+  return Date.now() - previousInboundAt.getTime() >= WHATSAPP_REENGAGEMENT_WINDOW_MS;
+}
+
+function buildPublicCardapioUrl() {
+  return new URL("/#cardapio", config.publicSiteUrl).toString();
 }
 
 async function fetchCepAddress(zipCode: string) {
@@ -884,7 +897,7 @@ async function handleBotMessage(message: Message) {
     return;
   }
 
-  const { customer, conversation } = await getOrCreateConversation(
+  const { conversation } = await getOrCreateConversation(
     phone,
     name,
     message.from,
@@ -903,11 +916,14 @@ async function handleBotMessage(message: Message) {
 
   const normalized = normalizeInboundText(body);
   const context = parseBotContext(conversation.botContext);
+  const previousInboundAt = conversation.lastInboundAt ? new Date(conversation.lastInboundAt) : null;
+  const now = new Date();
 
   await prisma.whatsAppConversation.update({
     where: { id: conversation.id },
     data: {
-      lastMessageAt: new Date(),
+      lastMessageAt: now,
+      lastInboundAt: now,
       phone,
       externalThreadId: message.from,
     },
@@ -915,26 +931,6 @@ async function handleBotMessage(message: Message) {
 
   if (normalized === "atendente") {
     await updateConversationState(conversation.id, "human_handoff", context);
-    await sendConversationMessage(
-      conversation,
-      "Tudo certo. A conversa foi passada para atendimento humano. Quando quiser retomar o bot, digite *menu*.",
-    );
-    return;
-  }
-
-  if (normalized === "cancelar") {
-    await updateConversationState(conversation.id, "idle", getDefaultContext());
-    await sendConversationMessage(conversation, "Pedido cancelado. Digite *menu* para começar novamente.");
-    return;
-  }
-
-  if (conversation.state === "human_handoff" && !WELCOME_KEYWORDS.has(normalized)) {
-    return;
-  }
-
-  if (WELCOME_KEYWORDS.has(normalized)) {
-    await updateConversationState(conversation.id, "menu_categoria", getDefaultContext());
-    await sendConversationMessage(conversation, categoryMenuText(await getPublicMenu()));
     return;
   }
 
@@ -942,57 +938,19 @@ async function handleBotMessage(message: Message) {
     return;
   }
 
-  const selection = getSelectionNumber(normalized);
-  const currentState = (conversation.state || "idle") as BotState;
-
-  switch (currentState) {
-    case "idle":
-      await updateConversationState(conversation.id, "menu_categoria", getDefaultContext());
-      await sendConversationMessage(conversation, categoryMenuText(await getPublicMenu()));
-      break;
-    case "menu_categoria":
-      await handleMenuCategorySelection(conversation, context, selection);
-      break;
-    case "menu_item":
-      await handleMenuItemSelection(conversation, context, selection);
-      break;
-    case "item_quantidade":
-      await handleQuantitySelection(conversation, context, selection);
-      break;
-    case "item_observacao":
-      await handleItemNote(conversation, context, body);
-      break;
-    case "carrinho":
-      await handleCartMenu(conversation, context, selection);
-      break;
-    case "tipo_pedido":
-      await handleOrderType(conversation, context, selection);
-      break;
-    case "endereco_cep":
-      await handleCepInput(conversation, context, body);
-      break;
-    case "endereco_numero":
-      await handleAddressNumber(conversation, context, body);
-      break;
-    case "pagamento":
-      await handlePayment(conversation, context, selection);
-      break;
-    case "confirmacao":
-      await handleConfirmation(conversation, customer, context, selection);
-      break;
-    case "order_updates":
-      await sendConversationMessage(
-        conversation,
-        "Seu pedido ja esta em andamento. Se precisar de ajuda, digite *atendente*.",
-      );
-      break;
-    case "human_handoff":
-      break;
-    default:
-      await updateConversationState(conversation.id, "menu_categoria", getDefaultContext());
-      await sendConversationMessage(conversation, categoryMenuText(await getPublicMenu()));
-      break;
+  if (!shouldSendPublicSiteReply(previousInboundAt)) {
+    return;
   }
+
+  await sendConversationMessage(
+    conversation,
+    [
+      "Oi! Agora os pedidos sao feitos pelo site.",
+      buildPublicCardapioUrl(),
+      "",
+      "Se quiser falar com um atendente, responda *atendente*.",
+    ].join("\n"),
+  );
 }
 
 async function updateMessageAck(message: Message, ack: MessageAck) {

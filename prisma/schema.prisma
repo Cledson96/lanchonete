@@ -443,6 +443,7 @@ model WhatsAppConversation {
   state             String
   botContext        Json?
   startedAt         DateTime            @default(now())
+  lastInboundAt     DateTime?
   lastMessageAt     DateTime?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
