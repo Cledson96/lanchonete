@@ -23,6 +23,7 @@ type OptionSeed = {
   name: string;
   slug: string;
   sortOrder: number;
+  priceDelta?: number;
 };
 
 type OptionGroupSeed = {
@@ -52,6 +53,8 @@ type CategorySeed = {
   slug: string;
   description?: string;
   sortOrder: number;
+  availableFrom?: string;
+  availableUntil?: string;
   items: MenuItemSeed[];
 };
 
@@ -93,7 +96,31 @@ const optionGroups: OptionGroupSeed[] = [
       { name: "Banana", slug: "banana", sortOrder: 14 },
     ],
   },
+  {
+    name: "Adicionais do almoço",
+    slug: "adicionais-do-almoco",
+    description: "Adicionais para marmitas e pratos especiais do almoço.",
+    minSelections: 0,
+    sortOrder: 2,
+    options: [
+      { name: "Arroz", slug: "arroz", sortOrder: 1, priceDelta: 7 },
+      { name: "Feijão", slug: "feijao", sortOrder: 2, priceDelta: 7 },
+      { name: "Macarrão", slug: "macarrao", sortOrder: 3, priceDelta: 7 },
+      { name: "Bife", slug: "bife", sortOrder: 4, priceDelta: 10 },
+      { name: "Bisteca", slug: "bisteca", sortOrder: 5, priceDelta: 8 },
+      { name: "Frango grelhado", slug: "frango-grelhado", sortOrder: 6, priceDelta: 8 },
+      { name: "Carne do dia", slug: "carne-do-dia", sortOrder: 7, priceDelta: 12 },
+    ],
+  },
 ];
+
+const lunchWeekDescription = `Cardápio do almoço:
+Segunda-feira: arroz, feijão, macarrão, salada de alface com tomate, batata frita e frango ao molho.
+Terça-feira: arroz, feijão, macarrão, salada mista, batata frita e frango à milanesa.
+Quarta-feira: arroz, feijão, macarrão, salada de repolho com tomate e cebolinha, batata frita e carne de panela.
+Quinta-feira: arroz, feijão, macarrão, salada de alface com tomate e cebola, batata frita e strogonoff.
+Sexta-feira: arroz, feijão, macarrão, vinagrete, batata frita, coxa e sobrecoxa assada.
+Sábado: arroz, feijão, macarrão, feijoada, salada mista e carnes de bife, bisteca e filé de frango grelhado.`;
 
 const categories: CategorySeed[] = [
   {
@@ -878,6 +905,130 @@ const categories: CategorySeed[] = [
       },
     ],
   },
+  {
+    name: "Pratos Especiais",
+    slug: "pratos-especiais",
+    description: "Pratos especiais do almoço com adicionais e disponibilidade de segunda a sábado, das 11h às 15h.",
+    sortOrder: 11,
+    availableFrom: "11:00",
+    availableUntil: "15:00",
+    items: [
+      {
+        name: "Contrafilé",
+        slug: "contrafile",
+        description: "Marmita média ou prato feito.",
+        price: 32,
+        sortOrder: 1,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à parmegiana - Marmita P",
+        slug: "bife-parmegiana-marmita-p",
+        description: "Bife à parmegiana servido na marmita pequena.",
+        price: 18,
+        sortOrder: 2,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à parmegiana - Marmita M",
+        slug: "bife-parmegiana-marmita-m",
+        description: "Bife à parmegiana servido na marmita média.",
+        price: 25,
+        sortOrder: 3,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à parmegiana - Marmita G",
+        slug: "bife-parmegiana-marmita-g",
+        description: "Bife à parmegiana servido na marmita grande.",
+        price: 30,
+        sortOrder: 4,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à parmegiana - Prato feito",
+        slug: "bife-parmegiana-prato-feito",
+        description: "Bife à parmegiana servido no prato feito.",
+        price: 25,
+        sortOrder: 5,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à cavalo - Marmita P",
+        slug: "bife-cavalo-marmita-p",
+        description: "Bife à cavalo servido na marmita pequena.",
+        price: 18,
+        sortOrder: 6,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à cavalo - Marmita M",
+        slug: "bife-cavalo-marmita-m",
+        description: "Bife à cavalo servido na marmita média.",
+        price: 23,
+        sortOrder: 7,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à cavalo - Marmita G",
+        slug: "bife-cavalo-marmita-g",
+        description: "Bife à cavalo servido na marmita grande.",
+        price: 29,
+        sortOrder: 8,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Bife à cavalo - Prato feito",
+        slug: "bife-cavalo-prato-feito",
+        description: "Bife à cavalo servido no prato feito.",
+        price: 23,
+        sortOrder: 9,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+    ],
+  },
+  {
+    name: "Cardápio Almoço",
+    slug: "cardapio-almoco",
+    description: lunchWeekDescription,
+    sortOrder: 12,
+    availableFrom: "11:00",
+    availableUntil: "15:00",
+    items: [
+      {
+        name: "Marmita P",
+        slug: "marmita-p-almoco",
+        description: "Marmita pequena do cardápio do almoço.",
+        price: 15,
+        sortOrder: 1,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Marmita M",
+        slug: "marmita-m-almoco",
+        description: "Marmita média do cardápio do almoço.",
+        price: 20,
+        sortOrder: 2,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Marmita G",
+        slug: "marmita-g-almoco",
+        description: "Marmita grande do cardápio do almoço.",
+        price: 25,
+        sortOrder: 3,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+      {
+        name: "Prato feito",
+        slug: "prato-feito-almoco",
+        description: "Prato feito do cardápio do almoço.",
+        price: 20,
+        sortOrder: 4,
+        optionGroupSlugs: ["adicionais-do-almoco"],
+      },
+    ],
+  },
 ];
 
 async function seedAdmin() {
@@ -930,26 +1081,26 @@ async function syncOptionGroups() {
   for (const group of optionGroups) {
     const savedGroup = await prisma.optionGroup.upsert({
       where: { slug: group.slug },
-      create: {
-        name: group.name,
-        slug: group.slug,
-        description: group.description,
-        minSelections: group.minSelections,
-        maxSelections: group.maxSelections,
-        isRequired: group.isRequired ?? false,
-        sortOrder: group.sortOrder,
-        isActive: true,
-      },
-      update: {
-        name: group.name,
-        description: group.description,
-        minSelections: group.minSelections,
-        maxSelections: group.maxSelections,
-        isRequired: group.isRequired ?? false,
-        sortOrder: group.sortOrder,
-        isActive: true,
-      },
-    });
+        create: {
+          name: group.name,
+          slug: group.slug,
+          description: group.description,
+          minSelections: group.minSelections,
+          maxSelections: group.maxSelections,
+          isRequired: group.isRequired ?? false,
+          sortOrder: group.sortOrder,
+          isActive: true,
+        },
+        update: {
+          name: group.name,
+          description: group.description,
+          minSelections: group.minSelections,
+          maxSelections: group.maxSelections,
+          isRequired: group.isRequired ?? false,
+          sortOrder: group.sortOrder,
+          isActive: true,
+        },
+      });
 
     optionGroupIds.set(group.slug, savedGroup.id);
 
@@ -961,23 +1112,23 @@ async function syncOptionGroups() {
             slug: option.slug,
           },
         },
-        create: {
-          optionGroupId: savedGroup.id,
-          name: option.name,
-          slug: option.slug,
-          sortOrder: option.sortOrder,
-          priceDelta: 0,
-          isDefault: false,
-          isActive: true,
-        },
-        update: {
-          name: option.name,
-          sortOrder: option.sortOrder,
-          priceDelta: 0,
-          isDefault: false,
-          isActive: true,
-        },
-      });
+          create: {
+            optionGroupId: savedGroup.id,
+            name: option.name,
+            slug: option.slug,
+            sortOrder: option.sortOrder,
+            priceDelta: option.priceDelta ?? 0,
+            isDefault: false,
+            isActive: true,
+          },
+          update: {
+            name: option.name,
+            sortOrder: option.sortOrder,
+            priceDelta: option.priceDelta ?? 0,
+            isDefault: false,
+            isActive: true,
+          },
+        });
     }
   }
 
@@ -1001,12 +1152,16 @@ async function syncCategoriesAndItems(optionGroupIds: Map<string, string>) {
         slug: category.slug,
         description: category.description,
         sortOrder: category.sortOrder,
+        availableFrom: category.availableFrom,
+        availableUntil: category.availableUntil,
         isActive: true,
       },
       update: {
         name: category.name,
         description: category.description,
         sortOrder: category.sortOrder,
+        availableFrom: category.availableFrom,
+        availableUntil: category.availableUntil,
         isActive: true,
       },
     });

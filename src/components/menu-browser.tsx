@@ -102,6 +102,11 @@ export function MenuBrowser({ categories }: Props) {
             <h2 className="mt-1.5 font-display text-[1.75rem] font-bold tracking-tight text-[var(--green-deep)] sm:text-[2rem]">
               {activeCategory?.name || "Cardápio"}
             </h2>
+            {activeCategory?.description ? (
+              <p className="mt-2 max-w-3xl whitespace-pre-line text-sm leading-6 text-[var(--muted)]">
+                {activeCategory.description}
+              </p>
+            ) : null}
           </div>
 
           <p className="text-[0.82rem] text-[var(--muted)]">

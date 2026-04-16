@@ -12,14 +12,14 @@ export default async function DashboardCardapioPage() {
 
   const browserCategories = categories.map((category) => {
     const typedCategory = category as typeof category & {
-      availableFrom?: Date | null;
-      availableUntil?: Date | null;
+      availableFrom?: string | null;
+      availableUntil?: string | null;
     };
 
     return {
       ...typedCategory,
-      availableFrom: typedCategory.availableFrom ? typedCategory.availableFrom.toISOString() : null,
-      availableUntil: typedCategory.availableUntil ? typedCategory.availableUntil.toISOString() : null,
+      availableFrom: typedCategory.availableFrom ?? null,
+      availableUntil: typedCategory.availableUntil ?? null,
     };
   });
 
