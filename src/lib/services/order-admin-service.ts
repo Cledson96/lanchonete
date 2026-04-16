@@ -24,10 +24,6 @@ const dashboardOrderViewStatuses = {
 export type DashboardOrderView = keyof typeof dashboardOrderViewStatuses;
 
 function getStatusMessage(code: string, status: OrderStatus, type: "delivery" | "retirada" | "local") {
-  if (status === "em_preparo") {
-    return `Pedido ${code} aceito. Ja estamos preparando tudo por aqui.`;
-  }
-
   if (status === "saiu_para_entrega" && type === "delivery") {
     return `Pedido ${code} saiu para entrega. Ja esta a caminho.`;
   }
