@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { decimal, optionalNullable, slugify } from "@/lib/utils";
 
@@ -58,6 +59,86 @@ export async function updateCategory(input: {
     where: { id: input.id },
     data,
   });
+}
+
+export async function deleteCategory(input: {
+  id: string;
+  strategy: "delete_items" | "move_items";
+  targetCategoryId?: string;
+}) {
+  const category = await prisma.category.findUnique({
+    where: { id: input.id },
+    include: {
+      menuItems: {
+        include: {
+          orderItems: true,
+          comandaEntries: true,
+          usedInCombos: true,
+        },
+      },
+    },
+  });
+
+  if (!category) {
+    throw new ApiError(404, "Categoria nao encontrada.");
+  }
+
+  if (input.strategy === "move_items") {
+    if (!input.targetCategoryId) {
+      throw new ApiError(422, "Selecione a categoria de destino.");
+    }
+
+    if (input.targetCategoryId === input.id) {
+      throw new ApiError(422, "A categoria de destino precisa ser diferente.");
+    }
+
+    const targetCategory = await prisma.category.findUnique({
+      where: { id: input.targetCategoryId },
+      select: { id: true },
+    });
+
+    if (!targetCategory) {
+      throw new ApiError(404, "Categoria de destino nao encontrada.");
+    }
+
+    await prisma.$transaction([
+      prisma.menuItem.updateMany({
+        where: { categoryId: input.id },
+        data: { categoryId: input.targetCategoryId },
+      }),
+      prisma.category.delete({ where: { id: input.id } }),
+    ]);
+
+    return {
+      category,
+      movedItems: category.menuItems.length,
+      deletedItems: 0,
+    };
+  }
+
+  const blockedItems = category.menuItems.filter((item) => {
+    return item.orderItems.length > 0 || item.comandaEntries.length > 0 || item.usedInCombos.length > 0;
+  });
+
+  if (blockedItems.length > 0) {
+    throw new ApiError(409, "Alguns itens desta categoria ja possuem historico e nao podem ser excluidos.", {
+      blockedItems: blockedItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+      })),
+    });
+  }
+
+  await prisma.$transaction([
+    prisma.menuItem.deleteMany({ where: { categoryId: input.id } }),
+    prisma.category.delete({ where: { id: input.id } }),
+  ]);
+
+  return {
+    category,
+    movedItems: 0,
+    deletedItems: category.menuItems.length,
+  };
 }
 
 export async function createMenuItem(input: {

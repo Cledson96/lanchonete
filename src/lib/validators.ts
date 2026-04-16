@@ -115,6 +115,20 @@ export const updateCategorySchema = createCategorySchema.partial().extend({
   id: stringField.min(1),
 });
 
+export const deleteCategorySchema = z.object({
+  id: stringField.min(1),
+  strategy: z.enum(["delete_items", "move_items"]),
+  targetCategoryId: stringField.min(1).optional(),
+}).superRefine((value, ctx) => {
+  if (value.strategy === "move_items" && !value.targetCategoryId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["targetCategoryId"],
+      message: "Selecione a categoria de destino.",
+    });
+  }
+});
+
 export const createMenuItemSchema = z.object({
   categoryId: stringField.min(1),
   name: stringField.min(2),
