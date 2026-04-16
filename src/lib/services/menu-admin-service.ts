@@ -12,6 +12,8 @@ export async function createCategory(input: {
   slug?: string;
   description?: string;
   sortOrder: number;
+  availableFrom?: string;
+  availableUntil?: string;
   isActive: boolean;
 }) {
   return prisma.category.create({
@@ -20,6 +22,8 @@ export async function createCategory(input: {
       slug: input.slug || slugify(input.name),
       description: optionalNullable(input.description),
       sortOrder: input.sortOrder,
+      availableFrom: optionalNullable(input.availableFrom),
+      availableUntil: optionalNullable(input.availableUntil),
       isActive: input.isActive,
     },
   });
@@ -31,6 +35,8 @@ export async function updateCategory(input: {
   slug?: string;
   description?: string;
   sortOrder?: number;
+  availableFrom?: string;
+  availableUntil?: string;
   isActive?: boolean;
 }) {
   const data: Prisma.CategoryUpdateInput = {};
@@ -49,6 +55,14 @@ export async function updateCategory(input: {
 
   if (hasOwn(input, "sortOrder")) {
     data.sortOrder = input.sortOrder;
+  }
+
+  if (hasOwn(input, "availableFrom")) {
+    data.availableFrom = optionalNullable(input.availableFrom);
+  }
+
+  if (hasOwn(input, "availableUntil")) {
+    data.availableUntil = optionalNullable(input.availableUntil);
   }
 
   if (hasOwn(input, "isActive")) {

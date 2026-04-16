@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isCategoryAvailableNow } from "@/lib/category-availability";
 
 export async function getPublicMenu() {
   const categories = await prisma.category.findMany({
@@ -41,7 +42,9 @@ export async function getPublicMenu() {
     },
   });
 
-  return categories.map((category) => ({
+  return categories
+    .filter((category) => isCategoryAvailableNow(category as { availableFrom?: string | null; availableUntil?: string | null }))
+    .map((category) => ({
     ...category,
     menuItems: category.menuItems.map((item) => ({
       ...item,
@@ -55,7 +58,7 @@ export async function getPublicMenu() {
           price: Number((link.ingredient as { price?: unknown }).price ?? 0),
         })),
     })),
-  }));
+    }));
 }
 
 export async function getAdminCategories() {

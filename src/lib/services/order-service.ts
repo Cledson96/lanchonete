@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/http";
+import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
 import { decimal, normalizePhone, optionalNullable } from "@/lib/utils";
@@ -75,11 +76,28 @@ export async function createOrder(input: CreateOrderInput) {
         where: { ingredient: { isActive: true } },
         include: { ingredient: { select: { id: true, name: true } } },
       },
+      category: {
+        select: {
+          id: true,
+          name: true,
+          availableFrom: true,
+          availableUntil: true,
+        },
+      },
     },
   });
 
   if (menuItems.length !== input.items.length) {
     throw new ApiError(404, "Um ou mais itens do pedido nao existem.");
+  }
+
+  const unavailableCategory = menuItems.find((item) => !isCategoryAvailableNow(item.category));
+
+  if (unavailableCategory) {
+    throw new ApiError(
+      422,
+      `O cardapio ${unavailableCategory.category.name} esta disponivel apenas ${formatAvailabilityWindow(unavailableCategory.category)}.`,
+    );
   }
 
   const optionIds = input.items.flatMap((item) => item.optionItemIds || []);

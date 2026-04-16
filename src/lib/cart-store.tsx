@@ -15,6 +15,10 @@ export type CartItem = {
   price: number;
   imageUrl?: string | null;
   categoryName: string;
+  categoryAvailability?: {
+    availableFrom?: string | null;
+    availableUntil?: string | null;
+  };
   quantity: number;
   notes?: string | null;
   optionItemIds?: string[];
@@ -186,6 +190,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   typeof item.imageUrl === "string" ? item.imageUrl : null,
                 categoryName:
                   typeof item.categoryName === "string" ? item.categoryName : "",
+                categoryAvailability:
+                  item.categoryAvailability && typeof item.categoryAvailability === "object"
+                    ? {
+                        availableFrom:
+                          typeof item.categoryAvailability.availableFrom === "string"
+                            ? item.categoryAvailability.availableFrom
+                            : null,
+                        availableUntil:
+                          typeof item.categoryAvailability.availableUntil === "string"
+                            ? item.categoryAvailability.availableUntil
+                            : null,
+                      }
+                    : undefined,
                 quantity:
                   typeof item.quantity === "number" && item.quantity > 0
                     ? Math.min(Math.floor(item.quantity), 99)

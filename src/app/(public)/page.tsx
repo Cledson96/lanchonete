@@ -50,11 +50,21 @@ function PhoneIcon() {
 export default async function HomePage() {
   const categories = await getPublicMenu();
 
-  const browserCategories = categories.map((category: { id: string; name: string; slug: string; description: string | null; menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }> }> }) => ({
+  const browserCategories = (categories as unknown as Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    availableFrom: string | null;
+    availableUntil: string | null;
+    menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }> }>;
+  }>).map((category) => ({
     id: category.id,
     name: category.name,
     slug: category.slug,
     description: category.description,
+    availableFrom: category.availableFrom,
+    availableUntil: category.availableUntil,
     menuItems: category.menuItems.map((item) => ({
       id: item.id,
       name: item.name,

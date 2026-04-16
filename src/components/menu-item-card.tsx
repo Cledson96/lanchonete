@@ -36,6 +36,10 @@ type MenuItemCardProps = {
   compareAtPrice?: number | null;
   imageUrl?: string | null;
   categoryName: string;
+  categoryAvailability?: {
+    availableFrom?: string | null;
+    availableUntil?: string | null;
+  };
   optionGroups?: OptionGroupForCard[];
   ingredients?: IngredientForCard[];
 };
@@ -48,6 +52,7 @@ export function MenuItemCard({
   compareAtPrice,
   imageUrl,
   categoryName,
+  categoryAvailability,
   optionGroups = [],
   ingredients = [],
 }: MenuItemCardProps) {
@@ -102,6 +107,7 @@ export function MenuItemCard({
         price: price + ingredientDelta,
         imageUrl,
         categoryName,
+        categoryAvailability,
         notes,
         quantity,
         optionItemIds,
@@ -114,7 +120,7 @@ export function MenuItemCard({
       setAdded(true);
       window.setTimeout(() => setAdded(false), 1300);
     },
-    [addItem, openCart, id, name, price, imageUrl, categoryName, optionGroups, ingredients],
+    [addItem, openCart, id, name, price, imageUrl, categoryName, categoryAvailability, optionGroups, ingredients],
   );
 
   const displayPrice = new Intl.NumberFormat("pt-BR", {

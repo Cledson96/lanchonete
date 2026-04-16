@@ -38,6 +38,8 @@ type MenuBrowserCategory = {
   name: string;
   slug: string;
   description: string | null;
+  availableFrom?: string | null;
+  availableUntil?: string | null;
   menuItems: MenuBrowserItem[];
 };
 
@@ -115,9 +117,10 @@ export function MenuBrowser({ categories }: Props) {
             <MenuItemCard
               key={item.id}
               categoryName={activeCategory?.name || ""}
+              categoryAvailability={activeCategory ? { availableFrom: activeCategory.availableFrom, availableUntil: activeCategory.availableUntil } : undefined}
               compareAtPrice={item.compareAtPrice}
               description={item.description}
-id={item.id}
+ id={item.id}
                imageUrl={item.imageUrl}
                ingredients={item.ingredients}
                name={item.name}

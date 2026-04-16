@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
@@ -620,6 +621,16 @@ export function PedidoCheckout() {
   const canRequestVerification =
     digitsOnly(customerPhone).length >= 10 && !verificationPending;
 
+  const unavailableItems = useMemo(
+    () =>
+      state.items.filter(
+        (item) => item.categoryAvailability && !isCategoryAvailableNow(item.categoryAvailability),
+      ),
+    [state.items],
+  );
+
+  const isMenuAvailableNow = unavailableItems.length === 0;
+
   const canSubmit =
     state.items.length > 0 &&
     customerName.trim().length >= 2 &&
@@ -628,6 +639,7 @@ export function PedidoCheckout() {
     verifiedPhone === normalizePhoneForCompare(customerPhone) &&
     paymentMethod &&
     isDeliveryAddressValid &&
+    isMenuAvailableNow &&
     !submitPending &&
     !deliveryQuoteLoading;
 
@@ -1417,6 +1429,12 @@ export function PedidoCheckout() {
             </div>
 
             <div className="mt-5 space-y-3">
+              {!isMenuAvailableNow ? (
+                <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  O cardapio de almoco esta disponivel apenas das 11:00 as 15:00.
+                </div>
+              ) : null}
+
               <button
                 className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--brand-green)] px-5 py-4 text-[1rem] font-bold text-white transition-all duration-300 hover:bg-[var(--brand-green-dark)] hover:shadow-[0_8px_25px_rgba(140,198,63,0.4)] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0"
                 disabled={!canSubmit}

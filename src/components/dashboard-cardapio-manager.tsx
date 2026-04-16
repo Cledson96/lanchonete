@@ -11,6 +11,8 @@ type CategorySummary = {
   slug: string;
   description: string | null;
   sortOrder: number;
+  availableFrom: string | null;
+  availableUntil: string | null;
   isActive: boolean;
 };
 
@@ -87,6 +89,8 @@ type CategoryEditorState = {
   slug: string;
   description: string;
   sortOrder: string;
+  availableFrom: string;
+  availableUntil: string;
   isActive: boolean;
 };
 
@@ -141,6 +145,8 @@ const emptyCategoryEditorState: CategoryEditorState = {
   slug: "",
   description: "",
   sortOrder: "0",
+  availableFrom: "",
+  availableUntil: "",
   isActive: true,
 };
 
@@ -297,6 +303,8 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
             slug: category.slug,
             description: category.description || "",
             sortOrder: String(category.sortOrder ?? 0),
+            availableFrom: category.availableFrom || "",
+            availableUntil: category.availableUntil || "",
             isActive: category.isActive,
           }
         : emptyCategoryEditorState,
@@ -457,6 +465,8 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
         slug: categoryEditor.slug || undefined,
         description: categoryEditor.description || undefined,
         sortOrder: Number(categoryEditor.sortOrder || 0),
+        availableFrom: categoryEditor.availableFrom || undefined,
+        availableUntil: categoryEditor.availableUntil || undefined,
         isActive: categoryEditor.isActive,
       };
 
@@ -1078,7 +1088,7 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
                   {categoryEditor.id ? "Editar categoria" : "Criar categoria"}
                 </h2>
                 <p className="mt-2 text-sm text-[var(--muted)]">
-                  Ajuste nome, slug, ordem e status da categoria.
+                  Ajuste nome, slug, janela de atendimento, ordem e status da categoria.
                 </p>
               </div>
               <button
@@ -1135,6 +1145,28 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
                     type="checkbox"
                   />
                   Categoria ativa
+                </label>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm text-[var(--muted)]">
+                  Disponivel de
+                  <input
+                    className="mt-2 w-full rounded-2xl border border-[var(--line)] bg-[var(--background)] px-4 py-3 text-[var(--foreground)]"
+                    onChange={(event) => setCategoryEditor((current) => ({ ...current, availableFrom: event.target.value }))}
+                    type="time"
+                    value={categoryEditor.availableFrom}
+                  />
+                </label>
+
+                <label className="block text-sm text-[var(--muted)]">
+                  Disponivel ate
+                  <input
+                    className="mt-2 w-full rounded-2xl border border-[var(--line)] bg-[var(--background)] px-4 py-3 text-[var(--foreground)]"
+                    onChange={(event) => setCategoryEditor((current) => ({ ...current, availableUntil: event.target.value }))}
+                    type="time"
+                    value={categoryEditor.availableUntil}
+                  />
                 </label>
               </div>
             </div>

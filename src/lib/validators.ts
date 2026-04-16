@@ -3,6 +3,12 @@ import { normalizePhone, normalizeZipCode, optionalTrimmed } from "@/lib/utils";
 
 const stringField = z.string().trim();
 const optionalStringField = stringField.optional().transform(optionalTrimmed);
+const timeField = z
+  .string()
+  .trim()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Horario invalido.")
+  .optional()
+  .transform(optionalTrimmed);
 
 export const paymentMethodSchema = z.enum([
   "dinheiro",
@@ -108,6 +114,8 @@ export const createCategorySchema = z.object({
   slug: optionalStringField,
   description: optionalStringField,
   sortOrder: z.coerce.number().int().min(0).default(0),
+  availableFrom: timeField,
+  availableUntil: timeField,
   isActive: z.coerce.boolean().default(true),
 });
 
