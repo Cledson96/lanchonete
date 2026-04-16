@@ -36,6 +36,7 @@ export async function POST(request: Request) {
 
     const confirmationMessage = buildOrderConfirmationMessage(order, {
       pixKey: config.storePixKey,
+      publicSiteUrl: config.publicSiteUrl,
       paymentMethodFallback: input.paymentMethod,
     });
 

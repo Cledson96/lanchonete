@@ -73,7 +73,7 @@ export async function createOrder(input: CreateOrderInput) {
       },
       ingredients: {
         where: { ingredient: { isActive: true } },
-        include: { ingredient: { select: { id: true } } },
+        include: { ingredient: { select: { id: true, name: true } } },
       },
     },
   });
@@ -304,7 +304,25 @@ export async function createOrder(input: CreateOrderInput) {
       include: {
         items: {
           include: {
-            menuItem: true,
+            menuItem: {
+              include: {
+                ingredients: {
+                  include: {
+                    ingredient: {
+                      select: {
+                        id: true,
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            ingredientCustomizations: {
+              include: {
+                ingredient: true,
+              },
+            },
             selectedOptions: {
               include: {
                 optionItem: true,
@@ -327,20 +345,20 @@ export async function getOrderByCode(code: string) {
       deliveryAddress: true,
       deliveryFeeRule: true,
       items: {
-         include: {
-           menuItem: true,
-           selectedOptions: {
-             include: {
-               optionItem: true,
-             },
-           },
-           ingredientCustomizations: {
-             include: {
-               ingredient: true,
-             },
-           },
-         },
-       },
+        include: {
+          menuItem: true,
+          ingredientCustomizations: {
+            include: {
+              ingredient: true,
+            },
+          },
+          selectedOptions: {
+            include: {
+              optionItem: true,
+            },
+          },
+        },
+      },
       statusEvents: {
         orderBy: { createdAt: "asc" },
       },

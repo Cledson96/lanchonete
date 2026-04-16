@@ -30,6 +30,12 @@ type OrderSummary = {
     menuItem: {
       name: string;
     };
+    ingredientCustomizations?: Array<{
+      quantity: number;
+      ingredient: {
+        name: string;
+      };
+    }>;
   }>;
 };
 
@@ -105,6 +111,18 @@ function formatCreatedAt(iso: string) {
 
 function humanize(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function summarizeIngredientChanges(
+  ingredientCustomizations?: OrderSummary["items"][number]["ingredientCustomizations"],
+) {
+  if (!ingredientCustomizations?.length) {
+    return [] as string[];
+  }
+
+  return ingredientCustomizations
+    .filter((ing) => ing.quantity !== 1)
+    .map((ing) => (ing.quantity === 0 ? `sem ${ing.ingredient.name}` : `${ing.quantity}x ${ing.ingredient.name}`));
 }
 
 async function parseJson<T>(response: Response): Promise<T> {
@@ -338,6 +356,10 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
                     .slice(0, 2)
                     .map((item) => `${item.quantity}x ${item.menuItem.name}`)
                     .join(" • ");
+                  const ingredientPreview = order.items
+                    .flatMap((item) => summarizeIngredientChanges(item.ingredientCustomizations))
+                    .slice(0, 3)
+                    .join(" • ");
 
                   return (
                     <button
@@ -379,6 +401,11 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
                         {itemsPreview || "Sem itens detalhados"}
                         {order.items.length > 2 ? ` • +${order.items.length - 2} itens` : ""}
                       </p>
+                      {ingredientPreview ? (
+                        <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                          {ingredientPreview}
+                        </p>
+                      ) : null}
 
                       <div className="mt-4 flex items-center justify-between gap-4 border-t border-[var(--line)] pt-4">
                         <span className="text-sm text-[var(--muted)]">{itemCount} itens</span>

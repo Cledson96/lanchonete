@@ -121,6 +121,11 @@ export async function listOrders(filters?: {
       items: {
         include: {
           menuItem: true,
+          ingredientCustomizations: {
+            include: {
+              ingredient: true,
+            },
+          },
         },
       },
       statusEvents: {

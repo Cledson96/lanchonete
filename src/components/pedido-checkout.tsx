@@ -725,17 +725,16 @@ export function PedidoCheckout() {
           type: fulfillmentType,
           paymentMethod,
           notes: orderNotes,
-          items: state.items.map((item) => ({
-            menuItemId: item.menuItemId,
-            quantity: item.quantity,
-            notes: optionalTrimmed(item.notes || ""),
-            optionItemIds: item.optionItemIds || [],
-            ingredients: item.ingredientCustomizations
-              ? Object.entries(item.ingredientCustomizations)
-                  .filter(([, qty]) => qty > 0)
-                  .map(([ingredientId, quantity]) => ({ ingredientId, quantity }))
-              : undefined,
-          })),
+            items: state.items.map((item) => ({
+              menuItemId: item.menuItemId,
+              quantity: item.quantity,
+              notes: optionalTrimmed(item.notes || ""),
+              optionItemIds: item.optionItemIds || [],
+              ingredients: item.ingredientCustomizations
+                ? Object.entries(item.ingredientCustomizations)
+                    .map(([ingredientId, quantity]) => ({ ingredientId, quantity }))
+                : undefined,
+            })),
           address:
             fulfillmentType === "delivery"
               ? {
