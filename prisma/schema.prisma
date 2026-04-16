@@ -173,6 +173,7 @@ model MenuItem {
   kind           MenuItemKind          @default(simples)
   price          Decimal               @db.Decimal(10, 2)
   compareAtPrice Decimal?              @db.Decimal(10, 2)
+  availableWeekdays String[]           @default([])
   isActive       Boolean               @default(true)
   isFeatured     Boolean               @default(false)
   sortOrder      Int                   @default(0)

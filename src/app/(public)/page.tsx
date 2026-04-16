@@ -57,7 +57,7 @@ export default async function HomePage() {
     description: string | null;
     availableFrom: string | null;
     availableUntil: string | null;
-    menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }> }>;
+    menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; availableWeekdays: string[]; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }> }>;
   }>).map((category) => ({
     id: category.id,
     name: category.name,
@@ -68,14 +68,15 @@ export default async function HomePage() {
     menuItems: category.menuItems.map((item) => ({
       id: item.id,
       name: item.name,
-      description: item.description,
-      imageUrl: item.imageUrl,
-      price: Number(item.price),
-      compareAtPrice: item.compareAtPrice ? Number(item.compareAtPrice) : null,
-      optionGroups: (item.optionGroups || []).map((group) => ({
-        id: group.id,
-        name: group.name,
-        description: group.description,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        price: Number(item.price),
+        compareAtPrice: item.compareAtPrice ? Number(item.compareAtPrice) : null,
+        availableWeekdays: item.availableWeekdays || [],
+        optionGroups: (item.optionGroups || []).map((group) => ({
+          id: group.id,
+          name: group.name,
+          description: group.description,
         minSelections: group.minSelections,
         maxSelections: group.maxSelections,
         isRequired: group.isRequired,

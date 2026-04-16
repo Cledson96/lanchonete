@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MENU_WEEKDAYS, formatMenuWeekdays } from "@/lib/menu-item-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { formatMoney } from "@/lib/utils";
 
@@ -56,6 +57,7 @@ type MenuItemSummary = {
     id: string;
     name: string;
   };
+  availableWeekdays?: string[];
   optionGroups: Array<{
     optionGroup: {
       id: string;
@@ -114,6 +116,7 @@ type EditorState = {
   isActive: boolean;
   isFeatured: boolean;
   sortOrder: string;
+  availableWeekdays: string[];
   optionGroupIds: string[];
   ingredientIds: string[];
   comboComponents: Array<{
@@ -134,6 +137,7 @@ const emptyEditorState: EditorState = {
   isActive: true,
   isFeatured: false,
   sortOrder: "0",
+  availableWeekdays: [],
   optionGroupIds: [],
   ingredientIds: [],
   comboComponents: [],
@@ -171,6 +175,8 @@ function normalizeItem(item: MenuItemSummary) {
     ...item,
     price: asNumber(item.price) ?? 0,
     compareAtPrice: asNumber(item.compareAtPrice),
+    optionGroups: item.optionGroups || [],
+    ingredients: item.ingredients || [],
     comboItems: item.comboItems || [],
   };
 }
@@ -188,8 +194,9 @@ function createEditorStateFromItem(item: ReturnType<typeof normalizeItem>): Edit
     isActive: item.isActive,
     isFeatured: item.isFeatured,
     sortOrder: String(item.sortOrder ?? 0),
-    optionGroupIds: item.optionGroups.map((group) => group.optionGroup.id),
-    ingredientIds: item.ingredients.map((link) => link.ingredient.id),
+    availableWeekdays: item.availableWeekdays || [],
+    optionGroupIds: (item.optionGroups || []).map((group) => group.optionGroup.id),
+    ingredientIds: (item.ingredients || []).map((link) => link.ingredient.id),
     comboComponents: (item.comboItems || []).map((component) => ({
       componentMenuItemId: component.componentMenuItem.id,
       quantity: String(component.quantity),
@@ -201,7 +208,11 @@ function createNewEditorState(categories: CategorySummary[]) {
   return {
     ...emptyEditorState,
     categoryId: categories[0]?.id || "",
-  } satisfies EditorState;
+    } satisfies EditorState;
+}
+
+function toggleWeekday(list: string[], weekday: string) {
+  return list.includes(weekday) ? list.filter((item) => item !== weekday) : [...list, weekday];
 }
 
 export function DashboardCardapioManager({ categories, items, optionGroups, ingredients }: Props) {
@@ -414,6 +425,7 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
         isActive: editor.isActive,
         isFeatured: editor.isFeatured,
         sortOrder: Number(editor.sortOrder || 0),
+        availableWeekdays: editor.availableWeekdays,
         optionGroupIds: editor.optionGroupIds,
         ingredientIds: editor.ingredientIds,
         comboComponents:
@@ -798,8 +810,8 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
 
           <div className="space-y-4">
             {visibleItems.map((item) => {
-              const optionLabels = item.optionGroups.map((group) => group.optionGroup.name);
-              const ingredientLabels = item.ingredients.map((link) => link.ingredient.name);
+              const optionLabels = (item.optionGroups || []).map((group) => group.optionGroup.name);
+              const ingredientLabels = (item.ingredients || []).map((link) => link.ingredient.name);
               const comboSummary = (item.comboItems || []).map((component) => `${component.quantity}x ${component.componentMenuItem.name}`);
               return (
                 <article key={item.id} className="group flex flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] shadow-[0_8px_24px_rgba(45,24,11,0.04)] transition hover:border-[var(--brand-orange)]/30 hover:shadow-[0_14px_30px_rgba(242,122,34,0.1)] sm:flex-row">
@@ -817,10 +829,15 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
                   <div className="flex flex-1 flex-col p-5">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-2xl font-semibold tracking-tight">{item.name}</h2>
                           {!item.isActive ? <span className="rounded-full bg-red-50 px-2.5 py-1 text-[0.7rem] font-semibold text-red-700">Inativo</span> : null}
                           {item.isFeatured ? <span className="rounded-full bg-[var(--brand-orange)]/10 px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--brand-orange-dark)]">Destaque</span> : null}
+                          {item.availableWeekdays?.length ? (
+                            <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--brand-green-dark)]">
+                              {formatMenuWeekdays(item.availableWeekdays)}
+                            </span>
+                          ) : null}
                         </div>
                         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.description || "Ingredientes nao informados."}</p>
                       </div>
@@ -1037,6 +1054,33 @@ export function DashboardCardapioManager({ categories, items, optionGroups, ingr
                         </label>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--background)] p-4">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">Dias disponíveis</p>
+                    <p className="mt-1 text-xs text-[var(--muted)]">Sem seleção = todos os dias. Use isso para pratos do dia.</p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {MENU_WEEKDAYS.map((weekday) => (
+                        <button
+                          key={weekday.value}
+                          className={`rounded-[1rem] border px-3 py-2 text-sm font-medium transition ${editor.availableWeekdays.includes(weekday.value) ? "border-[var(--brand-green)] bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)]" : "border-[var(--line)] bg-white text-[var(--foreground)] hover:bg-[var(--background)]"}`}
+                          onClick={() => setEditor((current) => ({
+                            ...current,
+                            availableWeekdays: toggleWeekday(current.availableWeekdays, weekday.value),
+                          }))}
+                          type="button"
+                        >
+                          {weekday.short}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      className="mt-3 rounded-full border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--background)]"
+                      onClick={() => setEditor((current) => ({ ...current, availableWeekdays: [] }))}
+                      type="button"
+                    >
+                      Todos os dias
+                    </button>
                   </div>
 
                   <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--background)] p-4">

@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { ApiError } from "@/lib/http";
+import { normalizeMenuWeekdays } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";
 import { decimal, optionalNullable, slugify } from "@/lib/utils";
 
@@ -167,6 +168,7 @@ export async function createMenuItem(input: {
   isActive: boolean;
   isFeatured: boolean;
   sortOrder: number;
+  availableWeekdays?: string[];
   optionGroupIds: string[];
   ingredientIds?: string[];
   comboComponents: Array<{
@@ -190,6 +192,7 @@ export async function createMenuItem(input: {
       isActive: input.isActive,
       isFeatured: input.isFeatured,
       sortOrder: input.sortOrder,
+      availableWeekdays: normalizeMenuWeekdays(input.availableWeekdays),
       optionGroups: {
         create: input.optionGroupIds.map((optionGroupId, index) => ({
           optionGroupId,
@@ -221,6 +224,11 @@ export async function createMenuItem(input: {
           optionGroup: true,
         },
       },
+      ingredients: {
+        include: {
+          ingredient: true,
+        },
+      },
       comboItems: {
         orderBy: [{ sortOrder: "asc" }, { componentMenuItem: { name: "asc" } }],
         include: {
@@ -250,6 +258,7 @@ export async function updateMenuItem(input: {
   isActive?: boolean;
   isFeatured?: boolean;
   sortOrder?: number;
+  availableWeekdays?: string[];
   optionGroupIds?: string[];
   ingredientIds?: string[];
   comboComponents?: Array<{
@@ -306,6 +315,10 @@ export async function updateMenuItem(input: {
     data.sortOrder = input.sortOrder;
   }
 
+  if (hasOwn(input, "availableWeekdays")) {
+    data.availableWeekdays = normalizeMenuWeekdays(input.availableWeekdays);
+  }
+
   if (hasOwn(input, "optionGroupIds")) {
     data.optionGroups = {
       deleteMany: {},
@@ -349,6 +362,11 @@ export async function updateMenuItem(input: {
       optionGroups: {
         include: {
           optionGroup: true,
+        },
+      },
+      ingredients: {
+        include: {
+          ingredient: true,
         },
       },
       comboItems: {

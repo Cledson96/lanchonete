@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isMenuItemAvailableNow } from "@/lib/menu-item-availability";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 
 export async function getPublicMenu() {
@@ -45,20 +46,23 @@ export async function getPublicMenu() {
   return categories
     .filter((category) => isCategoryAvailableNow(category as { availableFrom?: string | null; availableUntil?: string | null }))
     .map((category) => ({
-    ...category,
-    menuItems: category.menuItems.map((item) => ({
-      ...item,
-      optionGroups: item.optionGroups.map((link) => link.optionGroup),
-      ingredients: item.ingredients
-        .filter((link) => link.ingredient?.isActive)
-        .map((link) => ({
-          id: link.ingredient.id,
-          name: link.ingredient.name,
-          quantity: link.quantity,
-          price: Number((link.ingredient as { price?: unknown }).price ?? 0),
+      ...category,
+      menuItems: category.menuItems
+        .filter((item) => isMenuItemAvailableNow(item as { availableWeekdays?: string[] | null }))
+        .map((item) => ({
+          ...item,
+          optionGroups: item.optionGroups.map((link) => link.optionGroup),
+          ingredients: item.ingredients
+            .filter((link) => link.ingredient?.isActive)
+            .map((link) => ({
+              id: link.ingredient.id,
+              name: link.ingredient.name,
+              quantity: link.quantity,
+              price: Number((link.ingredient as { price?: unknown }).price ?? 0),
+            })),
         })),
-    })),
-    }));
+    }))
+    .filter((category) => category.menuItems.length > 0);
 }
 
 export async function getAdminCategories() {

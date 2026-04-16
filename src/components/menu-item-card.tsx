@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { MenuItemDetailDialog } from "@/components/menu-item-detail-dialog";
+import { formatMenuWeekdays } from "@/lib/menu-item-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
 
@@ -40,6 +41,7 @@ type MenuItemCardProps = {
     availableFrom?: string | null;
     availableUntil?: string | null;
   };
+  availableWeekdays?: string[];
   optionGroups?: OptionGroupForCard[];
   ingredients?: IngredientForCard[];
 };
@@ -53,6 +55,7 @@ export function MenuItemCard({
   imageUrl,
   categoryName,
   categoryAvailability,
+  availableWeekdays = [],
   optionGroups = [],
   ingredients = [],
 }: MenuItemCardProps) {
@@ -148,6 +151,7 @@ export function MenuItemCard({
 
   const hasIngredients = ingredients.length > 0;
   const hasOptions = optionGroups.length > 0;
+  const weekdaysLabel = formatMenuWeekdays(availableWeekdays);
 
   return (
     <>
@@ -177,6 +181,12 @@ export function MenuItemCard({
           {displayCompare ? (
             <span className="absolute right-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)]">
               Oferta
+            </span>
+          ) : null}
+
+          {weekdaysLabel !== "todos os dias" ? (
+            <span className="absolute left-3 bottom-3 rounded-full bg-black/75 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)] backdrop-blur-sm">
+              {weekdaysLabel}
             </span>
           ) : null}
 

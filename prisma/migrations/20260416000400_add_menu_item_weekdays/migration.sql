@@ -1,0 +1,2 @@
+ALTER TABLE "MenuItem"
+ADD COLUMN "availableWeekdays" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

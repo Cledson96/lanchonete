@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/http";
 import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
+import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
 import { decimal, normalizePhone, optionalNullable } from "@/lib/utils";
@@ -76,27 +77,64 @@ export async function createOrder(input: CreateOrderInput) {
         where: { ingredient: { isActive: true } },
         include: { ingredient: { select: { id: true, name: true } } },
       },
-      category: {
-        select: {
-          id: true,
-          name: true,
-          availableFrom: true,
-          availableUntil: true,
-        },
-      },
     },
   });
+
+  const categoryIds = [...new Set(menuItems.map((item) => item.categoryId))];
+  const categories = categoryIds.length
+    ? await prisma.category.findMany({
+        where: { id: { in: categoryIds } },
+      })
+    : [];
+  const categoryMap = new Map(categories.map((category) => [category.id, category]));
+
+  const typedMenuItems = menuItems as unknown as Array<{
+    id: string;
+    name: string;
+    price: { toString(): string } | number;
+    categoryId: string;
+    availableWeekdays: string[];
+    optionGroups: Array<{
+      optionGroup: {
+        options: Array<{ id: string }>;
+      };
+    }>;
+    ingredients: Array<{
+      ingredientId: string;
+    }>;
+  }>;
 
   if (menuItems.length !== input.items.length) {
     throw new ApiError(404, "Um ou mais itens do pedido nao existem.");
   }
 
-  const unavailableCategory = menuItems.find((item) => !isCategoryAvailableNow(item.category));
+  const unavailableCategory = typedMenuItems.find((item) => {
+    const category = categoryMap.get(item.categoryId) as
+      | { availableFrom?: string | null; availableUntil?: string | null }
+      | undefined;
+
+    return !isCategoryAvailableNow(category || {});
+  });
 
   if (unavailableCategory) {
+    const category = categoryMap.get(unavailableCategory.categoryId);
+
+    if (!category) {
+      throw new ApiError(404, "Categoria do cardapio nao encontrada.");
+    }
+
     throw new ApiError(
       422,
-      `O cardapio ${unavailableCategory.category.name} esta disponivel apenas ${formatAvailabilityWindow(unavailableCategory.category)}.`,
+      `O cardapio ${category.name} esta disponivel apenas ${formatAvailabilityWindow(category as { availableFrom?: string | null; availableUntil?: string | null })}.`,
+    );
+  }
+
+  const unavailableMenuItem = typedMenuItems.find((item) => !isMenuItemAvailableNow(item));
+
+  if (unavailableMenuItem) {
+    throw new ApiError(
+      422,
+      `O item "${unavailableMenuItem.name}" esta disponivel apenas em ${formatMenuWeekdays(unavailableMenuItem.availableWeekdays as string[] | null)}.`,
     );
   }
 
@@ -123,7 +161,7 @@ export async function createOrder(input: CreateOrderInput) {
     : [];
   const ingredientSet = new Set(ingredientRecords.map((i) => i.id));
 
-  const menuMap = new Map(menuItems.map((item) => [item.id, item]));
+  const menuMap = new Map(typedMenuItems.map((item) => [item.id, item]));
   const optionMap = new Map(optionItems.map((item) => [item.id, item]));
 
   let subtotal = 0;

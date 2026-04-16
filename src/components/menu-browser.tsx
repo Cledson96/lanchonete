@@ -11,6 +11,7 @@ type MenuBrowserItem = {
   imageUrl: string | null;
   price: number;
   compareAtPrice: number | null;
+  availableWeekdays?: string[];
   optionGroups?: Array<{
     id: string;
     name: string;
@@ -125,12 +126,13 @@ export function MenuBrowser({ categories }: Props) {
               categoryAvailability={activeCategory ? { availableFrom: activeCategory.availableFrom, availableUntil: activeCategory.availableUntil } : undefined}
               compareAtPrice={item.compareAtPrice}
               description={item.description}
- id={item.id}
-               imageUrl={item.imageUrl}
-               ingredients={item.ingredients}
-               name={item.name}
+              id={item.id}
+              imageUrl={item.imageUrl}
+              ingredients={item.ingredients}
+              name={item.name}
               optionGroups={item.optionGroups}
               price={item.price}
+              availableWeekdays={item.availableWeekdays}
             />
           ))}
         </div>

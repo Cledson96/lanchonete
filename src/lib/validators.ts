@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
 import { normalizePhone, normalizeZipCode, optionalTrimmed } from "@/lib/utils";
 
 const stringField = z.string().trim();
@@ -19,6 +20,7 @@ export const paymentMethodSchema = z.enum([
 ]);
 
 export const menuItemKindSchema = z.enum(["simples", "combo"]);
+const menuWeekdaySchema = z.enum(MENU_WEEKDAYS.map((weekday) => weekday.value) as [string, ...string[]]);
 
 export const orderTypeSchema = z.enum(["delivery", "retirada", "local"]);
 
@@ -157,6 +159,7 @@ export const createMenuItemSchema = z.object({
   isActive: z.coerce.boolean().default(true),
   isFeatured: z.coerce.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).default(0),
+  availableWeekdays: z.array(menuWeekdaySchema).default([]),
   optionGroupIds: z.array(stringField.min(1)).optional().default([]),
   ingredientIds: z.array(stringField.min(1)).optional().default([]),
   comboComponents: z
@@ -191,6 +194,7 @@ export const updateMenuItemSchema = z.object({
   isActive: z.coerce.boolean().optional(),
   isFeatured: z.coerce.boolean().optional(),
   sortOrder: z.coerce.number().int().min(0).optional(),
+  availableWeekdays: z.array(menuWeekdaySchema).optional(),
   optionGroupIds: z.array(stringField.min(1)).optional(),
   ingredientIds: z.array(stringField.min(1)).optional(),
   comboComponents: z
