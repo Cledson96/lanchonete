@@ -7,19 +7,6 @@ import { getPublicMenu } from "@/lib/services/menu-service";
 
 export const revalidate = 60;
 
-function WhatsAppIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  );
-}
-
 function ChevronDownIcon() {
   return (
     <svg
@@ -63,7 +50,7 @@ function PhoneIcon() {
 export default async function HomePage() {
   const categories = await getPublicMenu();
 
-  const browserCategories = categories.map((category: { id: string; name: string; slug: string; description: string | null; menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number }> }> }) => ({
+  const browserCategories = categories.map((category: { id: string; name: string; slug: string; description: string | null; menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }> }> }) => ({
     id: category.id,
     name: category.name,
     slug: category.slug,
@@ -93,6 +80,7 @@ export default async function HomePage() {
         id: ing.id,
         name: ing.name,
         quantity: ing.quantity,
+        price: Number(ing.price),
       })),
     })),
   }));
@@ -101,41 +89,32 @@ export default async function HomePage() {
     <>
       <main className="min-h-screen">
         {/* ─── Hero ─── */}
-        <section className="relative overflow-hidden bg-[var(--brand-orange)] flex flex-col lg:flex-row min-h-[550px] lg:min-h-[640px]">
+<section className="relative overflow-hidden bg-[var(--brand-orange)] flex flex-col lg:flex-row min-h-[340px] lg:min-h-[420px]">
           {/* Text Content Block */}
-          <div className="relative z-10 flex-1 flex items-center justify-center lg:justify-end px-6 pb-20 pt-16 lg:px-16 lg:py-24">
+          <div className="relative z-10 flex-1 flex items-center justify-center lg:justify-end px-6 pb-10 pt-10 lg:px-12 lg:py-14">
             <div className="w-full max-w-xl xl:mr-10">
-              <div className="hero-reveal inline-block mb-8">
+              <div className="hero-reveal inline-block mb-5">
                 <BrandLogo theme="menu-style" />
               </div>
 
-              <h1 className="hero-reveal text-[2.8rem] font-black leading-[1.05] tracking-tight text-white sm:text-[4rem] lg:text-[4.5rem] drop-shadow-md">
+              <h1 className="hero-reveal text-[2rem] font-black leading-[1.05] tracking-tight text-white sm:text-[2.8rem] lg:text-[3.5rem] drop-shadow-md">
                 <span 
                   className="block text-[var(--brand-green)]" 
-                  style={{ WebkitTextStroke: '2px white', textShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
+                  style={{ WebkitTextStroke: '1.5px white', textShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
                 >
                   LANCHES
                 </span>
                 ARTESANAIS
               </h1>
 
-              <p className="hero-reveal mt-6 max-w-md text-[1.05rem] font-medium leading-relaxed text-white/95">
+              <p className="hero-reveal mt-4 max-w-md text-[0.95rem] font-medium leading-relaxed text-white/95">
                 Pão selado na manteiga, maionese caseira e o verdadeiro hambúrguer artesanal. {brandContent.subheadline}
               </p>
 
-              <div className="hero-reveal mt-8 flex flex-col sm:flex-row flex-wrap gap-4">
+              <div className="hero-reveal mt-6">
                 <a className="cta-btn shadow-[0_8px_24px_rgba(108,158,49,0.3)] hover:scale-[1.02] active:scale-[0.98] !bg-white !text-[var(--brand-orange-dark)] hover:!bg-[var(--brand-green-glow)] transition-all duration-300" href="#cardapio">
                   Ver cardápio
                   <ChevronDownIcon />
-                </a>
-                <a
-                  className="cta-btn !bg-[var(--brand-green)] !text-white hover:!bg-[var(--brand-green-dark)] shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                  href={brandContent.whatsappUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <WhatsAppIcon className="h-5 w-5" />
-                  Pedir pelo WhatsApp
                 </a>
               </div>
             </div>
@@ -145,16 +124,16 @@ export default async function HomePage() {
           </div>
 
           {/* Image Block */}
-          <div className="relative h-[360px] w-full lg:h-auto lg:flex-1 lg:max-w-[50%]">
+          <div className="relative h-[240px] w-full lg:h-auto lg:flex-1 lg:max-w-[50%]">
              <Image
-              alt="Lanches artesanais"
-              className="object-cover object-center lg:object-[left_center]"
-              fill
-              priority
-              quality={90}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              src="/landing/hero-burger.jpg"
-            />
+               alt="Lanches artesanais"
+               className="object-cover object-center lg:object-[left_center]"
+               fill
+               priority
+               quality={90}
+               sizes="(max-width: 1024px) 100vw, 50vw"
+               src="/landing/hero-burger.jpg"
+             />
             {/* Gradient to blend with orange on mobile */}
             <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-orange)] to-transparent opacity-95 lg:hidden pointer-events-none"></div>
             {/* Subtle shadow on desktop between blocks */}
@@ -211,7 +190,7 @@ export default async function HomePage() {
         <MenuBrowser categories={browserCategories} />
 
         {/* ─── Footer ─── */}
-        <footer className="footer-site mt-10 py-10">
+        <footer className="footer-site mt-6 py-8">
           <div className="shell">
             <div className="flex flex-col items-center gap-8 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
               <div className="max-w-xs">
@@ -222,15 +201,6 @@ export default async function HomePage() {
               </div>
 
               <div className="flex flex-col items-center gap-3 sm:items-end">
-                <a
-                  className="whatsapp-btn"
-                  href={brandContent.whatsappUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <WhatsAppIcon className="h-4 w-4" />
-                  Pedir pelo WhatsApp
-                </a>
                 <p className="text-sm text-[#7a6b5a]">{brandContent.location}</p>
                 <p className="text-sm text-[#7a6b5a]">{brandContent.hours}</p>
               </div>

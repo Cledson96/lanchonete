@@ -52,6 +52,7 @@ export async function getPublicMenu() {
           id: link.ingredient.id,
           name: link.ingredient.name,
           quantity: link.quantity,
+          price: Number((link.ingredient as { price?: unknown }).price ?? 0),
         })),
     })),
   }));

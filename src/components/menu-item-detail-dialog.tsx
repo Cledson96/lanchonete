@@ -23,6 +23,7 @@ type IngredientForDialog = {
   id: string;
   name: string;
   quantity: number;
+  price: number; // preço unitário do ingrediente extra
 };
 
 type MenuItemDetailDialogProps = {
@@ -97,6 +98,18 @@ export function MenuItemDetailDialog({
     };
   }, [open, onClose]);
 
+  const ingredientDelta = useMemo(() => {
+    let total = 0;
+    for (const ing of ingredients) {
+      const currentQty = Math.max(0, Math.min(ingredientQtys[ing.id] ?? ing.quantity, ing.quantity));
+      const extraQty = currentQty - ing.quantity;
+      if (extraQty > 0) {
+        total += extraQty * ing.price;
+      }
+    }
+    return total;
+  }, [ingredients, ingredientQtys]);
+
   const optionDelta = useMemo(() => {
     let total = 0;
     for (const group of optionGroups) {
@@ -111,29 +124,37 @@ export function MenuItemDetailDialog({
     return total;
   }, [optionGroups, selectedOptions]);
 
-  const totalLabel = formatMoney((price + optionDelta) * quantity);
+  const totalLabel = formatMoney((price + optionDelta + ingredientDelta) * quantity);
 
-  function toggleRadio(groupId: string, optionId: string) {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [groupId]: prev[groupId]?.[0] === optionId ? [] : [optionId],
-    }));
+  function getOptionQuantity(groupId: string, optionId: string) {
+    return (selectedOptions[groupId] || []).filter((id) => id === optionId).length;
   }
 
-  function toggleCheckbox(groupId: string, optionId: string, maxSelections?: number | null) {
+  function incrementOption(groupId: string, optionId: string, maxSelections?: number | null) {
     setSelectedOptions((prev) => {
       const current = prev[groupId] || [];
-      const isSelected = current.includes(optionId);
-
-      if (isSelected) {
-        return { ...prev, [groupId]: current.filter((id) => id !== optionId) };
-      }
 
       if (maxSelections && current.length >= maxSelections) {
         return prev;
       }
 
       return { ...prev, [groupId]: [...current, optionId] };
+    });
+  }
+
+  function decrementOption(groupId: string, optionId: string) {
+    setSelectedOptions((prev) => {
+      const current = prev[groupId] || [];
+      const index = current.lastIndexOf(optionId);
+
+      if (index === -1) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [groupId]: [...current.slice(0, index), ...current.slice(index + 1)],
+      };
     });
   }
 
@@ -151,7 +172,7 @@ export function MenuItemDetailDialog({
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6">
-        <div className="relative flex w-full max-w-[52rem] max-h-[90vh] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--line)] bg-[var(--background)] shadow-[0_30px_80px_rgba(23,15,8,0.28)]">
+        <div className="relative flex w-full max-w-[52rem] max-h-[90vh] flex-col sm:flex-row overflow-hidden rounded-[var(--radius-xl)] border border-[var(--line)] bg-[var(--background)] shadow-[0_30px_80px_rgba(23,15,8,0.28)]">
 
           <button
             aria-label="Fechar detalhes"
@@ -164,7 +185,7 @@ export function MenuItemDetailDialog({
             </svg>
           </button>
 
-          <div className="relative hidden w-[42%] shrink-0 sm:block">
+          <div className="relative hidden w-full sm:w-[42%] shrink-0 sm:block">
             <Image
               alt={name}
               className="object-cover"
@@ -217,15 +238,18 @@ export function MenuItemDetailDialog({
               {ingredients.length > 0 && (
                 <div className="mt-3 border-t border-[var(--line)] pt-3 space-y-2">
                   <p className="text-[0.6rem] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">Monte seu lanche</p>
-                  <p className="text-[0.72rem] text-[var(--muted)]">Remova ou adicione mais dos ingredientes abaixo.</p>
+                  <p className="text-[0.72rem] text-[var(--muted)]">Remova os ingredientes abaixo. Para extras, use Adicionais.</p>
                   <div className="space-y-1.5">
                     {ingredients.map((ing) => {
-                      const qty = ingredientQtys[ing.id] ?? ing.quantity;
+                      const qty = Math.max(0, Math.min(ingredientQtys[ing.id] ?? ing.quantity, ing.quantity));
+                      const canIncrease = qty < ing.quantity;
                       return (
                         <div key={ing.id} className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-[0.82rem] bg-white/60 border border-[var(--line)]">
-                          <span className={`${qty === 0 ? "line-through text-[var(--muted)]/50" : "text-[var(--foreground)]"}`}>
-                            {ing.name}
-                          </span>
+                          <div className="min-w-0 flex-1">
+                            <span className={`${qty === 0 ? "line-through text-[var(--muted)]/50" : "text-[var(--foreground)]"}`}>
+                              {ing.name}
+                            </span>
+                          </div>
                           <div className="inline-flex items-center gap-1">
                             <button
                               aria-label={`Remover ${ing.name}`}
@@ -247,13 +271,16 @@ export function MenuItemDetailDialog({
                             </span>
                             <button
                               aria-label={`Adicionar ${ing.name}`}
-                              className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[var(--brand-green)]/20 text-[var(--green-rich)] transition hover:bg-[var(--brand-green)]/30"
-                              onClick={() =>
+                              className={`flex h-6 w-6 items-center justify-center rounded-full text-[var(--green-rich)] transition ${canIncrease ? "cursor-pointer bg-[var(--brand-green)]/20 hover:bg-[var(--brand-green)]/30" : "cursor-not-allowed bg-[var(--line)]/35 opacity-45"}`}
+                              onClick={() => {
+                                if (!canIncrease) return;
+
                                 setIngredientQtys((prev) => ({
                                   ...prev,
-                                  [ing.id]: Math.min(10, (prev[ing.id] ?? ing.quantity) + 1),
-                                }))
-                              }
+                                  [ing.id]: Math.min(ing.quantity, (prev[ing.id] ?? ing.quantity) + 1),
+                                }));
+                              }}
+                              disabled={!canIncrease}
                               type="button"
                             >
                               <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -272,7 +299,6 @@ export function MenuItemDetailDialog({
                 <div className="mt-3 border-t border-[var(--line)] pt-3 space-y-3">
                   <p className="text-[0.6rem] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">Adicionais</p>
                   {optionGroups.map((group) => {
-                    const isRadio = group.maxSelections === 1 && group.minSelections === 1;
                     const selected = selectedOptions[group.id] || [];
                     const groupDelta = selected.reduce((sum, optionId) => {
                       const option = group.options.find((o) => o.id === optionId);
@@ -299,31 +325,18 @@ export function MenuItemDetailDialog({
                         )}
                         <div className="mt-2 space-y-1.5">
                           {group.options.map((option) => {
-                            const isChecked = selected.includes(option.id);
+                            const optionQty = getOptionQuantity(group.id, option.id);
                             return (
-                              <label
+                              <div
                                 key={option.id}
-                                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] cursor-pointer transition-colors ${isChecked ? "bg-[var(--brand-green)]/5 text-[var(--foreground)]" : "text-[var(--muted)] hover:bg-[var(--cream)]"}`}
+                                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] transition-colors ${optionQty > 0 ? "bg-[var(--brand-green)]/5 text-[var(--foreground)]" : "text-[var(--muted)] hover:bg-[var(--cream)]"}`}
                               >
-                                <input
-                                  checked={isChecked}
-                                  className="accent-[var(--green-rich)]"
-                                  name={isRadio ? `group-${group.id}` : undefined}
-                                  onChange={() => {
-                                    if (isRadio) {
-                                      toggleRadio(group.id, option.id);
-                                    } else {
-                                      toggleCheckbox(group.id, option.id, group.maxSelections);
-                                    }
-                                  }}
-                                  type={isRadio ? "radio" : "checkbox"}
-                                />
-                                <span className="flex-1">
-                                  {option.name}
+                                <div className="min-w-0 flex-1">
+                                  <span>{option.name}</span>
                                   {option.description && (
                                     <span className="ml-1 text-[0.7rem] text-[var(--muted)]">— {option.description}</span>
                                   )}
-                                </span>
+                                </div>
                                 {option.priceDelta > 0 ? (
                                   <span className="text-xs font-semibold text-[var(--brand-green-dark)]">
                                     +{formatMoney(option.priceDelta)}
@@ -331,7 +344,32 @@ export function MenuItemDetailDialog({
                                 ) : (
                                   <span className="text-[0.65rem] text-[var(--muted)]">incluido</span>
                                 )}
-                              </label>
+                                <div className="inline-flex items-center gap-1">
+                                  <button
+                                    aria-label={`Diminuir ${option.name}`}
+                                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[var(--line)]/50 text-[var(--foreground)] transition hover:bg-red-100 hover:text-red-600"
+                                    onClick={() => decrementOption(group.id, option.id)}
+                                    type="button"
+                                  >
+                                    <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                      <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                  </button>
+                                  <span className="min-w-[1.2rem] text-center text-[0.78rem] font-bold text-[var(--foreground)]">
+                                    {optionQty}
+                                  </span>
+                                  <button
+                                    aria-label={`Adicionar ${option.name}`}
+                                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[var(--brand-green)]/20 text-[var(--green-rich)] transition hover:bg-[var(--brand-green)]/30"
+                                    onClick={() => incrementOption(group.id, option.id, group.maxSelections)}
+                                    type="button"
+                                  >
+                                    <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                      <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
                             );
                           })}
                         </div>
@@ -374,6 +412,17 @@ export function MenuItemDetailDialog({
                   </>
                 )}
               </div>
+
+              {(ingredientDelta > 0 || optionDelta > 0) && (
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.72rem] text-[var(--muted)]">
+                  {ingredientDelta > 0 && (
+                    <span>Ingredientes extras: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(ingredientDelta)}</strong></span>
+                  )}
+                  {optionDelta > 0 && (
+                    <span>Adicionais: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(optionDelta)}</strong></span>
+                  )}
+                </div>
+              )}
 
               <div className="flex-1" />
 

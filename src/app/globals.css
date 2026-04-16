@@ -329,7 +329,7 @@ select {
 .info-strip {
   position: relative;
   z-index: 10;
-  margin-top: -3.5rem;
+  margin-top: -2rem;
   padding-bottom: 1rem;
 }
 

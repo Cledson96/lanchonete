@@ -25,6 +25,7 @@ type IngredientForCard = {
   id: string;
   name: string;
   quantity: number;
+  price: number;
 };
 
 type MenuItemCardProps = {
@@ -81,17 +82,24 @@ export function MenuItemCard({
         }
       }
 
+      let ingredientDelta = 0;
       const ingredientNames: Record<string, string> = {};
       if (ingredientCustomizations && ingredients.length > 0) {
         for (const ing of ingredients) {
           ingredientNames[ing.id] = ing.name;
+          const currentQty = Math.max(0, Math.min(ingredientCustomizations[ing.id] ?? ing.quantity, ing.quantity));
+          const extraQty = currentQty - ing.quantity;
+
+          if (extraQty > 0) {
+            ingredientDelta += extraQty * ing.price;
+          }
         }
       }
 
       addItem({
         menuItemId: id,
         name,
-        price,
+        price: price + ingredientDelta,
         imageUrl,
         categoryName,
         notes,
