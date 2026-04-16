@@ -8,6 +8,10 @@ import { getPublicMenu } from "@/lib/services/menu-service";
 import { getWhatsAppClientManager } from "@/lib/whatsapp-client";
 import { digitsOnly, formatMoney, normalizePhone, normalizeZipCode, optionalTrimmed } from "@/lib/utils";
 
+const globalForWhatsApp = globalThis as typeof globalThis & {
+  whatsappListenersBound?: boolean;
+};
+
 type BotState =
   | "idle"
   | "menu_categoria"
@@ -62,6 +66,7 @@ const PAYMENT_OPTIONS = [
 ] as const;
 
 const WHATSAPP_REENGAGEMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
+const PUBLIC_SITE_REPLY_KEY = "public_site_reply";
 
 let listenersBound = false;
 
@@ -168,12 +173,41 @@ function getSelectionNumber(text: string) {
   return Number.parseInt(digits, 10);
 }
 
-function shouldSendPublicSiteReply(previousInboundAt: Date | null | undefined) {
-  if (!previousInboundAt) {
+function buildPublicSiteReplyBody() {
+  return [
+    "Oi! Agora os pedidos sao feitos pelo site.",
+    buildPublicCardapioUrl(),
+    "",
+    "Se quiser falar com um atendente, responda *atendente*.",
+  ].join("\n");
+}
+
+function shouldSendPublicSiteReply(lastStandardReplyAt: Date | null | undefined) {
+  if (!lastStandardReplyAt) {
     return true;
   }
 
-  return Date.now() - previousInboundAt.getTime() >= WHATSAPP_REENGAGEMENT_WINDOW_MS;
+  return Date.now() - lastStandardReplyAt.getTime() >= WHATSAPP_REENGAGEMENT_WINDOW_MS;
+}
+
+async function claimPublicSiteReply(conversationId: string) {
+  const now = new Date();
+  const cutoff = new Date(Date.now() - WHATSAPP_REENGAGEMENT_WINDOW_MS);
+
+  const result = await prisma.whatsAppConversation.updateMany({
+    where: {
+      id: conversationId,
+      OR: [{ lastStandardReplyAt: null }, { lastStandardReplyAt: { lt: cutoff } }],
+    },
+    data: {
+      lastStandardReplyAt: now,
+    },
+  });
+
+  return {
+    claimed: result.count > 0,
+    claimedAt: now,
+  };
 }
 
 function buildPublicCardapioUrl() {
@@ -431,6 +465,22 @@ async function sendConversationMessage(
   });
 
   return result;
+}
+
+async function sendStandardPublicSiteReply(conversation: { id: string; phone: string }) {
+  const claim = await claimPublicSiteReply(conversation.id);
+
+  if (!claim.claimed) {
+    return false;
+  }
+
+  const body = buildPublicSiteReplyBody();
+
+  await sendConversationMessage(conversation, body, {
+    kind: PUBLIC_SITE_REPLY_KEY,
+  });
+
+  return true;
 }
 
 function summarizeCartLines(lines: Array<{ name: string; quantity: number; subtotal: number; notes?: string }>) {
@@ -916,7 +966,6 @@ async function handleBotMessage(message: Message) {
 
   const normalized = normalizeInboundText(body);
   const context = parseBotContext(conversation.botContext);
-  const previousInboundAt = conversation.lastInboundAt ? new Date(conversation.lastInboundAt) : null;
   const now = new Date();
 
   await prisma.whatsAppConversation.update({
@@ -934,23 +983,19 @@ async function handleBotMessage(message: Message) {
     return;
   }
 
+  if (conversation.state === "human_handoff") {
+    return;
+  }
+
   if (!config.whatsappBotEnabled) {
     return;
   }
 
-  if (!shouldSendPublicSiteReply(previousInboundAt)) {
+  if (!shouldSendPublicSiteReply(conversation.lastStandardReplyAt ? new Date(conversation.lastStandardReplyAt) : null)) {
     return;
   }
 
-  await sendConversationMessage(
-    conversation,
-    [
-      "Oi! Agora os pedidos sao feitos pelo site.",
-      buildPublicCardapioUrl(),
-      "",
-      "Se quiser falar com um atendente, responda *atendente*.",
-    ].join("\n"),
-  );
+  await sendStandardPublicSiteReply(conversation);
 }
 
 async function updateMessageAck(message: Message, ack: MessageAck) {
@@ -974,7 +1019,7 @@ async function updateMessageAck(message: Message, ack: MessageAck) {
 }
 
 function ensureListenersBound() {
-  if (listenersBound) {
+  if (globalForWhatsApp.whatsappListenersBound || listenersBound) {
     return;
   }
 
@@ -982,6 +1027,7 @@ function ensureListenersBound() {
   manager.onInboundMessage((message) => void handleBotMessage(message));
   manager.onMessageAck((message, ack) => void updateMessageAck(message, ack));
   listenersBound = true;
+  globalForWhatsApp.whatsappListenersBound = true;
 }
 
 export async function getWhatsAppSession() {

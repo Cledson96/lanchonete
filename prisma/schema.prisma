@@ -445,6 +445,7 @@ model WhatsAppConversation {
   startedAt         DateTime            @default(now())
   lastInboundAt     DateTime?
   lastMessageAt     DateTime?
+  lastStandardReplyAt DateTime?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   customerProfile   CustomerProfile     @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)

@@ -45,6 +45,7 @@ export type WhatsAppSessionInfo = {
 
 const globalForWhatsApp = globalThis as typeof globalThis & {
   whatsappClientManager?: WhatsAppClientManager;
+  whatsappListenersBound?: boolean;
 };
 
 function sessionDir() {
