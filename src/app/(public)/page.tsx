@@ -100,55 +100,69 @@ export default async function HomePage() {
     <>
       <main className="min-h-screen">
         {/* ─── Hero ─── */}
-<section className="relative overflow-hidden bg-[var(--brand-orange)] flex flex-col lg:flex-row min-h-[340px] lg:min-h-[420px]">
-          {/* Text Content Block */}
-          <div className="relative z-10 flex-1 flex items-center justify-center lg:justify-end px-6 pb-10 pt-10 lg:px-12 lg:py-14">
-            <div className="w-full max-w-xl xl:mr-10">
-              <div className="hero-reveal inline-block mb-5">
-                <BrandLogo theme="menu-style" />
+        <section className="hero-v2">
+          <div className="shell relative z-[1] grid items-center gap-4 py-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8 lg:py-8">
+            {/* Coluna de texto */}
+            <div className="relative">
+              <div className="hero-reveal mb-3 flex items-center gap-3">
+                <span className="hero-status">
+                  <span className="hero-status__dot" />
+                  Aberto agora
+                </span>
+                <span className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/70">
+                  Curitiba · CIC
+                </span>
               </div>
 
-              <h1 className="hero-reveal text-[2rem] font-black leading-[1.05] tracking-tight text-white sm:text-[2.8rem] lg:text-[3.5rem] drop-shadow-md">
-                <span 
-                  className="block text-[var(--brand-green)]" 
-                  style={{ WebkitTextStroke: '1.5px white', textShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
-                >
-                  LANCHES
+              <h1 className="hero-reveal text-[1.55rem] font-black leading-[1.05] tracking-tight text-white sm:text-[1.9rem] lg:text-[2.3rem]">
+                <span className="text-[var(--brand-green)]" style={{ WebkitTextStroke: "1.5px #fff" }}>
+                  Lanches{" "}
                 </span>
-                ARTESANAIS
+                <span className="relative inline-block">
+                  artesanais
+                  <svg
+                    aria-hidden="true"
+                    className="hero-underline"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    viewBox="0 0 140 12"
+                  >
+                    <path
+                      d="M2 8 C 30 2, 70 2, 138 8"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeWidth={3}
+                    />
+                  </svg>
+                </span>
               </h1>
 
-              <p className="hero-reveal mt-4 max-w-md text-[0.95rem] font-medium leading-relaxed text-white/95">
-                Pão selado na manteiga, maionese caseira e o verdadeiro hambúrguer artesanal. {brandContent.subheadline}
+              <p className="hero-reveal mt-2 max-w-md text-[0.88rem] leading-snug text-white/80">
+                Pão selado na manteiga, maionese caseira e entrega quentinha até você.
               </p>
 
-              <div className="hero-reveal mt-6">
-                <a className="cta-btn shadow-[0_8px_24px_rgba(108,158,49,0.3)] hover:scale-[1.02] active:scale-[0.98] !bg-white !text-[var(--brand-orange-dark)] hover:!bg-[var(--brand-green-glow)] transition-all duration-300" href="#cardapio">
+              <div className="hero-reveal mt-4">
+                <a className="cta-btn cta-btn--primary" href="#cardapio">
                   Ver cardápio
                   <ChevronDownIcon />
                 </a>
               </div>
             </div>
-            
-            {/* Playful background shape */}
-            <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none"></div>
-          </div>
 
-          {/* Image Block */}
-          <div className="relative h-[240px] w-full lg:h-auto lg:flex-1 lg:max-w-[50%]">
-             <Image
-               alt="Lanches artesanais"
-               className="object-cover object-center lg:object-[left_center]"
-               fill
-               priority
-               quality={90}
-               sizes="(max-width: 1024px) 100vw, 50vw"
-               src="/landing/hero-burger.jpg"
-             />
-            {/* Gradient to blend with orange on mobile */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-orange)] to-transparent opacity-95 lg:hidden pointer-events-none"></div>
-            {/* Subtle shadow on desktop between blocks */}
-            <div className="hidden lg:block absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[var(--brand-orange)] to-transparent pointer-events-none z-10"></div>
+            {/* Coluna da imagem — só aparece em desktop */}
+            <div className="hero-reveal relative hidden items-center justify-center lg:flex">
+              <div className="hero-plate" style={{ maxWidth: 220 }}>
+                <Image
+                  alt="Lanches artesanais da casa"
+                  className="object-cover"
+                  fill
+                  priority
+                  quality={92}
+                  sizes="280px"
+                  src="/landing/hero-burger.jpg"
+                />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -160,7 +174,9 @@ export default async function HomePage() {
                 <div className="info-card__icon">
                   <MapPinIcon />
                 </div>
-                <p className="eyebrow">Localização</p>
+                <p className="eyebrow" style={{ color: "var(--green-deep)" }}>
+                  Localização
+                </p>
                 <p className="mt-1.5 text-[0.92rem] font-semibold leading-snug text-[var(--foreground)]">
                   {brandContent.location}
                 </p>
@@ -170,7 +186,9 @@ export default async function HomePage() {
                 <div className="info-card__icon">
                   <ClockIcon />
                 </div>
-                <p className="eyebrow">Horário</p>
+                <p className="eyebrow" style={{ color: "var(--green-deep)" }}>
+                  Horário
+                </p>
                 <p className="mt-1.5 text-[0.92rem] font-semibold leading-snug text-[var(--foreground)]">
                   {brandContent.hours}
                 </p>
@@ -180,18 +198,12 @@ export default async function HomePage() {
                 <div className="info-card__icon">
                   <PhoneIcon />
                 </div>
-                <p className="eyebrow">Atendimento</p>
-                <a
-                  className="mt-1.5 inline-flex items-center gap-1.5 text-[0.92rem] font-semibold text-[var(--green-rich)] transition-colors hover:text-[var(--green-deep)]"
-                  href={brandContent.whatsappUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Fazer pedido
-                  <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
+                <p className="eyebrow" style={{ color: "var(--green-deep)" }}>
+                  Entrega
+                </p>
+                <p className="mt-1.5 text-[0.92rem] font-semibold leading-snug text-[var(--foreground)]">
+                  Entrega rápida e quentinha até a sua porta
+                </p>
               </div>
             </div>
           </div>
@@ -201,24 +213,36 @@ export default async function HomePage() {
         <MenuBrowser categories={browserCategories} />
 
         {/* ─── Footer ─── */}
-        <footer className="footer-site mt-6 py-8">
+        <footer className="footer-site mt-6 py-10">
           <div className="shell">
-            <div className="flex flex-col items-center gap-8 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
-              <div className="max-w-xs">
+            <div className="flex flex-col items-center gap-10 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
+              <div className="max-w-sm">
                 <BrandLogo compact theme="dark" />
-                <p className="mt-3 text-sm leading-6 text-[#9a846e]">
+                <p className="mt-4 text-sm leading-6 text-[#b39a7c]">
                   {brandContent.subheadline}
                 </p>
+                <span className="footer-chip mt-4">● Lanchonete de bairro</span>
               </div>
 
-              <div className="flex flex-col items-center gap-3 sm:items-end">
-                <p className="text-sm text-[#7a6b5a]">{brandContent.location}</p>
-                <p className="text-sm text-[#7a6b5a]">{brandContent.hours}</p>
+              <div className="flex flex-col items-center gap-2.5 text-sm text-[#b39a7c] sm:items-end">
+                <p className="max-w-xs">{brandContent.location}</p>
+                <p>{brandContent.hours}</p>
+                <a
+                  className="mt-2 inline-flex items-center gap-1.5 text-[var(--brand-orange-soft)] hover:text-white transition-colors"
+                  href={brandContent.whatsappUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Fale no WhatsApp
+                  <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
               </div>
             </div>
 
-            <div className="mt-8 border-t border-[#2e2116] pt-6 text-center text-xs text-[#5c4d3e]">
-              © {new Date().getFullYear()} {brandContent.name}. Todos os direitos reservados.
+            <div className="mt-10 border-t border-[#3a281a] pt-6 text-center text-xs tracking-wide text-[#6e5b46]">
+              © {new Date().getFullYear()} {brandContent.name}. Feito com carinho em Curitiba.
             </div>
           </div>
         </footer>
