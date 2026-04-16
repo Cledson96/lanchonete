@@ -1,7 +1,10 @@
 import { requireCustomer } from "@/lib/auth/customer";
+import { config } from "@/lib/config";
 import { handleRouteError, ok } from "@/lib/http";
 import { readRequestBody } from "@/lib/request";
+import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { createOrder } from "@/lib/services/order-service";
+import { buildOrderConfirmationMessage } from "@/lib/services/order-confirmation-message";
 import { createOrderSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
@@ -30,6 +33,20 @@ export async function POST(request: Request) {
       ...input,
       customerProfileId: session.customerProfileId,
     });
+
+    const confirmationMessage = buildOrderConfirmationMessage(order, {
+      pixKey: config.storePixKey,
+      paymentMethodFallback: input.paymentMethod,
+    });
+
+    try {
+      await sendWhatsAppTextMessage({
+        to: session.phone,
+        body: confirmationMessage,
+      });
+    } catch (error) {
+      console.error("[orders:web:whatsapp-confirmation]", error);
+    }
 
     return ok({ order }, { status: 201 });
   } catch (error) {

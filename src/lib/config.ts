@@ -13,6 +13,7 @@ export const config = {
   whatsappAllowedCountryCode:
     process.env.WHATSAPP_ALLOWED_COUNTRY_CODE || "55",
   whatsappBotEnabled: process.env.WHATSAPP_BOT_ENABLED !== "false",
+  storePixKey: process.env.STORE_PIX_KEY || "",
 };
 
 export const cookieNames = {
