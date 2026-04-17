@@ -195,65 +195,114 @@ export default async function DashboardHomePage() {
       </article>
 
       {/* ─── Breakdown por canal e tipo ─── */}
-      <div className="grid gap-6 xl:grid-cols-2">
-        <article className="panel rounded-2xl bg-[var(--surface)] p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="eyebrow text-[var(--muted)]">Hoje por canal</p>
-              <h2 className="mt-1 text-base font-semibold tracking-tight">Origem dos pedidos</h2>
-            </div>
-            <span className="rounded-full bg-[var(--background)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-              hoje
-            </span>
-          </div>
-          <div className="mt-4 space-y-2">
-            {metrics.channelBreakdown.length ? (
-              metrics.channelBreakdown.map((item) => (
-                <div key={item.channel} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-3">
-                  <p className="text-sm font-medium capitalize">{item.channel}</p>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">{item._count._all} pedidos</p>
-                    <p className="text-xs text-[var(--muted)]">{formatMoney(item._sum.totalAmount)}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-4 text-sm text-[var(--muted)]">
-                Nenhum pedido registrado hoje.
-              </div>
-            )}
-          </div>
-        </article>
+      {(() => {
+        const channelTotal = metrics.channelBreakdown.reduce((s, i) => s + i._count._all, 0);
+        const typeTotal = metrics.typeBreakdown.reduce((s, i) => s + i._count._all, 0);
 
-        <article className="panel rounded-2xl bg-[var(--surface)] p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="eyebrow text-[var(--muted)]">Hoje por tipo</p>
-              <h2 className="mt-1 text-base font-semibold tracking-tight">Entrega × retirada</h2>
-            </div>
-            <span className="rounded-full bg-[var(--background)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-              hoje
-            </span>
-          </div>
-          <div className="mt-4 space-y-2">
-            {metrics.typeBreakdown.length ? (
-              metrics.typeBreakdown.map((item) => (
-                <div key={item.type} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-3">
-                  <p className="text-sm font-medium capitalize">{formatLabel(item.type)}</p>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">{item._count._all} pedidos</p>
-                    <p className="text-xs text-[var(--muted)]">{formatMoney(item._sum.totalAmount)}</p>
-                  </div>
+        const channelColors = [
+          { bar: "bg-[var(--brand-orange)]", text: "text-[var(--brand-orange-dark)]" },
+          { bar: "bg-[var(--brand-green)]", text: "text-[var(--brand-green-dark)]" },
+          { bar: "bg-sky-400", text: "text-sky-700" },
+          { bar: "bg-violet-400", text: "text-violet-700" },
+        ];
+        const typeColors = [
+          { bar: "bg-[var(--brand-green)]", text: "text-[var(--brand-green-dark)]" },
+          { bar: "bg-sky-400", text: "text-sky-700" },
+          { bar: "bg-amber-400", text: "text-amber-700" },
+        ];
+
+        return (
+          <div className="grid gap-6 xl:grid-cols-2">
+            {/* Canal */}
+            <article className="panel rounded-2xl bg-[var(--surface)] p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="eyebrow text-[var(--muted)]">Hoje por canal</p>
+                  <h2 className="mt-1 text-base font-semibold tracking-tight">Origem dos pedidos</h2>
                 </div>
-              ))
-            ) : (
-              <div className="rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-4 text-sm text-[var(--muted)]">
-                Nenhum pedido registrado hoje.
+                <span className="rounded-full bg-[var(--background)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  {channelTotal} total
+                </span>
               </div>
-            )}
+
+              <div className="mt-4 space-y-3">
+                {metrics.channelBreakdown.length ? (
+                  metrics.channelBreakdown.map((item, idx) => {
+                    const pct = channelTotal > 0 ? Math.round((item._count._all / channelTotal) * 100) : 0;
+                    const color = channelColors[idx % channelColors.length];
+                    return (
+                      <div key={item.channel}>
+                        <div className="mb-1.5 flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium capitalize">{item.channel}</p>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xs font-semibold ${color.text}`}>{pct}%</span>
+                            <span className="text-sm font-semibold">{item._count._all} pedidos</span>
+                            <span className="w-16 text-right text-xs text-[var(--muted)]">{formatMoney(item._sum.totalAmount)}</span>
+                          </div>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--background-strong)]">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${color.bar}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-4 text-sm text-[var(--muted)]">
+                    Nenhum pedido registrado hoje.
+                  </p>
+                )}
+              </div>
+            </article>
+
+            {/* Tipo */}
+            <article className="panel rounded-2xl bg-[var(--surface)] p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="eyebrow text-[var(--muted)]">Hoje por tipo</p>
+                  <h2 className="mt-1 text-base font-semibold tracking-tight">Entrega × retirada</h2>
+                </div>
+                <span className="rounded-full bg-[var(--background)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                  {typeTotal} total
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {metrics.typeBreakdown.length ? (
+                  metrics.typeBreakdown.map((item, idx) => {
+                    const pct = typeTotal > 0 ? Math.round((item._count._all / typeTotal) * 100) : 0;
+                    const color = typeColors[idx % typeColors.length];
+                    return (
+                      <div key={item.type}>
+                        <div className="mb-1.5 flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium capitalize">{formatLabel(item.type)}</p>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xs font-semibold ${color.text}`}>{pct}%</span>
+                            <span className="text-sm font-semibold">{item._count._all} pedidos</span>
+                            <span className="w-16 text-right text-xs text-[var(--muted)]">{formatMoney(item._sum.totalAmount)}</span>
+                          </div>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--background-strong)]">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${color.bar}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-4 text-sm text-[var(--muted)]">
+                    Nenhum pedido registrado hoje.
+                  </p>
+                )}
+              </div>
+            </article>
           </div>
-        </article>
-      </div>
+        );
+      })()}
     </main>
   );
 }
