@@ -2,6 +2,7 @@ import { OrderStatus } from "@prisma/client";
 import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
+import { syncLegacyCommandasToOrders } from "@/lib/services/comanda-service";
 import { normalizePhone } from "@/lib/utils";
 
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -97,6 +98,8 @@ export async function listOrders(filters?: {
   type?: "delivery" | "retirada" | "local";
   view?: DashboardOrderView;
 }) {
+  await syncLegacyCommandasToOrders();
+
   const statusFilter =
     filters?.status ??
     (filters?.view ? { in: dashboardOrderViewStatuses[filters.view] } : undefined);
@@ -113,10 +116,29 @@ export async function listOrders(filters?: {
         : [{ createdAt: "asc" }],
     include: {
       customerProfile: true,
+      comanda: {
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          notes: true,
+          totalAmount: true,
+          entries: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
       acceptedBy: true,
       items: {
         include: {
           menuItem: true,
+          selectedOptions: {
+            include: {
+              optionItem: true,
+            },
+          },
           ingredientCustomizations: {
             include: {
               ingredient: true,
@@ -136,6 +158,20 @@ export async function getOrderById(id: string) {
     where: { id },
     include: {
       customerProfile: true,
+      comanda: {
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          notes: true,
+          totalAmount: true,
+          entries: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
       deliveryAddress: true,
       deliveryFeeRule: true,
       acceptedBy: true,
@@ -165,6 +201,8 @@ export async function getOrderById(id: string) {
 }
 
 export async function getDashboardMetrics() {
+  await syncLegacyCommandasToOrders();
+
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
@@ -174,76 +212,88 @@ export async function getDashboardMetrics() {
     newOrders,
     preparingOrders,
     dispatchingOrders,
-    openCommandas,
+    localOrders,
+    legacyCommandas,
     completedToday,
     cancelledToday,
     revenueToday,
     channelBreakdown,
     typeBreakdown,
-  ] =
-    await Promise.all([
-      prisma.order.count({ where: { status: "novo" } }),
-      prisma.order.count({ where: { status: "em_preparo" } }),
-      prisma.order.count({ where: { status: "saiu_para_entrega" } }),
-      prisma.comanda.count({ where: { status: { notIn: ["fechado", "cancelado"] } } }),
-      prisma.order.count({
-        where: {
-          status: { in: completedStatuses },
-          OR: [
-            { deliveredAt: { gte: startOfDay } },
-            { updatedAt: { gte: startOfDay } },
-          ],
-        },
-      }),
-      prisma.order.count({
-        where: {
-          status: "cancelado",
-          cancelledAt: { gte: startOfDay },
-        },
-      }),
-      prisma.order.aggregate({
-        _sum: {
-          totalAmount: true,
-        },
-        where: {
-          status: { in: completedStatuses },
-          OR: [
-            { deliveredAt: { gte: startOfDay } },
-            { updatedAt: { gte: startOfDay } },
-          ],
-        },
-      }),
-      prisma.order.groupBy({
-        by: ["channel"],
-        where: {
-          createdAt: { gte: startOfDay },
-        },
-        _count: {
-          _all: true,
-        },
-        _sum: {
-          totalAmount: true,
-        },
-      }),
-      prisma.order.groupBy({
-        by: ["type"],
-        where: {
-          createdAt: { gte: startOfDay },
-        },
-        _count: {
-          _all: true,
-        },
-        _sum: {
-          totalAmount: true,
-        },
-      }),
-    ]);
+  ] = await Promise.all([
+    prisma.order.count({ where: { status: "novo" } }),
+    prisma.order.count({ where: { status: "em_preparo" } }),
+    prisma.order.count({ where: { status: "saiu_para_entrega" } }),
+    prisma.order.count({
+      where: {
+        channel: "local",
+        type: "local",
+        status: { notIn: ["fechado", "cancelado"] },
+      },
+    }),
+    prisma.comanda.count({
+      where: {
+        orderId: null,
+        status: { notIn: ["fechado", "cancelado"] },
+      },
+    }),
+    prisma.order.count({
+      where: {
+        status: { in: completedStatuses },
+        OR: [
+          { deliveredAt: { gte: startOfDay } },
+          { updatedAt: { gte: startOfDay } },
+        ],
+      },
+    }),
+    prisma.order.count({
+      where: {
+        status: "cancelado",
+        cancelledAt: { gte: startOfDay },
+      },
+    }),
+    prisma.order.aggregate({
+      _sum: {
+        totalAmount: true,
+      },
+      where: {
+        status: { in: completedStatuses },
+        OR: [
+          { deliveredAt: { gte: startOfDay } },
+          { updatedAt: { gte: startOfDay } },
+        ],
+      },
+    }),
+    prisma.order.groupBy({
+      by: ["channel"],
+      where: {
+        createdAt: { gte: startOfDay },
+      },
+      _count: {
+        _all: true,
+      },
+      _sum: {
+        totalAmount: true,
+      },
+    }),
+    prisma.order.groupBy({
+      by: ["type"],
+      where: {
+        createdAt: { gte: startOfDay },
+      },
+      _count: {
+        _all: true,
+      },
+      _sum: {
+        totalAmount: true,
+      },
+    }),
+  ]);
 
   return {
     newOrders,
     preparingOrders,
     dispatchingOrders,
-    openCommandas,
+    openCommandas: localOrders + legacyCommandas,
     completedToday,
     cancelledToday,
     revenueToday: revenueToday._sum.totalAmount,

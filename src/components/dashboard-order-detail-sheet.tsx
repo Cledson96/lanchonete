@@ -43,6 +43,14 @@ export type DashboardOrderDetail = {
   dispatchedAt: string | null;
   deliveredAt: string | null;
   cancelledAt: string | null;
+  comanda?: {
+    id: string;
+    code: string;
+    name: string | null;
+    notes: string | null;
+    totalAmount: number | string;
+    entries: Array<{ id: string }>;
+  } | null;
   deliveryAddress: {
     street: string;
     number: string;
@@ -352,6 +360,37 @@ export function DashboardOrderDetailSheet({
                   </p>
                 ) : null}
               </section>
+
+              {order.comanda ? (
+                <section className="rounded-xl border border-violet-200 bg-violet-50/60 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-violet-700">Comanda vinculada</p>
+                      <p className="mt-1 text-base font-semibold text-violet-950">
+                        {order.comanda.name?.trim() || `Comanda ${order.comanda.code.slice(0, 8)}`}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[0.7rem] font-semibold text-violet-700">
+                      {order.comanda.entries.length} lançamento(s)
+                    </span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-violet-700/80">Código</p>
+                      <p className="mt-0.5 font-semibold text-violet-950">{order.comanda.code.slice(0, 8)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-violet-700/80">Total da comanda</p>
+                      <p className="mt-0.5 font-semibold text-violet-950">{formatMoney(toNumber(order.comanda.totalAmount))}</p>
+                    </div>
+                  </div>
+                  {order.comanda.notes ? (
+                    <p className="mt-3 text-sm leading-5 text-violet-900">
+                      <span className="font-semibold">Obs. da comanda:</span> {order.comanda.notes}
+                    </p>
+                  ) : null}
+                </section>
+              ) : null}
 
               {/* Resumo financeiro */}
               <section className="rounded-xl border border-[var(--line)] bg-white p-4">

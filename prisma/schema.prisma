@@ -338,6 +338,7 @@ model Order {
   cancelledAt          DateTime?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+  comanda              Comanda?
   customerProfile      CustomerProfile?      @relation(fields: [customerProfileId], references: [id], onDelete: SetNull)
   deliveryAddress      Address?              @relation(fields: [addressId], references: [id], onDelete: SetNull)
   deliveryFeeRule      DeliveryFeeRule?      @relation(fields: [deliveryFeeRuleId], references: [id], onDelete: SetNull)
@@ -376,6 +377,7 @@ model OrderItemOption {
 
 model Comanda {
   id                String           @id @default(cuid())
+  orderId           String?          @unique
   customerProfileId String?
   openedById        String?
   code              String           @unique
@@ -393,6 +395,7 @@ model Comanda {
   updatedAt         DateTime         @updatedAt
   customerProfile   CustomerProfile? @relation(fields: [customerProfileId], references: [id], onDelete: SetNull)
   openedBy          User?            @relation("OpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
+  order             Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
   entries           ComandaEntry[]
 }
 

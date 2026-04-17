@@ -80,18 +80,44 @@ export async function createComanda(input: {
   const code = await generateUniqueComandaCode();
   const qrCodeSlug = await generateUniqueQrSlug(input.name);
 
-  return prisma.comanda.create({
-    data: {
-      code,
-      qrCodeSlug,
-      name: input.name.trim(),
-      notes: optionalNullable(input.notes),
-      openedById: input.openedById,
-      status: "novo",
-      subtotalAmount: decimal(0),
-      totalAmount: decimal(0),
-    },
-    include: comandaInclude,
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.create({
+      data: {
+        code,
+        channel: "local",
+        type: "local",
+        status: "novo",
+        customerName: input.name.trim(),
+        customerPhone: null,
+        notes: optionalNullable(input.notes),
+        subtotalAmount: decimal(0),
+        deliveryFeeAmount: decimal(0),
+        totalAmount: decimal(0),
+        paymentMethod: null,
+        paymentStatus: "pendente",
+        statusEvents: {
+          create: {
+            toStatus: "novo",
+            note: "Comanda criada no balcão.",
+          },
+        },
+      },
+    });
+
+    return tx.comanda.create({
+      data: {
+        code,
+        qrCodeSlug,
+        orderId: order.id,
+        name: input.name.trim(),
+        notes: optionalNullable(input.notes),
+        openedById: input.openedById,
+        status: "novo",
+        subtotalAmount: decimal(0),
+        totalAmount: decimal(0),
+      },
+      include: comandaInclude,
+    });
   });
 }
 
@@ -122,6 +148,18 @@ export async function addItemsToComanda(
 ) {
   const comanda = await prisma.comanda.findUnique({
     where: { id: comandaId },
+    include: {
+      order: {
+        include: {
+          items: {
+            include: {
+              selectedOptions: true,
+              ingredientCustomizations: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!comanda) {
@@ -262,7 +300,7 @@ export async function addItemsToComanda(
   const newTotal = newSubtotal - Number(comanda.discountAmount);
 
   return prisma.$transaction(async (tx) => {
-    await Promise.all(
+    const createdEntries = await Promise.all(
       normalizedItems.map(({ item, menuItem, selectedOptions, ingredientCustomizations, unitPrice, subtotalAmount }) =>
         tx.comandaEntry.create({
           data: {
@@ -291,6 +329,44 @@ export async function addItemsToComanda(
       ),
     );
 
+    if (comanda.orderId) {
+      await Promise.all(
+        normalizedItems.map(({ item, menuItem, selectedOptions, ingredientCustomizations, unitPrice, subtotalAmount }) =>
+          tx.orderItem.create({
+            data: {
+              orderId: comanda.orderId as string,
+              menuItemId: menuItem.id,
+              quantity: item.quantity,
+              unitPrice: decimal(unitPrice),
+              subtotalAmount: decimal(subtotalAmount),
+              notes: optionalNullable(item.notes),
+              selectedOptions: {
+                create: selectedOptions.map((option) => ({
+                  optionItemId: option.id,
+                  quantity: option.quantity,
+                  unitPriceDelta: option.priceDelta,
+                })),
+              },
+              ingredientCustomizations: {
+                create: ingredientCustomizations.map((ing) => ({
+                  ingredientId: ing.ingredientId,
+                  quantity: ing.quantity,
+                })),
+              },
+            },
+          }),
+        ),
+      );
+
+      await tx.order.update({
+        where: { id: comanda.orderId },
+        data: {
+          subtotalAmount: decimal(newSubtotal),
+          totalAmount: decimal(newTotal),
+        },
+      });
+    }
+
     return tx.comanda.update({
       where: { id: comandaId },
       data: {
@@ -306,14 +382,126 @@ export async function closeComanda(
   comandaId: string,
   paymentMethod: "dinheiro" | "cartao_credito" | "cartao_debito" | "pix" | "outro",
 ) {
-  return prisma.comanda.update({
+  const comanda = await prisma.comanda.findUnique({
     where: { id: comandaId },
-    data: {
-      status: "fechado",
-      paymentMethod,
-      paymentStatus: "pago",
-      closedAt: new Date(),
-    },
-    include: comandaInclude,
   });
+
+  if (!comanda) {
+    throw new ApiError(404, "Comanda nao encontrada.");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    if (comanda.orderId) {
+      await tx.order.update({
+        where: { id: comanda.orderId },
+        data: {
+          paymentMethod,
+          paymentStatus: "pago",
+        },
+      });
+    }
+
+    return tx.comanda.update({
+      where: { id: comandaId },
+      data: {
+        status: "fechado",
+        paymentMethod,
+        paymentStatus: "pago",
+        closedAt: new Date(),
+      },
+      include: comandaInclude,
+    });
+  });
+}
+
+export async function syncLegacyCommandasToOrders() {
+  const legacyCommandas = await prisma.comanda.findMany({
+    where: {
+      orderId: null,
+    },
+    include: {
+      entries: {
+        include: {
+          selectedOptions: {
+            include: {
+              optionItem: true,
+            },
+          },
+          ingredientCustomizations: {
+            include: {
+              ingredient: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  for (const comanda of legacyCommandas) {
+    await prisma.$transaction(async (tx) => {
+      const existingOrder = await tx.order.findFirst({
+        where: {
+          code: comanda.code,
+        },
+        select: { id: true },
+      });
+
+      if (existingOrder) {
+        await tx.comanda.update({
+          where: { id: comanda.id },
+          data: { orderId: existingOrder.id },
+        });
+        return;
+      }
+
+      const order = await tx.order.create({
+        data: {
+          code: comanda.code,
+          channel: "local",
+          type: "local",
+          status: comanda.status,
+          customerName: comanda.name,
+          customerPhone: null,
+          notes: comanda.notes,
+          subtotalAmount: comanda.subtotalAmount,
+          deliveryFeeAmount: decimal(0),
+          discountAmount: comanda.discountAmount,
+          totalAmount: comanda.totalAmount,
+          paymentMethod: comanda.paymentMethod,
+          paymentStatus: comanda.paymentStatus,
+        },
+      });
+
+      for (const entry of comanda.entries) {
+        await tx.orderItem.create({
+          data: {
+            orderId: order.id,
+            menuItemId: entry.menuItemId,
+            quantity: entry.quantity,
+            unitPrice: entry.unitPrice,
+            subtotalAmount: entry.subtotalAmount,
+            notes: entry.notes,
+            selectedOptions: {
+              create: entry.selectedOptions.map((option) => ({
+                optionItemId: option.optionItemId,
+                quantity: option.quantity,
+                unitPriceDelta: option.unitPriceDelta,
+              })),
+            },
+            ingredientCustomizations: {
+              create: entry.ingredientCustomizations.map((ing) => ({
+                ingredientId: ing.ingredientId,
+                quantity: ing.quantity,
+              })),
+            },
+          },
+        });
+      }
+
+      await tx.comanda.update({
+        where: { id: comanda.id },
+        data: { orderId: order.id },
+      });
+    });
+  }
 }

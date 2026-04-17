@@ -35,11 +35,23 @@ type OrderSummary = {
   totalAmount: number | string;
   createdAt: string;
   updatedAt: string;
+  comanda?: {
+    id: string;
+    code: string;
+    name: string | null;
+    notes: string | null;
+    totalAmount: number | string;
+    entries: Array<{ id: string }>;
+  } | null;
   items: Array<{
     id: string;
     quantity: number;
     notes: string | null;
     menuItem: { name: string };
+    selectedOptions?: Array<{
+      quantity: number;
+      optionItem: { name: string };
+    }>;
     ingredientCustomizations?: Array<{
       quantity: number;
       ingredient: { name: string };
@@ -59,6 +71,24 @@ type ColumnConfig = {
   accent: string;
   headerBg: string;
   countBg: string;
+};
+
+type KitchenItemCardData = {
+  id: string;
+  orderId: string;
+  orderCode: string;
+  orderStatus: OrderStatus;
+  channel: OrderChannel;
+  type: OrderSummary["type"];
+  customerName: string | null;
+  createdAt: string;
+  comandaLabel: string | null;
+  orderNotes: string | null;
+  quantity: number;
+  name: string;
+  itemNotes: string | null;
+  optionLines: string[];
+  ingredientLines: string[];
 };
 
 const columnsByView: Record<DashboardOrderView, ColumnConfig[]> = {
@@ -144,6 +174,45 @@ function summarizeIngredientChanges(
     .map((ing) => (ing.quantity === 0 ? `sem ${ing.ingredient.name}` : `${ing.quantity}x ${ing.ingredient.name}`));
 }
 
+function summarizeSelectedOptions(
+  selectedOptions?: OrderSummary["items"][number]["selectedOptions"],
+) {
+  if (!selectedOptions?.length) return [] as string[];
+
+  return selectedOptions.map((option) =>
+    option.quantity > 1 ? `${option.quantity}x ${option.optionItem.name}` : option.optionItem.name,
+  );
+}
+
+function getComandaLabel(order: Pick<OrderSummary, "comanda">) {
+  if (!order.comanda) return null;
+  return order.comanda.name?.trim() || order.comanda.code.slice(0, 8);
+}
+
+function buildKitchenItems(orders: OrderSummary[]) {
+  return orders
+    .filter((order) => order.status === "novo" || order.status === "em_preparo")
+    .flatMap((order) =>
+      order.items.map((item) => ({
+        id: `${order.id}:${item.id}`,
+        orderId: order.id,
+        orderCode: order.code,
+        orderStatus: order.status,
+        channel: order.channel,
+        type: order.type,
+        customerName: order.customerName,
+        createdAt: order.createdAt,
+        comandaLabel: getComandaLabel(order),
+        orderNotes: order.notes,
+        quantity: item.quantity,
+        name: item.menuItem.name,
+        itemNotes: item.notes,
+        optionLines: summarizeSelectedOptions(item.selectedOptions),
+        ingredientLines: summarizeIngredientChanges(item.ingredientCustomizations),
+      })),
+    );
+}
+
 async function parseJson<T>(response: Response): Promise<T> {
   const payload = (await response.json()) as T & { error?: { message?: string } };
   if (!response.ok) {
@@ -172,14 +241,9 @@ function OrderCard({
   const channel = channelMeta[order.channel];
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const hasNotes = Boolean(order.notes) || order.items.some((item) => Boolean(item.notes));
-  const itemsPreview = order.items
-    .slice(0, 2)
-    .map((item) => `${item.quantity}× ${item.menuItem.name}`)
-    .join(" • ");
-  const ingredientPreview = order.items
-    .flatMap((item) => summarizeIngredientChanges(item.ingredientCustomizations))
-    .slice(0, 3)
-    .join(" • ");
+  const visibleItems = order.items.slice(0, 3);
+  const hiddenItemsCount = order.items.length - visibleItems.length;
+  const comandaLabel = order.comanda?.name?.trim() || (order.comanda ? order.comanda.code.slice(0, 8) : null);
 
   return (
     <div
@@ -230,20 +294,57 @@ function OrderCard({
               obs
             </span>
           ) : null}
+          {order.comanda ? (
+            <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-violet-700">
+              Comanda {comandaLabel}
+            </span>
+          ) : null}
         </div>
 
         {/* Itens */}
-        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[var(--muted)]">
-          {itemsPreview || "Sem itens"}
-          {order.items.length > 2 ? ` • +${order.items.length - 2}` : ""}
-        </p>
-        {ingredientPreview ? (
-          <p className="mt-1 line-clamp-1 text-[0.7rem] text-[var(--muted)]">{ingredientPreview}</p>
-        ) : null}
+        <div className="mt-2 space-y-2">
+          {visibleItems.length ? (
+            visibleItems.map((item) => {
+              const optionPreview = summarizeSelectedOptions(item.selectedOptions).slice(0, 2).join(" • ");
+              const ingredientPreview = summarizeIngredientChanges(item.ingredientCustomizations).slice(0, 2).join(" • ");
+
+              return (
+                <div key={item.id} className="rounded-lg border border-[var(--line)] bg-[var(--background)] px-2.5 py-2">
+                  <div className="flex items-start gap-2">
+                    <span className="inline-flex min-w-8 shrink-0 items-center justify-center rounded-md bg-[var(--brand-orange)]/10 px-1.5 py-1 text-[0.65rem] font-bold text-[var(--brand-orange-dark)]">
+                      {item.quantity}x
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold leading-4 text-[var(--foreground)]">{item.menuItem.name}</p>
+                      {optionPreview ? (
+                        <p className="mt-1 line-clamp-2 text-[0.7rem] leading-4 text-[var(--brand-green-dark)]">+ {optionPreview}</p>
+                      ) : null}
+                      {ingredientPreview ? (
+                        <p className="mt-1 line-clamp-2 text-[0.7rem] leading-4 text-[var(--muted)]">{ingredientPreview}</p>
+                      ) : null}
+                      {item.notes ? (
+                        <p className="mt-1 line-clamp-2 text-[0.7rem] leading-4 text-amber-700">Obs: {item.notes}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-xs leading-relaxed text-[var(--muted)]">Sem itens</p>
+          )}
+
+          {hiddenItemsCount > 0 ? (
+            <p className="text-[0.7rem] font-medium text-[var(--muted)]">+{hiddenItemsCount} item(ns) neste pedido</p>
+          ) : null}
+        </div>
 
         {/* Rodapé */}
         <div className="mt-2 flex items-center justify-between border-t border-[var(--line)] pt-2">
-          <span className="text-[0.7rem] text-[var(--muted)]">{itemCount} {itemCount === 1 ? "item" : "itens"}</span>
+          <div className="text-[0.7rem] text-[var(--muted)]">
+            <p>{itemCount} {itemCount === 1 ? "item" : "itens"}</p>
+            {order.comanda ? <p>{order.comanda.entries.length} lançamento(s)</p> : null}
+          </div>
           <span className="text-sm font-bold text-[var(--foreground)]">
             {formatMoney(toNumber(order.totalAmount))}
           </span>
@@ -296,6 +397,103 @@ function KanbanColumn({
         ) : (
           <div className="rounded-xl border border-dashed border-[var(--line)] px-3 py-6 text-center text-xs text-[var(--muted)]">
             {isOver ? "Solte aqui" : "Vazio"}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function KitchenItemCard({
+  item,
+  onOpen,
+}: {
+  item: KitchenItemCardData;
+  onOpen: (orderId: string) => void;
+}) {
+  const channel = channelMeta[item.channel];
+
+  return (
+    <button
+      className="w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"
+      onClick={() => onOpen(item.orderId)}
+      type="button"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[var(--muted)]">
+              {item.orderCode.slice(0, 8)}
+            </span>
+            <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.65rem] font-semibold ${channel.badge}`}>
+              {channel.icon}
+              {channel.label}
+            </span>
+            {item.comandaLabel ? (
+              <span className="inline-flex rounded-md bg-violet-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-violet-700">
+                Comanda {item.comandaLabel}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-1 text-[0.75rem] font-medium text-[var(--muted)]">
+            {item.customerName || humanize(item.type)}
+          </p>
+        </div>
+        <span className="text-[0.7rem] font-semibold text-[var(--foreground)]">{formatElapsed(item.createdAt)}</span>
+      </div>
+
+      <div className="mt-3 flex items-start gap-2">
+        <span className="inline-flex min-w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-orange)]/10 px-2 py-1 text-xs font-bold text-[var(--brand-orange-dark)]">
+          {item.quantity}x
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold leading-5 text-[var(--foreground)]">{item.name}</p>
+          {item.optionLines.length ? (
+            <p className="mt-1 text-[0.75rem] leading-4 text-[var(--brand-green-dark)]">+ {item.optionLines.join(" • ")}</p>
+          ) : null}
+          {item.ingredientLines.length ? (
+            <p className="mt-1 text-[0.75rem] leading-4 text-[var(--muted)]">{item.ingredientLines.join(" • ")}</p>
+          ) : null}
+          {item.itemNotes ? (
+            <p className="mt-1 text-[0.75rem] leading-4 text-amber-700">Obs. item: {item.itemNotes}</p>
+          ) : null}
+          {item.orderNotes ? (
+            <p className="mt-1 text-[0.75rem] leading-4 text-amber-700/90">Obs. pedido: {item.orderNotes}</p>
+          ) : null}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function KitchenKanbanColumn({
+  column,
+  items,
+  loading,
+  onOpen,
+}: {
+  column: ColumnConfig;
+  items: KitchenItemCardData[];
+  loading: boolean;
+  onOpen: (orderId: string) => void;
+}) {
+  return (
+    <article className={`flex w-[18rem] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border-t-4 ${column.accent} border-x border-b border-[var(--line)] bg-[var(--surface)] shadow-sm`}>
+      <div className={`flex items-center justify-between gap-2 px-4 py-3 ${column.headerBg}`}>
+        <p className="text-sm font-bold tracking-tight">{column.label}</p>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${column.countBg}`}>{items.length}</span>
+      </div>
+
+      <div className="flex-1 space-y-2 overflow-y-auto p-3" style={{ minHeight: "14rem", maxHeight: "calc(100vh - 18rem)" }}>
+        {loading && !items.length ? (
+          <div className="rounded-xl border border-dashed border-[var(--line)] px-3 py-6 text-center text-xs text-[var(--muted)]">
+            Carregando…
+          </div>
+        ) : items.length ? (
+          items.map((item) => <KitchenItemCard key={item.id} item={item} onOpen={onOpen} />)
+        ) : (
+          <div className="rounded-xl border border-dashed border-[var(--line)] px-3 py-6 text-center text-xs text-[var(--muted)]">
+            Vazio
           </div>
         )}
       </div>
@@ -388,6 +586,20 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     }));
   }, [orders, view]);
+
+  const kitchenColumns = useMemo(() => {
+    const items = buildKitchenItems(orders);
+
+    return columnsByView.kitchen.map((column) => ({
+      ...column,
+      items: items
+        .filter((item) => item.orderStatus === column.status)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+    }));
+  }, [orders]);
+
+  const showOrderBoard = view !== "kitchen";
+  const showKitchenBoard = view === "operation" || view === "kitchen";
 
   async function handleTransition(toStatus: OrderStatus) {
     if (!selectedOrder) return;
@@ -516,32 +728,65 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
         </div>
       ) : null}
 
-      {/* ─── Kanban com scroll horizontal + DnD ─── */}
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={() => setActiveDrag(null)}
-      >
-        <section className="-mx-4 overflow-x-auto pb-4 lg:mx-0">
-          <div className="flex snap-x gap-4 px-4 lg:px-0">
-            {columns.map((column) => (
-              <KanbanColumn
-                key={column.status}
-                column={column}
-                orders={column.orders}
-                loading={loadingList}
-                allowDrop={view !== "archive"}
-                onOpen={(id) => void openOrder(id)}
-              />
-            ))}
-          </div>
-        </section>
+      {showOrderBoard ? (
+        <section className="space-y-3">
+          {showKitchenBoard ? (
+            <div>
+              <p className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Pedidos e comandas</p>
+              <p className="mt-1 text-xs text-[var(--muted)]">Visão consolidada do pedido inteiro para acompanhar status, total e contexto da comanda.</p>
+            </div>
+          ) : null}
 
-        <DragOverlay>
-          {activeDrag ? <OrderCard order={activeDrag} isOverlay /> : null}
-        </DragOverlay>
-      </DndContext>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={() => setActiveDrag(null)}
+          >
+            <section className="-mx-4 overflow-x-auto pb-4 lg:mx-0">
+              <div className="flex snap-x gap-4 px-4 lg:px-0">
+                {columns.map((column) => (
+                  <KanbanColumn
+                    key={column.status}
+                    column={column}
+                    orders={column.orders}
+                    loading={loadingList}
+                    allowDrop={view !== "archive"}
+                    onOpen={(id) => void openOrder(id)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <DragOverlay>
+              {activeDrag ? <OrderCard order={activeDrag} isOverlay /> : null}
+            </DragOverlay>
+          </DndContext>
+        </section>
+      ) : null}
+
+      {showKitchenBoard ? (
+        <section className="space-y-3">
+          <div>
+            <p className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Fila da cozinha por item</p>
+            <p className="mt-1 text-xs text-[var(--muted)]">Visão focada no que precisa ser preparado agora. Clique no item para abrir o pedido/comanda completo.</p>
+          </div>
+
+          <section className="-mx-4 overflow-x-auto pb-4 lg:mx-0">
+            <div className="flex snap-x gap-4 px-4 lg:px-0">
+              {kitchenColumns.map((column) => (
+                <KitchenKanbanColumn
+                  key={`kitchen-${column.status}`}
+                  column={column}
+                  items={column.items}
+                  loading={loadingList}
+                  onOpen={(id) => void openOrder(id)}
+                />
+              ))}
+            </div>
+          </section>
+        </section>
+      ) : null}
 
       <DashboardOrderDetailSheet
         error={detailError}
