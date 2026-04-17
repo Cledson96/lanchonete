@@ -3,8 +3,8 @@ import { DashboardOrdersWorkspace } from "@/components/dashboard-orders-workspac
 export default function DashboardOperationPage() {
   return (
     <DashboardOrdersWorkspace
-      description="Acompanhe todos os pedidos em tempo real: novos, em preparo, prontos e saindo para entrega em um unico fluxo."
-      title="Operacao"
+      description="Arraste os cards entre as colunas para mover o status. Novos, em preparo, prontos e saindo num só fluxo."
+      title="Operação"
       view="operation"
     />
   );
