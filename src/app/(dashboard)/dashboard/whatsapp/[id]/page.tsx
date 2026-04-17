@@ -16,6 +16,7 @@ function humanizeState(state: string) {
     em_atendimento: "Em atendimento",
     finalizado: "Finalizado",
     bot: "Bot",
+    human_handoff: "Atendente",
   };
   return map[state] || state;
 }

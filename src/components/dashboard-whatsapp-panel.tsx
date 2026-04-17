@@ -105,8 +105,17 @@ function humanizeConvState(state: string) {
     em_atendimento: "Em atendimento",
     finalizado: "Finalizado",
     bot: "Bot",
+    human_handoff: "Atendente",
   };
   return map[state] || state;
+}
+
+function isHumanHandoff(state: string) {
+  return state === "human_handoff";
+}
+
+function hasInboundLastMessage(conversation: ConversationItem) {
+  return conversation.messages[0]?.direction === "inbound";
 }
 
 /* ═══════════════════════════════════════════════
@@ -340,19 +349,36 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
             ) : (
               filteredConversations.map((conversation) => {
                 const lastMessage = conversation.messages[0];
+                const inboundLastMessage = hasInboundLastMessage(conversation);
+                const humanHandoff = isHumanHandoff(conversation.state);
+
                 return (
                   <Link
-                    className="group block overflow-hidden rounded-xl border border-[var(--line)] bg-white transition hover:border-[var(--brand-orange)]/40 hover:shadow-sm"
+                    className={`group block overflow-hidden rounded-xl border bg-white transition hover:border-[var(--brand-orange)]/40 hover:shadow-sm ${
+                      inboundLastMessage
+                        ? "border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/[0.04]"
+                        : "border-[var(--line)]"
+                    }`}
                     href={`/dashboard/whatsapp/${conversation.id}`}
                     key={conversation.id}
                   >
-                    <div className="flex items-start justify-between gap-3 p-3">
+                    <div className={`flex items-start justify-between gap-3 border-l-4 p-3 ${inboundLastMessage ? "border-[var(--brand-orange)]" : "border-transparent"}`}>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="truncate text-sm font-bold">{conversation.customerProfile.fullName}</p>
                           <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--muted)]">
                             {humanizeConvState(conversation.state)}
                           </span>
+                          {humanHandoff ? (
+                            <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-violet-700">
+                              Em atendente
+                            </span>
+                          ) : null}
+                          {inboundLastMessage ? (
+                            <span className="rounded-full bg-[var(--brand-orange)]/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--brand-orange-dark)]">
+                              Cliente falou
+                            </span>
+                          ) : null}
                           {conversation.order ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--brand-green-dark)]">
                               <LinkIcon />

@@ -67,6 +67,7 @@ const PAYMENT_OPTIONS = [
 
 const WHATSAPP_REENGAGEMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
 const PUBLIC_SITE_REPLY_KEY = "public_site_reply";
+const WHATSAPP_GROUP_THREAD_SUFFIX = "@g.us";
 
 let listenersBound = false;
 
@@ -74,6 +75,10 @@ function getDefaultContext(): BotContext {
   return {
     cart: [],
   };
+}
+
+function isGroupThread(threadId?: string | null) {
+  return threadId?.endsWith(WHATSAPP_GROUP_THREAD_SUFFIX) ?? false;
 }
 
 function parseBotContext(value: Prisma.JsonValue | null | undefined): BotContext {
@@ -928,6 +933,10 @@ async function handleBotMessage(message: Message) {
     return;
   }
 
+  if (isGroupThread(message.from)) {
+    return;
+  }
+
   const body = message.body?.trim();
 
   if (!body) {
@@ -1087,7 +1096,7 @@ export async function sendWhatsAppTextMessage(input: {
 }
 
 export async function listWhatsAppConversations() {
-  return prisma.whatsAppConversation.findMany({
+  const conversations = await prisma.whatsAppConversation.findMany({
     orderBy: [{ lastMessageAt: "desc" }, { updatedAt: "desc" }],
     include: {
       customerProfile: true,
@@ -1098,6 +1107,8 @@ export async function listWhatsAppConversations() {
       },
     },
   });
+
+  return conversations.filter((conversation) => !isGroupThread(conversation.externalThreadId));
 }
 
 export async function getWhatsAppConversationById(id: string) {
