@@ -161,82 +161,87 @@ export function CartDrawer() {
               {state.items.map((item) => (
                 <li
                   key={item.id}
-                  className="relative flex gap-4 rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm transition-shadow hover:shadow-md"
+                  className="flex gap-3 rounded-2xl border border-[var(--line)] bg-white p-3 shadow-sm"
                 >
                   {/* Thumb */}
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[1rem] bg-[var(--background-strong)] border border-[var(--brand-orange)]/10">
+                  <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">
                     <Image
                       alt={item.name}
                       className="object-cover"
                       fill
-                      sizes="80px"
+                      sizes="72px"
                       src={resolveMenuItemImage(item.imageUrl)}
                     />
                   </div>
-                  <div className="flex flex-1 flex-col gap-1.5">
-                    <div className="pr-2">
-                      <p className="text-[0.95rem] font-bold leading-snug text-[var(--foreground)]">
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    {/* Nome + remover */}
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-[0.9rem] font-bold leading-snug text-[var(--foreground)]">
                         {item.name}
                       </p>
-<p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--brand-green-dark)] mt-0.5">
-                          {item.categoryName}
-                        </p>
-                        {item.optionNames && item.optionNames.length > 0 ? (
-                          <div className="mt-0.5 flex flex-wrap gap-1">
-                            {item.optionNames.map((name, i) => (
-                              <span key={i} className="inline-flex rounded-full bg-[var(--brand-orange)]/10 px-1.5 py-0.5 text-[0.6rem] font-medium text-[var(--brand-orange-dark)]">
-                                +{name}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                        {item.ingredientCustomizations && item.ingredientNames ? (
-                          <div className="mt-0.5 flex flex-wrap gap-1">
-                            {Object.entries(item.ingredientCustomizations)
-                              .filter(([, qty]) => qty !== 1)
-                              .map(([ingId, qty]) => {
-                                const ingName = item.ingredientNames?.[ingId] || ingId;
-                                return (
-                                  <span key={ingId} className={`inline-flex rounded-full px-1.5 py-0.5 text-[0.6rem] font-medium ${qty === 0 ? "bg-red-50 text-red-600 line-through" : "bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]"}`}>
-                                    {qty === 0 ? `Sem ${ingName}` : `${qty}x ${ingName}`}
-                                  </span>
-                                );
-                              })}
-                          </div>
-                        ) : null}
+                      <button
+                        aria-label={`Remover ${item.name}`}
+                        className="mt-0.5 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-red-50 hover:text-red-500"
+                        onClick={() => removeItem(item.id)}
+                        type="button"
+                      >
+                        <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                          <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
                     </div>
 
+                    {/* Tags de opções/ingredientes */}
+                    {item.optionNames && item.optionNames.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {item.optionNames.map((name, i) => (
+                          <span key={i} className="inline-flex rounded-full bg-[var(--accent-light)] px-1.5 py-0.5 text-[0.6rem] font-medium text-[var(--brand-orange-dark)]">
+                            +{name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {item.ingredientCustomizations && item.ingredientNames ? (
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(item.ingredientCustomizations)
+                          .filter(([, qty]) => qty !== 1)
+                          .map(([ingId, qty]) => {
+                            const ingName = item.ingredientNames?.[ingId] || ingId;
+                            return (
+                              <span key={ingId} className={`inline-flex rounded-full px-1.5 py-0.5 text-[0.6rem] font-medium ${qty === 0 ? "bg-red-50 text-red-500" : "bg-[var(--accent-light)] text-[var(--brand-orange-dark)]"}`}>
+                                {qty === 0 ? `sem ${ingName}` : `${qty}× ${ingName}`}
+                              </span>
+                            );
+                          })}
+                      </div>
+                    ) : null}
+
+                    {/* Observação */}
                     {editingItemId === item.id ? (
-                      <div className="mt-2 rounded-2xl border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/5 p-3.5 shadow-inner">
-                        <label
-                          className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[var(--brand-orange-dark)]"
-                          htmlFor={`cart-notes-${item.id}`}
-                        >
-                          Anotações do Chef
-                        </label>
+                      <div className="mt-1 rounded-xl border border-[var(--line)] bg-[var(--cream)] p-2.5">
                         <textarea
-                          className="mt-2.5 min-h-[5rem] w-full rounded-xl border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-sm outline-none transition placeholder:text-[var(--muted)]/60 focus:border-[var(--brand-orange)] focus:ring-2 focus:ring-[var(--brand-orange)]/20"
+                          autoFocus
+                          className="w-full resize-none rounded-lg border border-[var(--line)] bg-white px-2.5 py-2 text-[0.82rem] text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/50 focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/20"
                           id={`cart-notes-${item.id}`}
                           maxLength={180}
                           onChange={(event) =>
-                            setDraftNotes((prev) => ({
-                              ...prev,
-                              [item.id]: event.target.value,
-                            }))
+                            setDraftNotes((prev) => ({ ...prev, [item.id]: event.target.value }))
                           }
                           placeholder="Ex.: sem tomate, tirar cebola..."
+                          rows={2}
                           value={draftNotes[item.id] ?? ""}
                         />
-                        <div className="mt-3 flex gap-2">
+                        <div className="mt-2 flex gap-1.5">
                           <button
-                            className="cursor-pointer rounded-full bg-[var(--brand-green)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--brand-green-dark)] hover:-translate-y-0.5"
+                            className="cursor-pointer rounded-full bg-[var(--brand-green)] px-3 py-1 text-[0.72rem] font-bold text-white transition hover:bg-[var(--brand-green-dark)]"
                             onClick={() => saveNotes(item.id)}
                             type="button"
                           >
                             Salvar
                           </button>
                           <button
-                            className="cursor-pointer rounded-full border border-[var(--line)] bg-white px-4 py-2 text-xs font-bold text-[var(--muted)] transition hover:bg-[var(--background-strong)] hover:text-[var(--foreground)]"
+                            className="cursor-pointer rounded-full border border-[var(--line)] px-3 py-1 text-[0.72rem] font-semibold text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             onClick={() => setEditingItemId(null)}
                             type="button"
                           >
@@ -246,112 +251,55 @@ export function CartDrawer() {
                       </div>
                     ) : item.notes ? (
                       <button
-                        className="mt-1 flex flex-col items-start cursor-pointer rounded-xl bg-[var(--brand-orange)]/10 px-3.5 py-2.5 text-left text-sm text-[var(--foreground)] border border-[var(--brand-orange)]/20 transition hover:bg-[var(--brand-orange)]/15 group"
+                        className="mt-0.5 flex cursor-pointer items-start gap-1.5 rounded-lg bg-[var(--cream)] px-2.5 py-1.5 text-left transition hover:bg-[var(--cream-deep)] group"
                         onClick={() => startEditing(item.id, item.notes)}
                         type="button"
                       >
-                        <span className="flex w-full items-center justify-between">
-                          <span className="block text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[var(--brand-orange-dark)]">
-                            Anotações do Chef
-                          </span>
-                          <svg className="w-3.5 h-3.5 text-[var(--brand-orange-dark)] opacity-40 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                        </span>
-                        <span className="mt-1.5 block leading-snug font-medium italic">&ldquo;{item.notes}&rdquo;</span>
+                        <svg className="mt-0.5 h-3 w-3 shrink-0 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        <span className="text-[0.75rem] italic leading-snug text-[var(--ink-soft)]">{item.notes}</span>
                       </button>
                     ) : (
                       <button
-                        className="mt-1 flex w-fit items-center gap-1.5 cursor-pointer text-left text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)] transition hover:text-[var(--brand-orange-dark)]"
+                        className="mt-0.5 flex w-fit cursor-pointer items-center gap-1 text-[0.72rem] text-[var(--muted)] transition hover:text-[var(--brand-orange-dark)]"
                         onClick={() => startEditing(item.id, item.notes)}
                         type="button"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                        Adicionar observação
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        Observação
                       </button>
                     )}
-                    <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-                      <p className="menu-price text-[1.1rem] font-black tracking-tight text-[var(--brand-orange-dark)]">
-                        {new Intl.NumberFormat("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        }).format((item.price + (item.optionDelta || 0)) * item.quantity)}
+
+                    {/* Preço + qty */}
+                    <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                      <p className="text-[1rem] font-extrabold text-[var(--accent)]">
+                        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format((item.price + (item.optionDelta || 0)) * item.quantity)}
                       </p>
-                      {/* Qty controls */}
-                      <div className="flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--background-strong)] p-1 shadow-sm">
+                      <div className="flex items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--background)] p-0.5">
                         <button
                           aria-label="Diminuir quantidade"
-                          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white text-[var(--foreground)] shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition hover:bg-[var(--brand-orange)] hover:text-white active:scale-95"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
+                          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-[var(--accent-light)] hover:text-[var(--brand-orange-dark)] active:scale-95"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           type="button"
                         >
-                          <svg
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M5 12h14"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
+                          <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
-                        <span className="min-w-[1.5rem] text-center text-[0.95rem] font-black text-[var(--foreground)]">
+                        <span className="min-w-[1.4rem] text-center text-[0.85rem] font-black text-[var(--foreground)]">
                           {item.quantity}
                         </span>
                         <button
                           aria-label="Aumentar quantidade"
-                          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white text-[var(--foreground)] shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition hover:bg-[var(--brand-green)] hover:text-white active:scale-95"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
+                          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-[var(--success-light)] hover:text-[var(--brand-green-dark)] active:scale-95"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           type="button"
                         >
-                          <svg
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M12 5v14m-7-7h14"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
+                          <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
                       </div>
                     </div>
-                  </div>
-                  {/* Remove */}
-                  <div className="absolute -top-2.5 -right-2.5">
-                    <button
-                      aria-label={`Remover ${item.name}`}
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white border border-[var(--line)] text-[var(--muted)] shadow-sm transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-500 hover:scale-110"
-                      onClick={() => removeItem(item.id)}
-                      type="button"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2.5}
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M18 6L6 18M6 6l12 12"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
                   </div>
                 </li>
               ))}
@@ -361,24 +309,26 @@ export function CartDrawer() {
 
         {/* Footer */}
         {state.items.length > 0 && (
-          <div className="relative border-t border-[var(--line)] bg-[var(--surface)] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-            <div className="mb-5 flex items-end justify-between">
-              <span className="text-[0.95rem] font-bold text-[var(--muted)] uppercase tracking-wider">Total do pedido</span>
-              <span className="menu-price text-[1.75rem] font-black tracking-tight text-[var(--foreground)] drop-shadow-sm">
+          <div className="border-t border-[var(--line)] bg-white px-5 pb-6 pt-4 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+            {/* Total */}
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">Total</span>
+              <span className="text-[1.5rem] font-extrabold leading-none text-[var(--foreground)]">
                 {displayTotal}
               </span>
             </div>
+
             <Link
-              className="group relative flex w-full cursor-pointer items-center justify-center gap-2 rounded-full overflow-hidden bg-[var(--brand-green)] py-4 text-[1.05rem] font-black text-white shadow-[0_8px_24px_rgba(140,198,63,0.35)] transition-all duration-300 hover:bg-[var(--brand-green-dark)] hover:shadow-[0_12px_32px_rgba(140,198,63,0.45)] hover:-translate-y-1 active:translate-y-0"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--brand-green)] py-3.5 text-[0.95rem] font-bold text-white shadow-[0_4px_14px_rgba(127,181,57,0.35)] transition-all duration-200 hover:bg-[var(--brand-green-dark)] hover:shadow-[0_6px_20px_rgba(127,181,57,0.4)] active:scale-[0.98]"
               href="/pedido"
               onClick={closeCart}
             >
-              <div className="absolute inset-0 w-1/2 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:translate-x-[250%] transition-transform duration-1000 ease-in-out" />
               Finalizar pedido
-              <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </Link>
+
             <button
-              className="mt-4 w-full cursor-pointer rounded-full border-2 border-transparent py-2.5 text-[0.85rem] font-bold text-[var(--muted)] transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-600"
+              className="mt-3 w-full cursor-pointer py-2 text-[0.78rem] font-semibold text-[var(--muted)] transition-colors hover:text-red-500"
               onClick={clearCart}
               type="button"
             >
