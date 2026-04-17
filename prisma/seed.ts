@@ -158,9 +158,95 @@ const optionGroups: OptionGroupSeed[] = [
       { name: "Prato feito", slug: "prato-feito", sortOrder: 4, priceDelta: 5 },
     ],
   },
+  {
+    name: "Adicionais dos lanches",
+    slug: "adicionais-dos-lanches",
+    description: "Adicionais disponíveis para lanches e burgers da casa.",
+    minSelections: 0,
+    sortOrder: 6,
+    options: [
+      { name: "Queijo extra", slug: "queijo-extra", sortOrder: 1, priceDelta: 3 },
+      { name: "Bacon extra", slug: "bacon-extra", sortOrder: 2, priceDelta: 5 },
+      { name: "Ovo extra", slug: "ovo-extra", sortOrder: 3, priceDelta: 4 },
+      { name: "Calabresa extra", slug: "calabresa-extra", sortOrder: 4, priceDelta: 5 },
+      { name: "Presunto extra", slug: "presunto-extra", sortOrder: 5, priceDelta: 3 },
+      { name: "Frango extra", slug: "frango-extra", sortOrder: 6, priceDelta: 6 },
+      { name: "Hamburguer extra", slug: "hamburguer-extra", sortOrder: 7, priceDelta: 8 },
+      { name: "Tomate extra", slug: "tomate-extra", sortOrder: 8, priceDelta: 2 },
+      { name: "Alface extra", slug: "alface-extra", sortOrder: 9, priceDelta: 2 },
+      { name: "Maionese extra", slug: "maionese-extra", sortOrder: 10, priceDelta: 2 },
+    ],
+  },
+  {
+    name: "Adicionais dos pasteis",
+    slug: "adicionais-dos-pasteis",
+    description: "Adicionais disponíveis para pastéis salgados e especiais.",
+    minSelections: 0,
+    sortOrder: 7,
+    options: [
+      { name: "Queijo extra", slug: "queijo-extra", sortOrder: 1, priceDelta: 3 },
+      { name: "Presunto extra", slug: "presunto-extra", sortOrder: 2, priceDelta: 3 },
+      { name: "Carne extra", slug: "carne-extra", sortOrder: 3, priceDelta: 5 },
+      { name: "Frango extra", slug: "frango-extra", sortOrder: 4, priceDelta: 5 },
+      { name: "Catupiry", slug: "catupiry", sortOrder: 5, priceDelta: 4 },
+      { name: "Cheddar", slug: "cheddar", sortOrder: 6, priceDelta: 4 },
+      { name: "Milho", slug: "milho", sortOrder: 7, priceDelta: 2 },
+      { name: "Ovo extra", slug: "ovo-extra", sortOrder: 8, priceDelta: 4 },
+    ],
+  },
+  {
+    name: "Adicionais das tapiocas",
+    slug: "adicionais-das-tapiocas",
+    description: "Adicionais disponíveis para tapiocas salgadas e doces.",
+    minSelections: 0,
+    sortOrder: 8,
+    options: [
+      { name: "Queijo extra", slug: "queijo-extra", sortOrder: 1, priceDelta: 3 },
+      { name: "Presunto extra", slug: "presunto-extra", sortOrder: 2, priceDelta: 3 },
+      { name: "Frango extra", slug: "frango-extra", sortOrder: 3, priceDelta: 5 },
+      { name: "Calabresa extra", slug: "calabresa-extra", sortOrder: 4, priceDelta: 5 },
+      { name: "Catupiry", slug: "catupiry", sortOrder: 5, priceDelta: 4 },
+      { name: "Cheddar", slug: "cheddar", sortOrder: 6, priceDelta: 4 },
+      { name: "Ovo extra", slug: "ovo-extra", sortOrder: 7, priceDelta: 4 },
+      { name: "Chocolate extra", slug: "chocolate-extra", sortOrder: 8, priceDelta: 4 },
+      { name: "Morango extra", slug: "morango-extra", sortOrder: 9, priceDelta: 4 },
+      { name: "Banana extra", slug: "banana-extra", sortOrder: 10, priceDelta: 4 },
+    ],
+  },
+  {
+    name: "Adicionais dos salgados",
+    slug: "adicionais-dos-salgados",
+    description: "Adicionais disponíveis para salgados e assados da vitrine.",
+    minSelections: 0,
+    sortOrder: 9,
+    options: [
+      { name: "Queijo extra", slug: "queijo-extra", sortOrder: 1, priceDelta: 3 },
+      { name: "Presunto extra", slug: "presunto-extra", sortOrder: 2, priceDelta: 3 },
+      { name: "Frango extra", slug: "frango-extra", sortOrder: 3, priceDelta: 5 },
+      { name: "Carne extra", slug: "carne-extra", sortOrder: 4, priceDelta: 5 },
+      { name: "Catupiry", slug: "catupiry", sortOrder: 5, priceDelta: 4 },
+      { name: "Cheddar", slug: "cheddar", sortOrder: 6, priceDelta: 4 },
+      { name: "Milho", slug: "milho", sortOrder: 7, priceDelta: 2 },
+      { name: "Ovo extra", slug: "ovo-extra", sortOrder: 8, priceDelta: 4 },
+    ],
+  },
 ];
 
 const lunchWeekDescription = `Cardápio do almoço de segunda a sábado, com pratos do dia e especiais.`;
+
+const categoryDefaultOptionGroupSlugs: Record<string, string[]> = {
+  lanches: ["adicionais-dos-lanches"],
+  "combo-lanches": ["adicionais-dos-lanches"],
+  "lanches-artesanais": ["adicionais-dos-lanches"],
+  "combos-artesanais": ["adicionais-dos-lanches"],
+  "pastel-salgado": ["adicionais-dos-pasteis"],
+  "pastel-doce": ["adicionais-dos-pasteis"],
+  "pastel-especial": ["adicionais-dos-pasteis"],
+  "tapioca-salgada": ["adicionais-das-tapiocas"],
+  "tapioca-doce": ["adicionais-das-tapiocas"],
+  acai: ["complementos-do-acai"],
+  salgados: ["adicionais-dos-salgados"],
+};
 
 const categories: CategorySeed[] = [
   {
@@ -1200,9 +1286,16 @@ async function syncCategoriesAndItems(optionGroupIds: Map<string, string>) {
         where: { menuItemId: savedItem.id },
       });
 
-      if (item.optionGroupSlugs?.length) {
+      const optionGroupSlugs = Array.from(
+        new Set([
+          ...(item.optionGroupSlugs || []),
+          ...(categoryDefaultOptionGroupSlugs[category.slug] || []),
+        ]),
+      );
+
+      if (optionGroupSlugs.length) {
         await prisma.menuItemOptionGroup.createMany({
-          data: item.optionGroupSlugs.map((groupSlug, index) => {
+          data: optionGroupSlugs.map((groupSlug, index) => {
             const optionGroupId = optionGroupIds.get(groupSlug);
 
             if (!optionGroupId) {

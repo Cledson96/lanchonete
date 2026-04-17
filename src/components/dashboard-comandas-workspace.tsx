@@ -322,6 +322,7 @@ export function DashboardComandasWorkspace() {
   const [closing, setClosing] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
+  const [addItemModalOpen, setAddItemModalOpen] = useState(false);
   const [createModal, setCreateModal] = useState<CreateModalState>({
     open: false,
     name: "",
@@ -433,6 +434,7 @@ export function DashboardComandasWorkspace() {
     setSelectedComanda(payload.comanda);
     await refreshList(false);
     setFeedback(`Item lançado na comanda ${payload.comanda.code}.`);
+    setAddItemModalOpen(false);
   }
 
   async function handleCloseComanda() {
@@ -650,36 +652,31 @@ export function DashboardComandasWorkspace() {
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{detailError}</div>
               ) : null}
 
-              {/* Grid: itens + lançamento */}
-              <div className="grid gap-4 2xl:grid-cols-[1fr_1fr]">
-                <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
-                  <div className="mb-3 flex items-center justify-between">
+              {/* Itens lançados */}
+              <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <p className="text-sm font-bold tracking-tight">Itens lançados</p>
                     <span className="rounded-full bg-[var(--brand-green)]/12 px-2 py-0.5 text-[0.65rem] font-bold text-[var(--brand-green-dark)]">
                       {selectedComanda.entries.reduce((sum, e) => sum + e.quantity, 0)} itens
                     </span>
                   </div>
-                  <ComandaEntryList
-                    emptyLabel="Nenhum item lançado. Use o painel ao lado para começar."
-                    entries={selectedComanda.entries}
-                  />
-                </section>
-
-                <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
-                  <div className="mb-3">
-                    <p className="text-sm font-bold tracking-tight">Lançamento manual</p>
-                    <p className="mt-0.5 text-xs text-[var(--muted)]">
-                      Adicione itens do cardápio direto na comanda.
-                    </p>
-                  </div>
-                  <ComandaMenuLauncher
-                    categories={categories}
-                    disabled={!canEdit}
-                    disabledMessage="Esta comanda foi encerrada e não aceita novos lançamentos."
-                    onAddItem={handleAddItem}
-                  />
-                </section>
-              </div>
+                  {canEdit ? (
+                    <button
+                      className="flex items-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
+                      onClick={() => setAddItemModalOpen(true)}
+                      type="button"
+                    >
+                      <PlusIcon />
+                      Adicionar item
+                    </button>
+                  ) : null}
+                </div>
+                <ComandaEntryList
+                  emptyLabel='Nenhum item lançado. Clique em "Adicionar item" para começar.'
+                  entries={selectedComanda.entries}
+                />
+              </section>
             </>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-4 py-12 text-center text-sm text-[var(--muted)] shadow-sm">
@@ -696,6 +693,43 @@ export function DashboardComandasWorkspace() {
           onClose={() => setQrModalOpen(false)}
           slug={selectedComanda.qrCodeSlug}
         />
+      ) : null}
+
+      {addItemModalOpen && selectedComanda ? (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(45,24,11,0.4)] backdrop-blur-[3px] sm:items-center sm:p-4">
+          <button
+            aria-label="Fechar"
+            className="absolute inset-0"
+            onClick={() => setAddItemModalOpen(false)}
+            type="button"
+          />
+          <div className="relative z-10 flex max-h-[92dvh] w-full flex-col rounded-t-3xl border border-[var(--line)] bg-white shadow-2xl sm:max-w-2xl sm:rounded-2xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--line)] px-5 py-4">
+              <div>
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Lançamento manual</p>
+                <h3 className="mt-0.5 text-base font-bold leading-tight">
+                  {selectedComanda.name || selectedComanda.customerProfile?.fullName || "Comanda"}
+                </h3>
+              </div>
+              <button
+                aria-label="Fechar"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] hover:bg-[var(--background)]"
+                onClick={() => setAddItemModalOpen(false)}
+                type="button"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-5">
+              <ComandaMenuLauncher
+                categories={categories}
+                disabled={!canEdit}
+                disabledMessage="Esta comanda foi encerrada e não aceita novos lançamentos."
+                onAddItem={handleAddItem}
+              />
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {closeModalOpen && selectedComanda ? (
