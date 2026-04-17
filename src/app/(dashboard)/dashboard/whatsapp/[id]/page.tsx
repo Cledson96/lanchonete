@@ -9,6 +9,17 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
+function humanizeState(state: string) {
+  const map: Record<string, string> = {
+    novo: "Novo",
+    aguardando: "Aguardando",
+    em_atendimento: "Em atendimento",
+    finalizado: "Finalizado",
+    bot: "Bot",
+  };
+  return map[state] || state;
+}
+
 export default async function DashboardWhatsAppConversationPage({ params }: PageProps) {
   const { id } = await params;
   const conversation = await getWhatsAppConversationById(id);
@@ -18,26 +29,38 @@ export default async function DashboardWhatsAppConversationPage({ params }: Page
   }
 
   return (
-    <main className="space-y-6 text-[var(--foreground)]">
-      <section className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6">
-        <Link
-          className="text-sm text-[var(--muted)] transition hover:text-[var(--foreground)]"
-          href="/dashboard/whatsapp"
-        >
-          ← Voltar para o painel do WhatsApp
-        </Link>
-        <div className="mt-4 flex flex-wrap items-start justify-between gap-5">
-          <div>
-            <p className="eyebrow mb-3 text-[var(--muted)]">Conversa</p>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {conversation.customerProfile.fullName}
-            </h1>
-            <p className="mt-3 text-sm text-white/68">{conversation.phone}</p>
-          </div>
-          <div className="rounded-[1.4rem] border border-[var(--line)] bg-white/6 px-4 py-4 text-sm text-white/76">
-            <p>Estado atual: {conversation.state}</p>
-            <p className="mt-2">Pedido vinculado: {conversation.order?.code || "Nenhum"}</p>
-          </div>
+    <main className="space-y-4 text-[var(--foreground)]">
+      {/* Breadcrumb + Header */}
+      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <Link
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--brand-orange)]"
+            href="/dashboard/whatsapp"
+          >
+            ← Voltar para conversas
+          </Link>
+          <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">
+            {conversation.customerProfile.fullName}
+          </h1>
+          <p className="mt-0.5 font-mono text-xs text-[var(--muted)]">{conversation.phone}</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-[0.65rem] font-semibold text-[var(--foreground)]">
+            {humanizeState(conversation.state)}
+          </span>
+          {conversation.order ? (
+            <Link
+              className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green)]/10 px-2.5 py-1 text-[0.65rem] font-semibold text-[var(--brand-green-dark)] transition hover:bg-[var(--brand-green)]/20"
+              href={`/dashboard/operacao`}
+            >
+              Pedido {conversation.order.code}
+            </Link>
+          ) : (
+            <span className="rounded-full bg-[var(--background)] px-2.5 py-1 text-[0.65rem] font-semibold text-[var(--muted)]">
+              Sem pedido vinculado
+            </span>
+          )}
         </div>
       </section>
 

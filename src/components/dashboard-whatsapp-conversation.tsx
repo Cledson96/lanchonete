@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type MessageItem = {
   id: string;
@@ -14,35 +14,59 @@ type Props = {
   initialMessages: MessageItem[];
 };
 
+function formatTime(iso: string) {
+  return new Intl.DateTimeFormat("pt-BR", { timeStyle: "short" }).format(new Date(iso));
+}
+
+function formatDateLabel(iso: string) {
+  const date = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return "Hoje";
+  if (date.toDateString() === yesterday.toDateString()) return "Ontem";
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(date);
+}
+
+function SendIcon() {
+  return (
+    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function DashboardWhatsAppConversation({ conversationId, initialMessages }: Props) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(initialMessages);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages.length]);
 
   async function sendMessage() {
+    if (!message.trim()) return;
     try {
       setPending(true);
       setError(null);
-
-      const response = await fetch(`/api/dashboard/whatsapp/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ content: message }),
-      });
-
-      const payload = (await response.json()) as {
-        error?: {
-          message?: string;
-        };
-      };
-
+      const response = await fetch(
+        `/api/dashboard/whatsapp/conversations/${conversationId}/messages`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ content: message }),
+        }
+      );
+      const payload = (await response.json()) as { error?: { message?: string } };
       if (!response.ok) {
-        throw new Error(payload.error?.message || "Nao foi possivel enviar a mensagem.");
+        throw new Error(payload.error?.message || "Não foi possível enviar a mensagem.");
       }
-
       setMessages((current) => [
         ...current,
         {
@@ -60,47 +84,111 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
     }
   }
 
-  return (
-    <section className="panel shadow-sm transition hover:shadow-md hover:border-[var(--brand-orange)]/30 rounded-[2rem] border-[var(--line)] bg-[var(--surface)] p-6 text-[var(--foreground)]">
-      <p className="eyebrow mb-3 text-[var(--muted)]">Atendimento</p>
-      <h2 className="text-2xl font-semibold tracking-tight">Mensagens</h2>
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void sendMessage();
+    }
+  }
 
-      <div className="mt-5 space-y-3">
-        {messages.map((item) => (
-          <div
-            key={item.id}
-            className={`max-w-[85%] rounded-[1.25rem] px-4 py-3 text-sm leading-6 ${
-              item.direction === "outbound"
-                ? "ml-auto bg-accent text-[var(--foreground)]"
-                : "bg-white/10 text-white/86"
-            }`}
-          >
-            <p>{item.content}</p>
-            <p className="mt-2 text-xs opacity-70">
-              {new Date(item.createdAt).toLocaleString("pt-BR")}
+  // Agrupa mensagens por dia
+  const grouped: Array<{ label: string; items: MessageItem[] }> = [];
+  for (const msg of messages) {
+    const label = formatDateLabel(msg.createdAt);
+    const last = grouped[grouped.length - 1];
+    if (last && last.label === label) {
+      last.items.push(msg);
+    } else {
+      grouped.push({ label, items: [msg] });
+    }
+  }
+
+  return (
+    <section className="flex h-[calc(100dvh-18rem)] min-h-[28rem] flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-sm">
+      {/* Chat area */}
+      <div
+        className="flex-1 space-y-3 overflow-y-auto bg-[var(--background)]/40 p-4"
+        ref={scrollRef}
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, rgba(36,18,8,0.04) 1px, transparent 0)",
+          backgroundSize: "16px 16px",
+        }}
+      >
+        {messages.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <p className="rounded-xl border border-dashed border-[var(--line)] bg-white px-4 py-6 text-center text-xs text-[var(--muted)]">
+              Nenhuma mensagem ainda. Envie a primeira para iniciar.
             </p>
           </div>
-        ))}
+        ) : (
+          grouped.map((group) => (
+            <div className="space-y-2" key={group.label}>
+              <div className="flex justify-center">
+                <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-[var(--muted)] shadow-sm">
+                  {group.label}
+                </span>
+              </div>
+              {group.items.map((item) => {
+                const outbound = item.direction === "outbound";
+                return (
+                  <div
+                    className={`flex ${outbound ? "justify-end" : "justify-start"}`}
+                    key={item.id}
+                  >
+                    <div
+                      className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm leading-5 shadow-sm ${
+                        outbound
+                          ? "rounded-br-sm bg-emerald-500 text-white"
+                          : "rounded-bl-sm bg-white text-[var(--foreground)]"
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap break-words">{item.content}</p>
+                      <p
+                        className={`mt-1 text-right text-[0.6rem] ${
+                          outbound ? "text-emerald-50/80" : "text-[var(--muted)]"
+                        }`}
+                      >
+                        {formatTime(item.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))
+        )}
       </div>
 
-      <div className="mt-6 rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface)] p-4">
-        <label className="block text-sm font-semibold text-white/86">Responder manualmente</label>
-        <textarea
-          className="mt-3 min-h-28 w-full rounded-[1rem] border border-[var(--line)] bg-[#120c09] px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/50 focus:border-[var(--brand-orange)]/40"
-          maxLength={2000}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Digite a resposta para o cliente..."
-          value={message}
-        />
-        {error ? <p className="mt-3 text-sm text-red-200">{error}</p> : null}
-        <div className="mt-4 flex justify-end">
+      {/* Composer */}
+      <div className="shrink-0 border-t border-[var(--line)] bg-[var(--surface)] p-3">
+        {error ? (
+          <div className="mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-700">
+            {error}
+          </div>
+        ) : null}
+        <div className="flex items-end gap-2">
+          <textarea
+            className="min-h-[42px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-sm leading-5 outline-none transition focus:border-[var(--brand-orange)]"
+            maxLength={2000}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Digite a resposta para o cliente…  (Enter envia, Shift+Enter quebra linha)"
+            rows={1}
+            value={message}
+          />
           <button
-            className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-55"
+            aria-label="Enviar"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={pending || !message.trim()}
             onClick={() => void sendMessage()}
             type="button"
           >
-            {pending ? "Enviando..." : "Enviar mensagem"}
+            {pending ? (
+              <span className="text-[0.65rem]">…</span>
+            ) : (
+              <SendIcon />
+            )}
           </button>
         </div>
       </div>
