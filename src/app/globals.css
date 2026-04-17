@@ -408,8 +408,8 @@ select {
 .info-strip {
   position: relative;
   z-index: 10;
-  margin-top: 2rem;
-  padding-bottom: 1rem;
+  margin-top: 0;
+  padding-bottom: 0;
 }
 
 .info-card {

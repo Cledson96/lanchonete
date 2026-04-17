@@ -95,26 +95,36 @@ export function MenuBrowser({ categories }: Props) {
         onSelect={handleSelectCategory}
       />
 
-      <div className="shell pt-8">
+      <div className="shell pt-7">
         {/* Section header */}
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="eyebrow text-[var(--accent)]">Cardápio</p>
-            <h2 className="mt-1.5 font-display text-[1.75rem] font-bold tracking-tight text-[var(--green-deep)] sm:text-[2rem]">
-              {activeCategory?.name || "Cardápio"}
-            </h2>
-            {activeCategory?.description ? (
-              <p className="mt-2 max-w-3xl whitespace-pre-line text-sm leading-6 text-[var(--muted)]">
-                {activeCategory.description}
-              </p>
-            ) : null}
+        <div className="mb-6">
+          <div className="flex items-end justify-between gap-4">
+            {/* Título com acento laranja */}
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="block h-8 w-1 rounded-full bg-gradient-to-b from-[var(--brand-orange)] to-[var(--brand-green)]"
+              />
+              <div>
+                <h2 className="text-[1.35rem] font-extrabold leading-tight tracking-tight text-[var(--foreground)]">
+                  {activeCategory?.name || "Cardápio"}
+                </h2>
+                {activeCategory?.description ? (
+                  <p className="mt-0.5 text-[0.8rem] leading-snug text-[var(--muted)] max-w-sm">
+                    {activeCategory.description}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Contador como badge */}
+            <span className="shrink-0 rounded-full border border-[var(--line)] bg-white px-3 py-1 text-[0.72rem] font-semibold text-[var(--muted)]">
+              {showingStart}–{showingEnd} de {activeCategory?.menuItems.length || 0}
+            </span>
           </div>
 
-          <p className="text-[0.82rem] text-[var(--muted)]">
-            Mostrando {showingStart}–{showingEnd} de{" "}
-            <span className="font-semibold text-[var(--accent)]">{activeCategory?.menuItems.length || 0}</span>
-            {" "}itens
-          </p>
+          {/* Linha decorativa */}
+          <div className="mt-4 h-px bg-gradient-to-r from-[var(--brand-orange)] via-[var(--line)] to-transparent" />
         </div>
 
         {/* Grid */}

@@ -155,89 +155,85 @@ export function MenuItemCard({
 
   return (
     <>
-      <article className="menu-card group flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-lg)]"
+      <article
+        className="menu-card group flex h-full flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-md)]"
         style={{ boxShadow: "var(--shadow-sm)" }}
       >
+        {/* Imagem */}
         <button
           aria-label={`Ver detalhes de ${name}`}
-          className="relative h-52 cursor-pointer overflow-hidden bg-[var(--cream)] text-left"
+          className="relative h-44 cursor-pointer overflow-hidden bg-[var(--cream)] text-left"
           onClick={openDetails}
           type="button"
         >
           <Image
             alt={name}
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
             src={resolveMenuItemImage(imageUrl)}
           />
 
-          <span className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
+          {/* Gradiente base suave */}
+          <span className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/25 to-transparent" />
 
-          <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-[var(--green-rich)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
-            {categoryName}
-          </span>
-
+          {/* Badges — só os que adicionam valor real */}
           {displayCompare ? (
-            <span className="absolute right-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)]">
+            <span className="absolute left-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-white shadow-sm">
               Oferta
             </span>
           ) : null}
 
           {weekdaysLabel !== "todos os dias" ? (
-            <span className="absolute left-3 bottom-3 rounded-full bg-black/75 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)] backdrop-blur-sm">
+            <span className="absolute bottom-2.5 left-3 rounded-full bg-black/70 px-2.5 py-0.5 text-[0.6rem] font-semibold text-white backdrop-blur-sm">
               {weekdaysLabel}
             </span>
           ) : null}
 
-          {hasOptions || hasIngredients ? (
-            <span className="absolute bottom-3 right-3 rounded-full bg-[var(--brand-orange)]/90 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white shadow-[var(--shadow-sm)] backdrop-blur-sm">
-              +Adicionais
+          {(hasOptions || hasIngredients) && weekdaysLabel === "todos os dias" ? (
+            <span className="absolute bottom-2.5 right-3 rounded-full bg-[var(--brand-orange)]/85 px-2 py-0.5 text-[0.6rem] font-semibold text-white backdrop-blur-sm">
+              + opções
             </span>
           ) : null}
         </button>
 
-        <div className="flex flex-1 flex-col p-4 pt-3.5">
-          <button
-            className="cursor-pointer text-left"
-            onClick={openDetails}
-            type="button"
-          >
-            <h3 className="text-[1.15rem] font-display font-bold leading-snug text-[var(--foreground)] transition-colors duration-200 hover:text-[var(--green-rich)]">
+        {/* Conteúdo */}
+        <div className="flex flex-1 flex-col p-3.5">
+          <button className="cursor-pointer text-left" onClick={openDetails} type="button">
+            <h3 className="text-[0.95rem] font-bold leading-snug text-[var(--foreground)] transition-colors duration-150 group-hover:text-[var(--brand-orange-dark)] line-clamp-2">
               {name}
             </h3>
           </button>
 
-          <p className="mt-2 line-clamp-2 text-[0.85rem] leading-relaxed text-[var(--muted)]">
-            {displayDescription}
-          </p>
+          {description?.trim() ? (
+            <p className="mt-1.5 line-clamp-2 text-[0.78rem] leading-relaxed text-[var(--muted)]">
+              {description}
+            </p>
+          ) : null}
 
           <div className="flex-1" />
 
-          <div className="mt-4 flex items-end justify-between gap-3">
+          {/* Preço + botão */}
+          <div className="mt-3 flex items-center justify-between gap-2">
             <div>
-              <p className="menu-price text-[1.65rem] font-bold leading-none text-[var(--accent)]">
+              {displayCompare ? (
+                <p className="text-[0.7rem] text-[var(--muted)] line-through leading-none mb-0.5">{displayCompare}</p>
+              ) : null}
+              <p className="text-[1.15rem] font-extrabold leading-none text-[var(--accent)]">
                 {displayPrice}
               </p>
-              {displayCompare ? (
-                <p className="mt-0.5 text-xs text-[var(--muted)] line-through">{displayCompare}</p>
-              ) : null}
             </div>
-          </div>
 
-          <div className="mt-5">
             <button
-              aria-label={`Ver detalhes e adicionar ${name} ao pedido`}
-              className="w-full cursor-pointer rounded-[var(--radius-sm)] bg-[var(--green-rich)] px-4 py-3 text-[0.85rem] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[var(--green-deep)] active:scale-[0.97]"
+              aria-label={`Adicionar ${name} ao pedido`}
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-3.5 py-2 text-[0.78rem] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-green-dark)] active:scale-[0.96]"
               onClick={openDetails}
               type="button"
             >
-              <span className="inline-flex items-center justify-center gap-1.5">
-                <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Adicionar ao pedido
-              </span>
+              <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.8} viewBox="0 0 24 24">
+                <path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Adicionar
             </button>
           </div>
         </div>

@@ -36,7 +36,7 @@ function CategoryIcon({ name }: { name: string }) {
   return (
     <svg
       aria-hidden="true"
-      className="h-4 w-4 shrink-0"
+      className="h-3.5 w-3.5 shrink-0"
       fill="none"
       stroke="currentColor"
       strokeWidth={1.6}
@@ -52,29 +52,30 @@ export function CategoryNav({
   activeCategoryId,
   onSelect,
 }: CategoryNavProps) {
-  const activeClasses = "bg-[var(--brand-green)] text-white shadow-[0_6px_20px_rgba(140,198,63,0.35)] -translate-y-0.5 border border-transparent";
-  const inactiveClasses = "bg-white text-[var(--foreground)] border border-[var(--line)] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_16px_rgba(242,122,34,0.08)] hover:border-[var(--brand-orange)]/40 hover:text-[var(--brand-orange-dark)] hover:-translate-y-0.5";
+  const activeClasses =
+    "bg-[var(--brand-orange)] text-white border border-[var(--brand-orange)] shadow-[0_4px_14px_rgba(234,106,28,0.32)]";
+  const inactiveClasses =
+    "bg-white text-[var(--ink-soft)] border border-[var(--line)] hover:border-[var(--brand-orange)] hover:text-[var(--brand-orange-dark)] hover:bg-[var(--accent-light)]";
 
   return (
-    <div className="sticky top-[59px] z-30 border-b border-[var(--line)] bg-[var(--background)]/90 backdrop-blur-xl">
-      <div className="shell py-4">
-        {/* Desktop: flex-wrap shows ALL categories */}
-        <div className="hidden flex-wrap items-center gap-3 lg:flex">
+    <div className="sticky top-[59px] z-30 bg-[var(--background)]/95 backdrop-blur-xl shadow-[0_1px_0_rgba(36,18,8,0.07)]">
+      <div className="shell py-3">
+        {/* Desktop: flex-wrap */}
+        <div className="hidden flex-wrap items-center gap-2 lg:flex">
           {categories.map((category) => {
             const isActive = category.id === activeCategoryId;
-
             return (
               <button
                 key={category.id}
                 aria-current={isActive ? "true" : undefined}
-                className={`relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 text-[0.88rem] font-bold transition-all duration-300 ${
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold transition-all duration-200 ${
                   isActive ? activeClasses : inactiveClasses
                 }`}
                 onClick={() => onSelect(category.id)}
                 type="button"
               >
                 <CategoryIcon name={category.name} />
-                <span className="tracking-wide">{category.name}</span>
+                <span>{category.name}</span>
               </button>
             );
           })}
@@ -82,27 +83,26 @@ export function CategoryNav({
 
         {/* Mobile: horizontal scroll */}
         <div className="relative overflow-x-auto lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-w-max items-center gap-2.5 pr-12">
+          <div className="flex min-w-max items-center gap-2 pr-10">
             {categories.map((category) => {
               const isActive = category.id === activeCategoryId;
-
               return (
                 <button
                   key={category.id}
                   aria-current={isActive ? "true" : undefined}
-                  className={`relative flex shrink-0 cursor-pointer items-center gap-2.5 rounded-full px-4 py-3 text-[0.85rem] font-bold transition-all duration-300 ${
+                  className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold transition-all duration-200 ${
                     isActive ? activeClasses : inactiveClasses
                   }`}
                   onClick={() => onSelect(category.id)}
                   type="button"
                 >
                   <CategoryIcon name={category.name} />
-                  <span className="tracking-wide">{category.name}</span>
+                  <span>{category.name}</span>
                 </button>
               );
             })}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[var(--background)] via-[var(--background)]/80 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-[var(--background)] to-transparent" />
         </div>
       </div>
     </div>

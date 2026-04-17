@@ -101,7 +101,7 @@ export default async function HomePage() {
       <main className="min-h-screen">
         {/* ─── Hero ─── */}
         <section className="hero-v2">
-          <div className="shell relative z-[1] grid items-center gap-4 py-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8 lg:py-8">
+          <div className="shell relative z-[1] grid items-center gap-6 py-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10 lg:py-8 xl:py-12 2xl:py-16">
             {/* Coluna de texto */}
             <div className="relative">
               <div className="hero-reveal mb-3 flex items-center gap-3">
@@ -114,7 +114,7 @@ export default async function HomePage() {
                 </span>
               </div>
 
-              <h1 className="hero-reveal text-[1.55rem] font-black leading-[1.05] tracking-tight text-white sm:text-[1.9rem] lg:text-[2.3rem]">
+              <h1 className="hero-reveal text-[1.6rem] font-black leading-[1.05] tracking-tight text-white sm:text-[2rem] lg:text-[2.5rem] xl:text-[3rem] 2xl:text-[3.5rem]">
                 <span className="text-[var(--brand-green)]" style={{ WebkitTextStroke: "1.5px #fff" }}>
                   Lanches{" "}
                 </span>
@@ -137,7 +137,7 @@ export default async function HomePage() {
                 </span>
               </h1>
 
-              <p className="hero-reveal mt-2 max-w-md text-[0.88rem] leading-snug text-white/80">
+              <p className="hero-reveal mt-2 max-w-md text-[0.88rem] leading-snug text-white/80 xl:text-[1rem] xl:mt-3">
                 Pão selado na manteiga, maionese caseira e entrega quentinha até você.
               </p>
 
@@ -151,7 +151,7 @@ export default async function HomePage() {
 
             {/* Coluna da imagem — só aparece em desktop */}
             <div className="hero-reveal relative hidden items-center justify-center lg:flex">
-              <div className="hero-plate" style={{ maxWidth: 220 }}>
+              <div className="hero-plate" style={{ width: "clamp(150px, 26vh, 280px)" }}>
                 <Image
                   alt="Lanches artesanais da casa"
                   className="object-cover"
@@ -166,48 +166,44 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ─── Info Strip ─── */}
-        <section className="info-strip">
+        {/* ─── Info Bar ─── */}
+        <div className="border-b border-[var(--line)] bg-white">
           <div className="shell">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="info-card stagger-in">
-                <div className="info-card__icon">
+            <div className="flex flex-col divide-y divide-[var(--line)] sm:flex-row sm:divide-x sm:divide-y-0">
+
+              <div className="flex items-center gap-3 py-3 sm:flex-1 sm:px-5 sm:py-3.5 first:sm:pl-0 last:sm:pr-0">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--brand-orange-dark)]">
                   <MapPinIcon />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--green-deep)]">Localização</p>
+                  <p className="truncate text-[0.82rem] font-medium text-[var(--foreground)]">{brandContent.location}</p>
                 </div>
-                <p className="eyebrow" style={{ color: "var(--green-deep)" }}>
-                  Localização
-                </p>
-                <p className="mt-1.5 text-[0.92rem] font-semibold leading-snug text-[var(--foreground)]">
-                  {brandContent.location}
-                </p>
               </div>
 
-              <div className="info-card stagger-in">
-                <div className="info-card__icon">
+              <div className="flex items-center gap-3 py-3 sm:flex-1 sm:px-5 sm:py-3.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--brand-orange-dark)]">
                   <ClockIcon />
+                </span>
+                <div>
+                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--green-deep)]">Horário</p>
+                  <p className="text-[0.82rem] font-medium text-[var(--foreground)]">{brandContent.hours}</p>
                 </div>
-                <p className="eyebrow" style={{ color: "var(--green-deep)" }}>
-                  Horário
-                </p>
-                <p className="mt-1.5 text-[0.92rem] font-semibold leading-snug text-[var(--foreground)]">
-                  {brandContent.hours}
-                </p>
               </div>
 
-              <div className="info-card stagger-in">
-                <div className="info-card__icon">
+              <div className="flex items-center gap-3 py-3 sm:flex-1 sm:px-5 sm:py-3.5 last:sm:pr-0">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--brand-orange-dark)]">
                   <PhoneIcon />
+                </span>
+                <div>
+                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--green-deep)]">Entrega</p>
+                  <p className="text-[0.82rem] font-medium text-[var(--foreground)]">Rápida e quentinha até você</p>
                 </div>
-                <p className="eyebrow" style={{ color: "var(--green-deep)" }}>
-                  Entrega
-                </p>
-                <p className="mt-1.5 text-[0.92rem] font-semibold leading-snug text-[var(--foreground)]">
-                  Entrega rápida e quentinha até a sua porta
-                </p>
               </div>
+
             </div>
           </div>
-        </section>
+        </div>
 
         {/* ─── Cardápio ─── */}
         <MenuBrowser categories={browserCategories} />
