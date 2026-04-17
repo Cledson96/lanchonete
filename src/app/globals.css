@@ -67,6 +67,26 @@
   box-sizing: border-box;
 }
 
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--brand-orange);
+}
+
+.input::placeholder {
+  color: rgba(138, 106, 74, 0.55);
+}
+
 html {
   min-height: 100%;
   color: var(--foreground);
