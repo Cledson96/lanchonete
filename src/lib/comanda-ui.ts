@@ -132,15 +132,15 @@ export function humanizePaymentMethod(value: PaymentMethod) {
     case "dinheiro":
       return "Dinheiro";
     case "cartao_credito":
-      return "Cartao de credito";
+      return "Cartão de crédito";
     case "cartao_debito":
-      return "Cartao de debito";
+      return "Cartão de débito";
     case "pix":
       return "Pix";
     case "outro":
       return "Outro";
     default:
-      return "Nao definido";
+      return "Não definido";
   }
 }
 

@@ -8,95 +8,94 @@ type Props = {
   emptyLabel?: string;
 };
 
+function formatTime(iso: string) {
+  return new Intl.DateTimeFormat("pt-BR", { timeStyle: "short" }).format(new Date(iso));
+}
+
 export function ComandaEntryList({
   entries,
-  emptyLabel = "Nenhum item lancado ainda.",
+  emptyLabel = "Nenhum item lançado ainda.",
 }: Props) {
   if (!entries.length) {
     return (
-      <div className="rounded-[1.5rem] border border-dashed border-[var(--line)] bg-[var(--background)] px-5 py-8 text-sm text-[var(--muted)]">
+      <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-6 text-center text-sm text-[var(--muted)]">
         {emptyLabel}
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {entries.map((entry) => (
-        <article
-          className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--background)] px-4 py-4"
-          key={entry.id}
-        >
-          <div className="flex gap-4">
-            <div className="relative hidden h-[4.5rem] w-[4.5rem] overflow-hidden rounded-[1.1rem] bg-[var(--surface)] sm:block">
+    <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+      {entries.map((entry, idx) => {
+        const extras = entry.selectedOptions;
+        const modifiedIngredients = (entry.ingredientCustomizations || []).filter((ing) => ing.quantity !== 1);
+
+        return (
+          <article
+            className={`flex gap-3 p-3 ${idx > 0 ? "border-t border-[var(--line)]" : ""}`}
+            key={entry.id}
+          >
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[var(--background)]">
               <Image
                 alt={entry.menuItem.name}
                 className="object-cover"
                 fill
-                sizes="72px"
+                sizes="56px"
                 src={resolveMenuItemImage(entry.menuItem.imageUrl)}
               />
+              <span className="absolute right-1 top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--brand-orange)] px-1 text-[0.65rem] font-bold text-white">
+                {entry.quantity}
+              </span>
             </div>
 
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-                    {entry.quantity}x item lancado
-                  </p>
-                  <h3 className="mt-1 text-lg font-semibold tracking-tight text-[var(--foreground)]">
-                    {entry.menuItem.name}
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-[var(--muted)]">Unitario {formatMoney(entry.unitPrice)}</p>
-                  <p className="mt-1 text-lg font-semibold text-[var(--brand-orange-dark)]">
-                    {formatMoney(entry.subtotalAmount)}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold leading-tight">{entry.menuItem.name}</p>
+                  <p className="mt-0.5 text-[0.7rem] text-[var(--muted)]">
+                    {formatTime(entry.createdAt)} · Unitário {formatMoney(entry.unitPrice)}
                   </p>
                 </div>
+                <p className="shrink-0 text-sm font-bold">{formatMoney(entry.subtotalAmount)}</p>
               </div>
 
-              {entry.selectedOptions.length ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {entry.selectedOptions.map((option) => (
+              {(extras.length > 0 || modifiedIngredients.length > 0) ? (
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {extras.map((opt) => (
                     <span
-                      className="rounded-full border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/8 px-3 py-1 text-xs font-medium text-[var(--brand-green-dark)]"
-                      key={`${entry.id}-${option.optionItem.id}`}
+                      className="inline-flex items-center gap-1 rounded-md bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.65rem] font-medium text-[var(--brand-green-dark)]"
+                      key={`${entry.id}-${opt.optionItem.id}`}
                     >
-                      {option.optionItem.name}
-                      {Number(option.unitPriceDelta) > 0 ? ` +${formatMoney(option.unitPriceDelta)}` : ""}
+                      + {opt.quantity > 1 ? `${opt.quantity}× ` : ""}{opt.optionItem.name}
+                      {Number(opt.unitPriceDelta) > 0 ? (
+                        <span className="text-[var(--muted)]">({formatMoney(opt.unitPriceDelta)})</span>
+                      ) : null}
+                    </span>
+                  ))}
+                  {modifiedIngredients.map((ing) => (
+                    <span
+                      className={`inline-flex rounded-md px-1.5 py-0.5 text-[0.65rem] font-medium ${
+                        ing.quantity === 0
+                          ? "bg-red-50 text-red-600 line-through"
+                          : "bg-sky-50 text-sky-700"
+                      }`}
+                      key={`${entry.id}-ing-${ing.ingredient.id}`}
+                    >
+                      {ing.quantity === 0 ? `sem ${ing.ingredient.name}` : `${ing.quantity}× ${ing.ingredient.name}`}
                     </span>
                   ))}
                 </div>
               ) : null}
 
-              {entry.ingredientCustomizations && entry.ingredientCustomizations.length > 0 ? (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {entry.ingredientCustomizations
-                    .filter((ing) => ing.quantity !== 1)
-                    .map((ing) => (
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${ing.quantity === 0 ? "border border-red-200 bg-red-50 text-red-600 line-through" : "border border-[var(--brand-orange)]/20 bg-[var(--brand-orange)]/8 text-[var(--brand-orange-dark)]"}`}
-                        key={`${entry.id}-ing-${ing.ingredient.id}`}
-                      >
-                        {ing.quantity === 0 ? `Sem ${ing.ingredient.name}` : `${ing.quantity}x ${ing.ingredient.name}`}
-                      </span>
-                    ))}
-                </div>
-              ) : null}
-
               {entry.notes ? (
-                <div className="mt-3 rounded-[1.1rem] border border-[var(--brand-orange)]/12 bg-[var(--surface)] px-3 py-3 text-sm text-[var(--muted)]">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[var(--brand-orange-dark)]">
-                    Observacao do item
-                  </p>
-                  <p className="mt-1 leading-6">{entry.notes}</p>
-                </div>
+                <p className="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[0.7rem] leading-4 text-amber-800">
+                  <span className="font-semibold">Obs:</span> {entry.notes}
+                </p>
               ) : null}
             </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        );
+      })}
     </div>
   );
 }
