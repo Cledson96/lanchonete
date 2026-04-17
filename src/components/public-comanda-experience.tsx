@@ -76,6 +76,7 @@ export function PublicComandaExperience({ slug }: Props) {
     quantity: number;
     notes?: string;
     optionItemIds: string[];
+    ingredientCustomizations: Record<string, number>;
   }) {
     if (!comanda) {
       return;

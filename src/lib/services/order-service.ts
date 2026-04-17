@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/http";
 import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
 import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu-item-availability";
+import { groupRepeatedIds } from "@/lib/option-item-quantity";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
 import { decimal, normalizePhone, optionalNullable } from "@/lib/utils";
@@ -172,14 +173,14 @@ export async function createOrder(input: CreateOrderInput) {
       throw new ApiError(404, "Item do cardapio nao encontrado.");
     }
 
-    const selectedOptions = (item.optionItemIds || []).map((optionId) => {
-      const option = optionMap.get(optionId);
+    const selectedOptions = groupRepeatedIds(item.optionItemIds || []).map(({ id, quantity }) => {
+      const option = optionMap.get(id);
 
       if (!option) {
         throw new ApiError(404, "Adicional nao encontrado.");
       }
 
-      return option;
+      return { ...option, quantity };
     });
 
     const validOptionIds = new Set(
@@ -216,7 +217,7 @@ export async function createOrder(input: CreateOrderInput) {
     }));
 
     const optionDelta = selectedOptions.reduce(
-      (sum, option) => sum + Number(option.priceDelta),
+      (sum, option) => sum + Number(option.priceDelta) * option.quantity,
       0,
     );
     const unitPrice = Number(menuItem.price) + optionDelta;
@@ -333,9 +334,9 @@ export async function createOrder(input: CreateOrderInput) {
             subtotalAmount: money(lineSubtotal),
             notes: optionalNullable(item.notes),
             selectedOptions: {
-              create: selectedOptions.map((option) => ({
+            create: selectedOptions.map((option) => ({
                 optionItemId: option.id,
-                quantity: 1,
+                quantity: option.quantity,
                 unitPriceDelta: option.priceDelta,
               })),
             },

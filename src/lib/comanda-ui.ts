@@ -98,6 +98,7 @@ export type PublicMenuCategory = {
       id: string;
       name: string;
       quantity: number;
+      price?: number | string;
     }>;
   }>;
 };

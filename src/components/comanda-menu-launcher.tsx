@@ -16,6 +16,7 @@ type Props = {
     quantity: number;
     notes?: string;
     optionItemIds: string[];
+    ingredientCustomizations: Record<string, number>;
   }) => Promise<void>;
 };
 
@@ -36,7 +37,7 @@ export function ComandaMenuLauncher({
     return categories.find((category) => category.id === activeCategoryId) || categories[0] || null;
   }, [activeCategoryId, categories]);
 
-  async function handleAdd(input: { quantity: number; notes?: string; optionItemIds: string[] }) {
+  async function handleAdd(input: { quantity: number; notes?: string; optionItemIds: string[]; ingredientCustomizations: Record<string, number> }) {
     if (!selectedItem) {
       return;
     }
@@ -49,6 +50,7 @@ export function ComandaMenuLauncher({
         quantity: input.quantity,
         notes: input.notes,
         optionItemIds: input.optionItemIds,
+        ingredientCustomizations: input.ingredientCustomizations,
       });
       setSelectedItem(null);
       setSelectedCategoryName("");
