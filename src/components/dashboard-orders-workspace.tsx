@@ -13,6 +13,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/order-operations";
 import { formatMoney } from "@/lib/utils";
 import {
   DashboardOrderDetailSheet,
@@ -42,12 +43,20 @@ type OrderSummary = {
     notes: string | null;
     totalAmount: number | string;
     entries: Array<{ id: string }>;
+    operationalSummary?: OperationalSummary;
   } | null;
+  operationalSummary: OperationalSummary;
   items: Array<{
     id: string;
     quantity: number;
     notes: string | null;
     menuItem: { name: string };
+    units: Array<{
+      id: string;
+      sequence: number;
+      status: OrderItemUnitStatus;
+    }>;
+    operationalSummary: OperationalSummary;
     selectedOptions?: Array<{
       quantity: number;
       optionItem: { name: string };
@@ -76,20 +85,25 @@ type ColumnConfig = {
 type KitchenItemCardData = {
   id: string;
   orderId: string;
+  itemId: string;
+  unitId: string;
   orderCode: string;
-  orderStatus: OrderStatus;
+  unitStatus: OrderItemUnitStatus;
   channel: OrderChannel;
   type: OrderSummary["type"];
   customerName: string | null;
   createdAt: string;
   comandaLabel: string | null;
   orderNotes: string | null;
-  quantity: number;
+  itemQuantity: number;
+  unitSequence: number;
   name: string;
   itemNotes: string | null;
   optionLines: string[];
   ingredientLines: string[];
 };
+
+type KitchenColumnConfig = ColumnConfig & { status: "novo" | "em_preparo" | "pronto" };
 
 const columnsByView: Record<DashboardOrderView, ColumnConfig[]> = {
   operation: [
@@ -101,6 +115,7 @@ const columnsByView: Record<DashboardOrderView, ColumnConfig[]> = {
   kitchen: [
     { status: "novo", label: "Novos", accent: "border-t-amber-400", headerBg: "bg-amber-50", countBg: "bg-amber-100 text-amber-700" },
     { status: "em_preparo", label: "Em preparo", accent: "border-t-[var(--brand-orange)]", headerBg: "bg-[var(--brand-orange)]/5", countBg: "bg-[var(--brand-orange)]/15 text-[var(--brand-orange-dark)]" },
+    { status: "pronto", label: "Prontos", accent: "border-t-[var(--brand-green)]", headerBg: "bg-[var(--brand-green)]/5", countBg: "bg-[var(--brand-green)]/15 text-[var(--brand-green-dark)]" },
   ],
   dispatch: [
     { status: "pronto", label: "Prontos", accent: "border-t-[var(--brand-green)]", headerBg: "bg-[var(--brand-green)]/5", countBg: "bg-[var(--brand-green)]/15 text-[var(--brand-green-dark)]" },
@@ -191,26 +206,41 @@ function getComandaLabel(order: Pick<OrderSummary, "comanda">) {
 
 function buildKitchenItems(orders: OrderSummary[]) {
   return orders
-    .filter((order) => order.status === "novo" || order.status === "em_preparo")
+    .filter((order) => order.status !== "cancelado" && order.status !== "fechado")
     .flatMap((order) =>
-      order.items.map((item) => ({
-        id: `${order.id}:${item.id}`,
-        orderId: order.id,
-        orderCode: order.code,
-        orderStatus: order.status,
-        channel: order.channel,
-        type: order.type,
-        customerName: order.customerName,
-        createdAt: order.createdAt,
-        comandaLabel: getComandaLabel(order),
-        orderNotes: order.notes,
-        quantity: item.quantity,
-        name: item.menuItem.name,
-        itemNotes: item.notes,
-        optionLines: summarizeSelectedOptions(item.selectedOptions),
-        ingredientLines: summarizeIngredientChanges(item.ingredientCustomizations),
-      })),
+      order.items.flatMap((item) =>
+        item.units
+          .filter((unit) => unit.status === "novo" || unit.status === "em_preparo" || unit.status === "pronto")
+          .map((unit) => ({
+            id: unit.id,
+            orderId: order.id,
+            itemId: item.id,
+            unitId: unit.id,
+            orderCode: order.code,
+            unitStatus: unit.status,
+            channel: order.channel,
+            type: order.type,
+            customerName: order.customerName,
+            createdAt: order.createdAt,
+            comandaLabel: getComandaLabel(order),
+            orderNotes: order.notes,
+            itemQuantity: item.quantity,
+            unitSequence: unit.sequence,
+            name: item.menuItem.name,
+            itemNotes: item.notes,
+            optionLines: summarizeSelectedOptions(item.selectedOptions),
+            ingredientLines: summarizeIngredientChanges(item.ingredientCustomizations),
+          })),
+      ),
     );
+}
+
+function describeOrderSummary(summary: OperationalSummary) {
+  if (summary.isFullyDelivered) return "Todos entregues";
+  if (summary.isFullyReady) return "Todos prontos";
+  if (summary.isPartiallyDelivered) return "Entrega parcial";
+  if (summary.isPartiallyReady) return "Parcial pronto";
+  return "Em andamento";
 }
 
 async function parseJson<T>(response: Response): Promise<T> {
@@ -244,6 +274,7 @@ function OrderCard({
   const visibleItems = order.items.slice(0, 3);
   const hiddenItemsCount = order.items.length - visibleItems.length;
   const comandaLabel = order.comanda?.name?.trim() || (order.comanda ? order.comanda.code.slice(0, 8) : null);
+  const progressLabel = describeOrderSummary(order.operationalSummary);
 
   return (
     <div
@@ -299,6 +330,9 @@ function OrderCard({
               Comanda {comandaLabel}
             </span>
           ) : null}
+          <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--muted)]">
+            {progressLabel}
+          </span>
         </div>
 
         {/* Itens */}
@@ -344,6 +378,7 @@ function OrderCard({
           <div className="text-[0.7rem] text-[var(--muted)]">
             <p>{itemCount} {itemCount === 1 ? "item" : "itens"}</p>
             {order.comanda ? <p>{order.comanda.entries.length} lançamento(s)</p> : null}
+            <p>{order.operationalSummary.readyOrDeliveredUnits}/{order.operationalSummary.activeUnits} prontos</p>
           </div>
           <span className="text-sm font-bold text-[var(--foreground)]">
             {formatMoney(toNumber(order.totalAmount))}
@@ -406,18 +441,29 @@ function KanbanColumn({
 
 function KitchenItemCard({
   item,
+  isOverlay,
   onOpen,
 }: {
   item: KitchenItemCardData;
+  isOverlay?: boolean;
   onOpen: (orderId: string) => void;
 }) {
+  const { setNodeRef, attributes, listeners, transform, isDragging } = useDraggable({
+    id: item.id,
+    data: { item },
+    disabled: isOverlay,
+  });
   const channel = channelMeta[item.channel];
 
   return (
     <button
-      className="w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"
+      ref={isOverlay ? undefined : setNodeRef}
+      style={isOverlay ? undefined : { transform: CSS.Translate.toString(transform) }}
+      className={`w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition ${isDragging && !isOverlay ? "opacity-40" : ""} ${isOverlay ? "cursor-grabbing rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
       onClick={() => onOpen(item.orderId)}
       type="button"
+      {...(isOverlay ? {} : listeners)}
+      {...(isOverlay ? {} : attributes)}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -444,10 +490,11 @@ function KitchenItemCard({
 
       <div className="mt-3 flex items-start gap-2">
         <span className="inline-flex min-w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-orange)]/10 px-2 py-1 text-xs font-bold text-[var(--brand-orange-dark)]">
-          {item.quantity}x
+          #{item.unitSequence}
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-5 text-[var(--foreground)]">{item.name}</p>
+          <p className="mt-1 text-[0.72rem] leading-4 text-[var(--muted)]">Unidade {item.unitSequence} de {item.itemQuantity}</p>
           {item.optionLines.length ? (
             <p className="mt-1 text-[0.75rem] leading-4 text-[var(--brand-green-dark)]">+ {item.optionLines.join(" • ")}</p>
           ) : null}
@@ -472,13 +519,15 @@ function KitchenKanbanColumn({
   loading,
   onOpen,
 }: {
-  column: ColumnConfig;
+  column: KitchenColumnConfig;
   items: KitchenItemCardData[];
   loading: boolean;
   onOpen: (orderId: string) => void;
 }) {
+  const { setNodeRef, isOver } = useDroppable({ id: column.status });
+
   return (
-    <article className={`flex w-[18rem] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border-t-4 ${column.accent} border-x border-b border-[var(--line)] bg-[var(--surface)] shadow-sm`}>
+    <article ref={setNodeRef} className={`flex w-[18rem] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border-t-4 ${column.accent} border-x border-b border-[var(--line)] bg-[var(--surface)] shadow-sm transition-all ${isOver ? "ring-2 ring-[var(--brand-orange)]/50 ring-offset-2 scale-[1.01]" : ""}`}>
       <div className={`flex items-center justify-between gap-2 px-4 py-3 ${column.headerBg}`}>
         <p className="text-sm font-bold tracking-tight">{column.label}</p>
         <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${column.countBg}`}>{items.length}</span>
@@ -493,7 +542,7 @@ function KitchenKanbanColumn({
           items.map((item) => <KitchenItemCard key={item.id} item={item} onOpen={onOpen} />)
         ) : (
           <div className="rounded-xl border border-dashed border-[var(--line)] px-3 py-6 text-center text-xs text-[var(--muted)]">
-            Vazio
+            {isOver ? "Solte aqui" : "Vazio"}
           </div>
         )}
       </div>
@@ -516,6 +565,8 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
   const [channelFilter, setChannelFilter] = useState<"all" | OrderChannel>("all");
   const [typeFilter, setTypeFilter] = useState<"all" | OrderSummary["type"]>("all");
   const [activeDrag, setActiveDrag] = useState<OrderSummary | null>(null);
+  const [activeKitchenItem, setActiveKitchenItem] = useState<KitchenItemCardData | null>(null);
+  const [pendingUnitId, setPendingUnitId] = useState<string | null>(null);
   const ordersRef = useRef<OrderSummary[]>([]);
 
   const sensors = useSensors(
@@ -590,10 +641,10 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
   const kitchenColumns = useMemo(() => {
     const items = buildKitchenItems(orders);
 
-    return columnsByView.kitchen.map((column) => ({
+    return (columnsByView.kitchen as KitchenColumnConfig[]).map((column) => ({
       ...column,
       items: items
-        .filter((item) => item.orderStatus === column.status)
+        .filter((item) => item.unitStatus === column.status)
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     }));
   }, [orders]);
@@ -623,6 +674,32 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
       setDetailError(error instanceof Error ? error.message : "Não foi possível atualizar o status.");
     } finally {
       setPendingStatus(null);
+    }
+  }
+
+  async function handleUnitTransition(input: {
+    orderId: string;
+    itemId: string;
+    unitId: string;
+    toStatus: "em_preparo" | "pronto" | "entregue" | "cancelado";
+  }) {
+    try {
+      setPendingUnitId(input.unitId);
+      setDetailError(null);
+      setFeedback(null);
+      const response = await fetch(`/api/dashboard/orders/${input.orderId}/items/${input.itemId}/units/${input.unitId}/status`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ toStatus: input.toStatus }),
+      });
+      const payload = await parseJson<{ order: DashboardOrderDetail }>(response);
+      setSelectedOrder(payload.order);
+      setFeedback(`Item atualizado para ${humanize(input.toStatus)}.`);
+      await refreshOrders(false);
+    } catch (error) {
+      setDetailError(error instanceof Error ? error.message : "Não foi possível atualizar o item.");
+    } finally {
+      setPendingUnitId(null);
     }
   }
 
@@ -671,6 +748,32 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
       setOrders(prev);
       setListError(error instanceof Error ? error.message : "Não foi possível mover o pedido.");
     }
+  }
+
+  function handleKitchenDragStart(event: DragStartEvent) {
+    const items = buildKitchenItems(ordersRef.current);
+    const kitchenItem = items.find((item) => item.id === event.active.id);
+    if (kitchenItem) setActiveKitchenItem(kitchenItem);
+  }
+
+  async function handleKitchenDragEnd(event: DragEndEvent) {
+    setActiveKitchenItem(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const items = buildKitchenItems(ordersRef.current);
+    const current = items.find((item) => item.id === active.id);
+    const toStatus = over.id as OrderItemUnitStatus;
+
+    if (!current || current.unitStatus === toStatus) return;
+    if (toStatus !== "em_preparo" && toStatus !== "pronto") return;
+
+    await handleUnitTransition({
+      orderId: current.orderId,
+      itemId: current.itemId,
+      unitId: current.unitId,
+      toStatus,
+    });
   }
 
   return (
@@ -773,17 +876,23 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
           </div>
 
           <section className="-mx-4 overflow-x-auto pb-4 lg:mx-0">
-            <div className="flex snap-x gap-4 px-4 lg:px-0">
-              {kitchenColumns.map((column) => (
-                <KitchenKanbanColumn
-                  key={`kitchen-${column.status}`}
-                  column={column}
-                  items={column.items}
-                  loading={loadingList}
-                  onOpen={(id) => void openOrder(id)}
-                />
-              ))}
-            </div>
+            <DndContext onDragStart={handleKitchenDragStart} onDragEnd={handleKitchenDragEnd} onDragCancel={() => setActiveKitchenItem(null)} sensors={sensors}>
+              <div className="flex snap-x gap-4 px-4 lg:px-0">
+                {kitchenColumns.map((column) => (
+                  <KitchenKanbanColumn
+                    key={`kitchen-${column.status}`}
+                    column={column}
+                    items={column.items}
+                    loading={loadingList}
+                    onOpen={(id) => void openOrder(id)}
+                  />
+                ))}
+              </div>
+
+              <DragOverlay>
+                {activeKitchenItem ? <KitchenItemCard item={activeKitchenItem} isOverlay onOpen={() => undefined} /> : null}
+              </DragOverlay>
+            </DndContext>
           </section>
         </section>
       ) : null}
@@ -794,8 +903,10 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
         loading={loadingDetail}
         onClose={closeDetail}
         onTransition={handleTransition}
+        onUnitTransition={handleUnitTransition}
         order={selectedOrder}
         pendingStatus={pendingStatus}
+        pendingUnitId={pendingUnitId}
       />
     </main>
   );

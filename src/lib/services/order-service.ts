@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/http";
 import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
 import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu-item-availability";
+import { buildOrderItemUnits } from "@/lib/order-item-units";
 import { groupRepeatedIds } from "@/lib/option-item-quantity";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
@@ -346,6 +347,9 @@ export async function createOrder(input: CreateOrderInput) {
                 quantity: ing.quantity,
               })),
             },
+            units: {
+              create: buildOrderItemUnits(item.quantity),
+            },
           })),
         },
         statusEvents: {
@@ -380,6 +384,9 @@ export async function createOrder(input: CreateOrderInput) {
                 ingredient: true,
               },
             },
+            units: {
+              orderBy: { sequence: "asc" },
+            },
             selectedOptions: {
               include: {
                 optionItem: true,
@@ -408,6 +415,9 @@ export async function getOrderByCode(code: string) {
             include: {
               ingredient: true,
             },
+          },
+          units: {
+            orderBy: { sequence: "asc" },
           },
           selectedOptions: {
             include: {

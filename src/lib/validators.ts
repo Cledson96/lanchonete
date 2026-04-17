@@ -282,6 +282,10 @@ export const updateOrderStatusSchema = z.object({
   note: optionalStringField,
 });
 
+export const updateOrderItemUnitStatusSchema = z.object({
+  toStatus: z.enum(["em_preparo", "pronto", "entregue", "cancelado"]),
+});
+
 export const sendWhatsAppConversationMessageSchema = z.object({
   content: stringField.min(1).max(2000),
 });

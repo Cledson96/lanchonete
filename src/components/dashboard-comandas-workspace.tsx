@@ -61,6 +61,15 @@ function formatElapsed(iso: string) {
   return `${Math.floor(hours / 24)}d`;
 }
 
+function describeComandaProgress(comanda: ComandaDetail) {
+  if (comanda.operationalSummary.isFullyDelivered) return "Todos entregues";
+  if (comanda.operationalSummary.isFullyReady) return "Todos prontos";
+  if (comanda.operationalSummary.isPartiallyDelivered) return "Entrega parcial";
+  if (comanda.operationalSummary.isPartiallyReady) return "Parcial pronta";
+  if (comanda.operationalSummary.preparingUnits > 0) return "Em preparo";
+  return "Aguardando preparo";
+}
+
 function sortCommandas(commandas: ComandaDetail[]) {
   return [...commandas].sort((left, right) => {
     const leftActive = canEditComanda(left.status);
@@ -523,6 +532,7 @@ export function DashboardComandasWorkspace() {
                 const selected = selectedId === comanda.id;
                 const active = canEditComanda(comanda.status);
                 const entryCount = comanda.entries.reduce((sum, e) => sum + e.quantity, 0);
+                const progressLabel = describeComandaProgress(comanda);
 
                 return (
                   <button
@@ -544,6 +554,14 @@ export function DashboardComandasWorkspace() {
                         <p className="mt-0.5 truncate text-sm font-semibold leading-tight">
                           {comanda.name || comanda.customerProfile?.fullName || "Sem nome"}
                         </p>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          <span className="rounded-full bg-[var(--background)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--muted)]">
+                            {progressLabel}
+                          </span>
+                          <span className="rounded-full bg-[var(--brand-green)]/12 px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--brand-green-dark)]">
+                            {comanda.operationalSummary.readyOrDeliveredUnits}/{comanda.operationalSummary.activeUnits} prontos
+                          </span>
+                        </div>
                       </div>
                       <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[0.6rem] font-semibold ${statusTone(comanda.status)}`}>
                         {humanizeComandaStatus(comanda.status)}
@@ -621,6 +639,20 @@ export function DashboardComandasWorkspace() {
                       </span>
                     )}
                   </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-4">
+                  <span className="rounded-full bg-[var(--background)] px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--muted)]">
+                    {describeComandaProgress(selectedComanda)}
+                  </span>
+                  <span className="rounded-full bg-[var(--brand-green)]/12 px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--brand-green-dark)]">
+                    {selectedComanda.operationalSummary.readyOrDeliveredUnits}/{selectedComanda.operationalSummary.activeUnits} prontos
+                  </span>
+                  {selectedComanda.operationalSummary.deliveredUnits > 0 ? (
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[0.7rem] font-semibold text-emerald-700">
+                      {selectedComanda.operationalSummary.deliveredUnits} entregue(s)
+                    </span>
+                  ) : null}
                 </div>
 
                 {/* KPIs financeiros */}

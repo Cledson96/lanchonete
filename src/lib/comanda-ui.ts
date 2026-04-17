@@ -1,3 +1,5 @@
+import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/order-operations";
+
 export type ComandaStatus =
   | "novo"
   | "em_preparo"
@@ -30,6 +32,7 @@ export type ComandaDetail = {
   createdAt: string;
   updatedAt: string;
   closedAt: string | null;
+  operationalSummary: OperationalSummary;
   customerProfile?: {
     id: string;
     fullName: string;
@@ -67,6 +70,15 @@ export type ComandaDetail = {
       };
       quantity: number;
     }>;
+    units: Array<{
+      id: string;
+      sequence: number;
+      status: OrderItemUnitStatus;
+      startedAt?: string | null;
+      readyAt?: string | null;
+      deliveredAt?: string | null;
+    }>;
+    operationalSummary: OperationalSummary;
   }>;
 };
 

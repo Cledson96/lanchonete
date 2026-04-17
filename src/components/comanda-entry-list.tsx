@@ -3,6 +3,15 @@ import { formatMoney } from "@/lib/utils";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import type { ComandaDetail } from "@/lib/comanda-ui";
 
+function describeEntrySummary(summary: ComandaDetail["entries"][number]["operationalSummary"]) {
+  if (summary.isFullyDelivered) return "Todos entregues";
+  if (summary.isFullyReady) return "Todos prontos";
+  if (summary.isPartiallyDelivered) return "Entrega parcial";
+  if (summary.isPartiallyReady) return "Parcial pronto";
+  if (summary.preparingUnits > 0) return "Em preparo";
+  return "Aguardando preparo";
+}
+
 type Props = {
   entries: ComandaDetail["entries"];
   emptyLabel?: string;
@@ -55,6 +64,19 @@ export function ComandaEntryList({
                   <p className="mt-0.5 text-[0.7rem] text-[var(--muted)]">
                     {formatTime(entry.createdAt)} · Unitário {formatMoney(entry.unitPrice)}
                   </p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--muted)]">
+                      {describeEntrySummary(entry.operationalSummary)}
+                    </span>
+                    <span className="inline-flex rounded-md bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--brand-green-dark)]">
+                      {entry.operationalSummary.readyOrDeliveredUnits}/{entry.operationalSummary.activeUnits} prontos
+                    </span>
+                    {entry.operationalSummary.deliveredUnits > 0 ? (
+                      <span className="inline-flex rounded-md bg-emerald-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-emerald-700">
+                        {entry.operationalSummary.deliveredUnits} entregue(s)
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 <p className="shrink-0 text-sm font-bold">{formatMoney(entry.subtotalAmount)}</p>
               </div>
@@ -92,6 +114,27 @@ export function ComandaEntryList({
                   <span className="font-semibold">Obs:</span> {entry.notes}
                 </p>
               ) : null}
+
+              <div className="mt-2 flex flex-wrap gap-1">
+                {entry.units.map((unit) => (
+                  <span
+                    className={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${
+                      unit.status === "novo"
+                        ? "bg-amber-100 text-amber-700"
+                        : unit.status === "em_preparo"
+                          ? "bg-[var(--brand-orange)]/15 text-[var(--brand-orange-dark)]"
+                          : unit.status === "pronto"
+                            ? "bg-[var(--brand-green)]/15 text-[var(--brand-green-dark)]"
+                            : unit.status === "entregue"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-red-100 text-red-700"
+                    }`}
+                    key={unit.id}
+                  >
+                    #{unit.sequence} · {unit.status.replaceAll("_", " ")}
+                  </span>
+                ))}
+              </div>
             </div>
           </article>
         );

@@ -37,6 +37,14 @@ enum OrderStatus {
   cancelado
 }
 
+enum OrderItemUnitStatus {
+  novo
+  em_preparo
+  pronto
+  entregue
+  cancelado
+}
+
 enum PaymentMethod {
   dinheiro
   cartao_credito
@@ -362,6 +370,7 @@ model OrderItem {
   menuItem        MenuItem          @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
   selectedOptions OrderItemOption[]
   ingredientCustomizations OrderItemIngredient[]
+  units           OrderItemUnit[]
 }
 
 model OrderItemOption {
@@ -414,6 +423,27 @@ model ComandaEntry {
   menuItem        MenuItem             @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
   selectedOptions ComandaEntryOption[]
   ingredientCustomizations ComandaEntryIngredient[]
+  units           OrderItemUnit[]
+}
+
+model OrderItemUnit {
+  id            String              @id @default(cuid())
+  orderItemId   String
+  comandaEntryId String?
+  sequence      Int
+  status        OrderItemUnitStatus @default(novo)
+  startedAt     DateTime?
+  readyAt       DateTime?
+  deliveredAt   DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  orderItem     OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  comandaEntry  ComandaEntry?       @relation(fields: [comandaEntryId], references: [id], onDelete: SetNull)
+
+  @@unique([orderItemId, sequence])
+  @@index([status, createdAt])
+  @@index([comandaEntryId])
 }
 
 model ComandaEntryOption {

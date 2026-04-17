@@ -1,8 +1,14 @@
-import { OrderStatus } from "@prisma/client";
+import { Prisma, OrderItemUnitStatus, OrderStatus } from "@prisma/client";
 import { ApiError } from "@/lib/http";
+import {
+  ORDER_ITEM_UNIT_TRANSITIONS,
+  attachOrderOperationalSummary,
+  buildUnitTimestampPatch,
+} from "@/lib/order-operations";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { syncLegacyCommandasToOrders } from "@/lib/services/comanda-service";
+import { syncMissingOrderItemUnits } from "@/lib/services/order-item-unit-service";
 import { normalizePhone } from "@/lib/utils";
 
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -21,6 +27,103 @@ const dashboardOrderViewStatuses = {
   dispatch: ["pronto", "saiu_para_entrega"],
   archive: ["entregue", "fechado", "cancelado"],
 } satisfies Record<string, OrderStatus[]>;
+
+const orderInclude = {
+  customerProfile: true,
+  comanda: {
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      notes: true,
+      totalAmount: true,
+      entries: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  },
+  acceptedBy: true,
+  items: {
+    include: {
+      menuItem: true,
+      units: {
+        orderBy: { sequence: "asc" as const },
+      },
+      selectedOptions: {
+        include: {
+          optionItem: true,
+        },
+      },
+      ingredientCustomizations: {
+        include: {
+          ingredient: true,
+        },
+      },
+    },
+  },
+  statusEvents: {
+    orderBy: { createdAt: "asc" as const },
+  },
+} as const;
+
+function syncUnitStatusesForOrderTransition(tx: Prisma.TransactionClient, orderId: string, toStatus: OrderStatus, now: Date) {
+  if (toStatus === "em_preparo") {
+    return tx.orderItemUnit.updateMany({
+      where: {
+        orderItem: { orderId },
+        status: "novo",
+      },
+      data: {
+        status: "em_preparo",
+        ...buildUnitTimestampPatch("em_preparo", now),
+      },
+    });
+  }
+
+  if (toStatus === "pronto") {
+    return tx.orderItemUnit.updateMany({
+      where: {
+        orderItem: { orderId },
+        status: { in: ["novo", "em_preparo"] },
+      },
+      data: {
+        status: "pronto",
+        startedAt: now,
+        readyAt: now,
+      },
+    });
+  }
+
+  if (toStatus === "entregue") {
+    return tx.orderItemUnit.updateMany({
+      where: {
+        orderItem: { orderId },
+        status: "pronto",
+      },
+      data: {
+        status: "entregue",
+        deliveredAt: now,
+      },
+    });
+  }
+
+  if (toStatus === "cancelado") {
+    return tx.orderItemUnit.updateMany({
+      where: {
+        orderItem: { orderId },
+        status: { in: ["novo", "em_preparo", "pronto"] },
+      },
+      data: {
+        status: "cancelado",
+        cancelledAt: now,
+      },
+    });
+  }
+
+  return Promise.resolve({ count: 0 });
+}
 
 export type DashboardOrderView = keyof typeof dashboardOrderViewStatuses;
 
@@ -99,6 +202,7 @@ export async function listOrders(filters?: {
   view?: DashboardOrderView;
 }) {
   await syncLegacyCommandasToOrders();
+  await syncMissingOrderItemUnits();
 
   const statusFilter =
     filters?.status ??
@@ -114,82 +218,19 @@ export async function listOrders(filters?: {
       filters?.view === "archive"
         ? [{ updatedAt: "desc" }]
         : [{ createdAt: "asc" }],
-    include: {
-      customerProfile: true,
-      comanda: {
-        select: {
-          id: true,
-          code: true,
-          name: true,
-          notes: true,
-          totalAmount: true,
-          entries: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      },
-      acceptedBy: true,
-      items: {
-        include: {
-          menuItem: true,
-          selectedOptions: {
-            include: {
-              optionItem: true,
-            },
-          },
-          ingredientCustomizations: {
-            include: {
-              ingredient: true,
-            },
-          },
-        },
-      },
-      statusEvents: {
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
+    include: orderInclude,
+  }).then((orders) => orders.map((order) => attachOrderOperationalSummary(order)));
 }
 
 export async function getOrderById(id: string) {
+  await syncMissingOrderItemUnits();
+
   return prisma.order.findUnique({
     where: { id },
     include: {
-      customerProfile: true,
-      comanda: {
-        select: {
-          id: true,
-          code: true,
-          name: true,
-          notes: true,
-          totalAmount: true,
-          entries: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      },
+      ...orderInclude,
       deliveryAddress: true,
       deliveryFeeRule: true,
-      acceptedBy: true,
-      items: {
-        include: {
-          menuItem: true,
-          selectedOptions: {
-            include: {
-              optionItem: true,
-            },
-          },
-          ingredientCustomizations: {
-            include: {
-              ingredient: true,
-            },
-          },
-        },
-      },
       statusEvents: {
         orderBy: { createdAt: "asc" },
         include: {
@@ -197,11 +238,70 @@ export async function getOrderById(id: string) {
         },
       },
     },
+  }).then((order) => (order ? attachOrderOperationalSummary(order) : null));
+}
+
+export async function transitionOrderItemUnitStatus(input: {
+  orderId: string;
+  orderItemId: string;
+  unitId: string;
+  toStatus: OrderItemUnitStatus;
+}) {
+  const unit = await prisma.orderItemUnit.findUnique({
+    where: { id: input.unitId },
+    include: {
+      orderItem: {
+        select: {
+          id: true,
+          orderId: true,
+          order: {
+            select: {
+              type: true,
+            },
+          },
+        },
+      },
+    },
   });
+
+  if (!unit || unit.orderItemId !== input.orderItemId || unit.orderItem.orderId !== input.orderId) {
+    throw new ApiError(404, "Unidade do item nao encontrada.");
+  }
+
+  if (unit.status === input.toStatus) {
+    throw new ApiError(409, "A unidade ja esta neste status.");
+  }
+
+  if (!ORDER_ITEM_UNIT_TRANSITIONS[unit.status].includes(input.toStatus)) {
+    throw new ApiError(409, "Transicao de status da unidade invalida.");
+  }
+
+  if (input.toStatus === "entregue" && unit.orderItem.order.type !== "local") {
+    throw new ApiError(422, "Entrega por unidade so esta disponivel para consumo local.");
+  }
+
+  const now = new Date();
+
+  await prisma.orderItemUnit.update({
+    where: { id: unit.id },
+    data: {
+      status: input.toStatus,
+      ...buildUnitTimestampPatch(input.toStatus, now),
+    },
+  });
+
+  const order = await getOrderById(input.orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Pedido nao encontrado.");
+  }
+
+  return order;
 }
 
 export async function getDashboardMetrics() {
   await syncLegacyCommandasToOrders();
+  await syncMissingOrderItemUnits();
 
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
@@ -327,6 +427,8 @@ export async function transitionOrderStatus(input: {
   const now = new Date();
 
   const updatedOrder = await prisma.$transaction(async (tx) => {
+    await syncUnitStatusesForOrderTransition(tx, order.id, input.toStatus, now);
+
     const updated = await tx.order.update({
       where: { id: order.id },
       data: {
@@ -355,6 +457,9 @@ export async function transitionOrderStatus(input: {
         items: {
           include: {
             menuItem: true,
+            units: {
+              orderBy: { sequence: "asc" },
+            },
           },
         },
         statusEvents: {
@@ -363,7 +468,7 @@ export async function transitionOrderStatus(input: {
       },
     });
 
-    return updated;
+    return attachOrderOperationalSummary(updated as typeof updated & { comanda?: null });
   });
 
   const message = getStatusMessage(updatedOrder.code, input.toStatus, order.type);

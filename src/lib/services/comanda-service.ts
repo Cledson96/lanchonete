@@ -1,5 +1,8 @@
 import { ApiError } from "@/lib/http";
+import { buildOrderItemUnits } from "@/lib/order-item-units";
+import { attachComandaOperationalSummary } from "@/lib/order-operations";
 import { prisma } from "@/lib/prisma";
+import { syncMissingOrderItemUnits } from "@/lib/services/order-item-unit-service";
 import { groupRepeatedIds } from "@/lib/option-item-quantity";
 import { decimal, optionalNullable, slugify } from "@/lib/utils";
 
@@ -32,6 +35,9 @@ const comandaInclude = {
         include: {
           ingredient: true,
         },
+      },
+      units: {
+        orderBy: { sequence: "asc" as const },
       },
     },
   },
@@ -117,29 +123,35 @@ export async function createComanda(input: {
         totalAmount: decimal(0),
       },
       include: comandaInclude,
-    });
+    }).then((comanda) => attachComandaOperationalSummary(comanda));
   });
 }
 
 export async function getComandaBySlug(slug: string) {
+  await syncMissingOrderItemUnits();
+
   return prisma.comanda.findUnique({
     where: { qrCodeSlug: slug },
     include: comandaInclude,
-  });
+  }).then((comanda) => (comanda ? attachComandaOperationalSummary(comanda) : null));
 }
 
 export async function getComandaById(id: string) {
+  await syncMissingOrderItemUnits();
+
   return prisma.comanda.findUnique({
     where: { id },
     include: comandaInclude,
-  });
+  }).then((comanda) => (comanda ? attachComandaOperationalSummary(comanda) : null));
 }
 
 export async function listCommandas() {
+  await syncMissingOrderItemUnits();
+
   return prisma.comanda.findMany({
     orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
     include: comandaInclude,
-  });
+  }).then((commandas) => commandas.map((comanda) => attachComandaOperationalSummary(comanda)));
 }
 
 export async function addItemsToComanda(
@@ -331,7 +343,7 @@ export async function addItemsToComanda(
 
     if (comanda.orderId) {
       await Promise.all(
-        normalizedItems.map(({ item, menuItem, selectedOptions, ingredientCustomizations, unitPrice, subtotalAmount }) =>
+        normalizedItems.map(({ item, menuItem, selectedOptions, ingredientCustomizations, unitPrice, subtotalAmount }, index) =>
           tx.orderItem.create({
             data: {
               orderId: comanda.orderId as string,
@@ -352,6 +364,9 @@ export async function addItemsToComanda(
                   ingredientId: ing.ingredientId,
                   quantity: ing.quantity,
                 })),
+              },
+              units: {
+                create: buildOrderItemUnits(item.quantity, createdEntries[index]?.id),
               },
             },
           }),
@@ -374,7 +389,7 @@ export async function addItemsToComanda(
         totalAmount: decimal(newTotal),
       },
       include: comandaInclude,
-    });
+    }).then((updatedComanda) => attachComandaOperationalSummary(updatedComanda));
   });
 }
 
@@ -410,7 +425,7 @@ export async function closeComanda(
         closedAt: new Date(),
       },
       include: comandaInclude,
-    });
+    }).then((updatedComanda) => attachComandaOperationalSummary(updatedComanda));
   });
 }
 
@@ -493,6 +508,9 @@ export async function syncLegacyCommandasToOrders() {
                 ingredientId: ing.ingredientId,
                 quantity: ing.quantity,
               })),
+            },
+            units: {
+              create: buildOrderItemUnits(entry.quantity, entry.id),
             },
           },
         });

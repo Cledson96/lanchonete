@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/order-operations";
 import { formatMoney } from "@/lib/utils";
 
 type OrderStatus =
@@ -22,6 +23,8 @@ type PaymentMethod =
   | "pix"
   | "outro"
   | null;
+
+type UnitActionStatus = "em_preparo" | "pronto" | "entregue" | "cancelado";
 
 export type DashboardOrderDetail = {
   id: string;
@@ -50,7 +53,9 @@ export type DashboardOrderDetail = {
     notes: string | null;
     totalAmount: number | string;
     entries: Array<{ id: string }>;
+    operationalSummary?: OperationalSummary;
   } | null;
+  operationalSummary: OperationalSummary;
   deliveryAddress: {
     street: string;
     number: string;
@@ -84,6 +89,16 @@ export type DashboardOrderDetail = {
         name: string;
       };
     }>;
+    units: Array<{
+      id: string;
+      sequence: number;
+      status: OrderItemUnitStatus;
+      startedAt?: string | null;
+      readyAt?: string | null;
+      deliveredAt?: string | null;
+      cancelledAt?: string | null;
+    }>;
+    operationalSummary: OperationalSummary;
   }>;
   statusEvents: Array<{
     id: string;
@@ -109,7 +124,14 @@ type Props = {
   loading: boolean;
   onClose: () => void;
   onTransition: (toStatus: OrderStatus) => Promise<void>;
+  onUnitTransition: (input: {
+    orderId: string;
+    itemId: string;
+    unitId: string;
+    toStatus: UnitActionStatus;
+  }) => Promise<void>;
   pendingStatus: OrderStatus | null;
+  pendingUnitId: string | null;
   feedback: string | null;
   error: string | null;
 };
@@ -172,6 +194,23 @@ function humanizePaymentMethod(value: PaymentMethod) {
   }
 }
 
+function humanizeUnitStatus(status: OrderItemUnitStatus) {
+  switch (status) {
+    case "novo":
+      return "Novo";
+    case "em_preparo":
+      return "Em preparo";
+    case "pronto":
+      return "Pronto";
+    case "entregue":
+      return "Entregue";
+    case "cancelado":
+      return "Cancelado";
+    default:
+      return status;
+  }
+}
+
 const statusStyle: Record<OrderStatus, string> = {
   novo: "bg-amber-100 text-amber-700 border-amber-200",
   em_preparo: "bg-[var(--brand-orange)]/15 text-[var(--brand-orange-dark)] border-[var(--brand-orange)]/30",
@@ -187,6 +226,47 @@ const channelStyle: Record<OrderChannel, { label: string; cls: string }> = {
   whatsapp: { label: "WhatsApp", cls: "bg-emerald-100 text-emerald-700" },
   local: { label: "Balcão", cls: "bg-[var(--brand-orange)]/15 text-[var(--brand-orange-dark)]" },
 };
+
+const unitStatusStyle: Record<OrderItemUnitStatus, string> = {
+  novo: "bg-amber-100 text-amber-700 border-amber-200",
+  em_preparo: "bg-[var(--brand-orange)]/15 text-[var(--brand-orange-dark)] border-[var(--brand-orange)]/30",
+  pronto: "bg-[var(--brand-green)]/15 text-[var(--brand-green-dark)] border-[var(--brand-green)]/30",
+  entregue: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  cancelado: "bg-red-100 text-red-700 border-red-200",
+};
+
+function describeOperationalSummary(summary: OperationalSummary) {
+  return [
+    summary.pendingUnits ? `${summary.pendingUnits} novo(s)` : null,
+    summary.preparingUnits ? `${summary.preparingUnits} em preparo` : null,
+    summary.readyUnits ? `${summary.readyUnits} pronto(s)` : null,
+    summary.deliveredUnits ? `${summary.deliveredUnits} entregue(s)` : null,
+    summary.cancelledUnits ? `${summary.cancelledUnits} cancelado(s)` : null,
+  ].filter(Boolean) as string[];
+}
+
+function describeReadyState(summary: OperationalSummary) {
+  if (summary.isFullyDelivered) return "Todos os itens já foram entregues.";
+  if (summary.isFullyReady) return "Todos os itens estão prontos.";
+  if (summary.isPartiallyDelivered) return "Parte dos itens já foi entregue.";
+  if (summary.isPartiallyReady) return "Parte dos itens já está pronta.";
+  return "Ainda há itens aguardando preparo.";
+}
+
+function getUnitActions(unitStatus: OrderItemUnitStatus, orderType: OrderType) {
+  switch (unitStatus) {
+    case "novo":
+      return [{ toStatus: "em_preparo", label: "Iniciar" } satisfies { toStatus: UnitActionStatus; label: string }];
+    case "em_preparo":
+      return [{ toStatus: "pronto", label: "Pronto" } satisfies { toStatus: UnitActionStatus; label: string }];
+    case "pronto":
+      return orderType === "local"
+        ? [{ toStatus: "entregue", label: "Entregue" } satisfies { toStatus: UnitActionStatus; label: string }]
+        : [];
+    default:
+      return [] as Array<{ toStatus: UnitActionStatus; label: string }>;
+  }
+}
 
 function getActions(order: DashboardOrderDetail): OrderAction[] {
   switch (order.status) {
@@ -262,7 +342,9 @@ export function DashboardOrderDetailSheet({
   loading,
   onClose,
   onTransition,
+  onUnitTransition,
   pendingStatus,
+  pendingUnitId,
   feedback,
   error,
 }: Props) {
@@ -384,6 +466,16 @@ export function DashboardOrderDetailSheet({
                       <p className="mt-0.5 font-semibold text-violet-950">{formatMoney(toNumber(order.comanda.totalAmount))}</p>
                     </div>
                   </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[0.7rem] font-semibold text-violet-700">
+                      {describeReadyState(order.comanda.operationalSummary || order.operationalSummary)}
+                    </span>
+                    {order.comanda.operationalSummary?.isPartiallyDelivered ? (
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[0.7rem] font-semibold text-emerald-700">
+                        Entrega parcial
+                      </span>
+                    ) : null}
+                  </div>
                   {order.comanda.notes ? (
                     <p className="mt-3 text-sm leading-5 text-violet-900">
                       <span className="font-semibold">Obs. da comanda:</span> {order.comanda.notes}
@@ -391,6 +483,37 @@ export function DashboardOrderDetailSheet({
                   ) : null}
                 </section>
               ) : null}
+
+              <section className="rounded-xl border border-[var(--line)] bg-white p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Andamento dos itens</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">{describeReadyState(order.operationalSummary)}</p>
+                  </div>
+                  <span className="rounded-full bg-[var(--background)] px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--foreground)]">
+                    {order.operationalSummary.readyOrDeliveredUnits}/{order.operationalSummary.activeUnits} pronto(s)
+                  </span>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-lg bg-[var(--background)] px-3 py-2">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Novos</p>
+                    <p className="mt-1 text-lg font-bold text-amber-700">{order.operationalSummary.pendingUnits}</p>
+                  </div>
+                  <div className="rounded-lg bg-[var(--background)] px-3 py-2">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Em preparo</p>
+                    <p className="mt-1 text-lg font-bold text-[var(--brand-orange-dark)]">{order.operationalSummary.preparingUnits}</p>
+                  </div>
+                  <div className="rounded-lg bg-[var(--background)] px-3 py-2">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Prontos</p>
+                    <p className="mt-1 text-lg font-bold text-[var(--brand-green-dark)]">{order.operationalSummary.readyUnits}</p>
+                  </div>
+                  <div className="rounded-lg bg-[var(--background)] px-3 py-2">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Entregues</p>
+                    <p className="mt-1 text-lg font-bold text-emerald-700">{order.operationalSummary.deliveredUnits}</p>
+                  </div>
+                </div>
+              </section>
 
               {/* Resumo financeiro */}
               <section className="rounded-xl border border-[var(--line)] bg-white p-4">
@@ -469,6 +592,7 @@ export function DashboardOrderDetailSheet({
                   {order.items.map((item, idx) => {
                     const extras = item.selectedOptions.filter((o) => o.optionItem.name);
                     const modifiedIngredients = item.ingredientCustomizations.filter((i) => i.quantity !== 1);
+                    const itemSummary = describeOperationalSummary(item.operationalSummary);
 
                     return (
                       <article
@@ -531,6 +655,71 @@ export function DashboardOrderDetailSheet({
                             <span className="leading-4">{item.notes}</span>
                           </div>
                         ) : null}
+
+                        <div className="mt-3 rounded-lg border border-[var(--line)] bg-[var(--background)]/70 p-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Operação por unidade</p>
+                              <p className="mt-1 text-[0.75rem] text-[var(--muted)]">
+                                {itemSummary.length ? itemSummary.join(" • ") : "Nenhuma unidade operacional registrada."}
+                              </p>
+                            </div>
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[0.7rem] font-semibold text-[var(--foreground)]">
+                              {item.operationalSummary.readyOrDeliveredUnits}/{item.operationalSummary.activeUnits} pronto(s)
+                            </span>
+                          </div>
+
+                          <div className="mt-3 space-y-2">
+                            {item.units.map((unit) => {
+                              const unitActions = getUnitActions(unit.status, order.type);
+
+                              return (
+                                <div key={unit.id} className="rounded-lg border border-[var(--line)] bg-white px-3 py-2.5">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="rounded-md bg-[var(--background)] px-2 py-0.5 text-[0.7rem] font-bold text-[var(--foreground)]">
+                                        Unidade {unit.sequence}
+                                      </span>
+                                      <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold ${unitStatusStyle[unit.status]}`}>
+                                        {humanizeUnitStatus(unit.status)}
+                                      </span>
+                                    </div>
+                                    <p className="text-[0.65rem] text-[var(--muted)]">
+                                      {unit.deliveredAt
+                                        ? `Entregue ${formatTime(unit.deliveredAt)}`
+                                        : unit.readyAt
+                                          ? `Pronto ${formatTime(unit.readyAt)}`
+                                          : unit.startedAt
+                                            ? `Iniciado ${formatTime(unit.startedAt)}`
+                                            : "Aguardando"}
+                                    </p>
+                                  </div>
+
+                                  {unitActions.length ? (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {unitActions.map((action) => (
+                                        <button
+                                          key={`${unit.id}-${action.toStatus}`}
+                                          className="rounded-full border border-[var(--line)] bg-[var(--background)] px-3 py-1.5 text-[0.75rem] font-semibold text-[var(--foreground)] transition hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5 disabled:cursor-not-allowed disabled:opacity-55"
+                                          disabled={pendingUnitId === unit.id || pendingStatus !== null}
+                                          onClick={() => void onUnitTransition({
+                                            orderId: order.id,
+                                            itemId: item.id,
+                                            unitId: unit.id,
+                                            toStatus: action.toStatus,
+                                          })}
+                                          type="button"
+                                        >
+                                          {pendingUnitId === unit.id ? "Atualizando…" : action.label}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </article>
                     );
                   })}
