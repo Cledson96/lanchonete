@@ -6,6 +6,10 @@ import { SimpleCache } from "@/lib/simple-cache";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const publicMenuCache = new SimpleCache<any[]>(30_000);
 
+export function invalidatePublicMenuCache(): void {
+  publicMenuCache.invalidate("menu");
+}
+
 export async function getPublicMenu() {
   const cached = publicMenuCache.get("menu");
   if (cached) return cached;

@@ -50,33 +50,43 @@ function PhoneIcon() {
 export default async function HomePage() {
   const categories = await getPublicMenu();
 
-  const browserCategories = (categories as unknown as Array<{
-    id: string;
-    name: string;
-    slug: string;
-    description: string | null;
-    availableFrom: string | null;
-    availableUntil: string | null;
-    menuItems: Array<{ id: string; name: string; description: string | null; imageUrl: string | null; price: unknown; compareAtPrice: unknown; availableWeekdays: string[]; optionGroups: Array<{ id: string; name: string; description: string | null; minSelections: number; maxSelections: number | null; isRequired: boolean; options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }> }>; ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }> }>;
-  }>).map((category) => ({
+  const browserCategories = categories.map((category) => ({
     id: category.id,
     name: category.name,
     slug: category.slug,
     description: category.description,
     availableFrom: category.availableFrom,
     availableUntil: category.availableUntil,
-    menuItems: category.menuItems.map((item) => ({
+    menuItems: category.menuItems.map((item: {
+      id: string;
+      name: string;
+      description: string | null;
+      imageUrl: string | null;
+      price: unknown;
+      compareAtPrice?: unknown;
+      availableWeekdays: string[] | null;
+      optionGroups: Array<{
+        id: string;
+        name: string;
+        description: string | null;
+        minSelections: number;
+        maxSelections: number | null;
+        isRequired: boolean;
+        options: Array<{ id: string; name: string; description: string | null; priceDelta: unknown }>;
+      }>;
+      ingredients: Array<{ id: string; name: string; quantity: number; price: unknown }>;
+    }) => ({
       id: item.id,
       name: item.name,
-        description: item.description,
-        imageUrl: item.imageUrl,
-        price: Number(item.price),
-        compareAtPrice: item.compareAtPrice ? Number(item.compareAtPrice) : null,
-        availableWeekdays: item.availableWeekdays || [],
-        optionGroups: (item.optionGroups || []).map((group) => ({
-          id: group.id,
-          name: group.name,
-          description: group.description,
+      description: item.description,
+      imageUrl: item.imageUrl,
+      price: Number(item.price),
+      compareAtPrice: item.compareAtPrice ? Number(item.compareAtPrice) : null,
+      availableWeekdays: item.availableWeekdays || [],
+      optionGroups: (item.optionGroups || []).map((group) => ({
+        id: group.id,
+        name: group.name,
+        description: group.description,
         minSelections: group.minSelections,
         maxSelections: group.maxSelections,
         isRequired: group.isRequired,

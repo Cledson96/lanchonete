@@ -6,7 +6,7 @@ import {
   deleteOptionGroup,
   updateOptionGroup,
 } from "@/lib/services/menu-admin-service";
-import { getAdminOptionGroups } from "@/lib/services/menu-service";
+import { getAdminOptionGroups, invalidatePublicMenuCache } from "@/lib/services/menu-service";
 import {
   createOptionGroupSchema,
   updateOptionGroupSchema,
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, createOptionGroupSchema);
     const optionGroup = await createOptionGroup(input);
+    invalidatePublicMenuCache();
     return ok({ optionGroup }, { status: 201 });
   } catch (error) {
     return handleRouteError(error);
@@ -38,6 +39,7 @@ export async function PATCH(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, updateOptionGroupSchema);
     const optionGroup = await updateOptionGroup(input);
+    invalidatePublicMenuCache();
     return ok({ optionGroup });
   } catch (error) {
     return handleRouteError(error);
@@ -53,6 +55,7 @@ export async function DELETE(request: Request) {
       return notFound("Grupo nao encontrado.");
     }
     await deleteOptionGroup(id);
+    invalidatePublicMenuCache();
     return ok({ deleted: true });
   } catch (error) {
     return handleRouteError(error);

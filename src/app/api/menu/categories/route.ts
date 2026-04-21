@@ -6,7 +6,7 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/lib/services/menu-admin-service";
-import { getAdminCategories } from "@/lib/services/menu-service";
+import { getAdminCategories, invalidatePublicMenuCache } from "@/lib/services/menu-service";
 import {
   createCategorySchema,
   deleteCategorySchema,
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, createCategorySchema);
     const category = await createCategory(input);
+    invalidatePublicMenuCache();
     return ok({ category }, { status: 201 });
   } catch (error) {
     return handleRouteError(error);
@@ -39,6 +40,7 @@ export async function PATCH(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, updateCategorySchema);
     const category = await updateCategory(input);
+    invalidatePublicMenuCache();
     return ok({ category });
   } catch (error) {
     return handleRouteError(error);
@@ -50,6 +52,7 @@ export async function DELETE(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, deleteCategorySchema);
     const result = await deleteCategory(input);
+    invalidatePublicMenuCache();
     return ok({ result });
   } catch (error) {
     return handleRouteError(error);
