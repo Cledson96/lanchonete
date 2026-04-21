@@ -1,6 +1,11 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { cookieNames, config } from "@/lib/config";
+import { blacklistToken, isTokenBlacklisted } from "./token-blacklist";
+
+function generateJti(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 type AdminSessionPayload = {
   sub: string;
@@ -32,12 +37,16 @@ async function signSession(
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
+    .setJti(generateJti())
     .setExpirationTime(expiresIn)
     .sign(getSecret());
 }
 
 async function verifySession(token: string) {
   const result = await jwtVerify<AppSessionPayload>(token, getSecret());
+  if (result.payload.jti && isTokenBlacklisted(result.payload.jti)) {
+    throw new Error("Token invalidado.");
+  }
   return result.payload;
 }
 
@@ -69,11 +78,33 @@ export async function setCustomerSession(payload: CustomerSessionPayload) {
 
 export async function clearAdminSession() {
   const store = await cookies();
+  const token = store.get(cookieNames.admin)?.value;
+  if (token) {
+    try {
+      const payload = await jwtVerify<{ jti?: string }>(token, getSecret());
+      if (payload.payload.jti) {
+        blacklistToken(payload.payload.jti);
+      }
+    } catch {
+      // Token already invalid, nothing to blacklist
+    }
+  }
   store.delete(cookieNames.admin);
 }
 
 export async function clearCustomerSession() {
   const store = await cookies();
+  const token = store.get(cookieNames.customer)?.value;
+  if (token) {
+    try {
+      const payload = await jwtVerify<{ jti?: string }>(token, getSecret());
+      if (payload.payload.jti) {
+        blacklistToken(payload.payload.jti);
+      }
+    } catch {
+      // Token already invalid, nothing to blacklist
+    }
+  }
   store.delete(cookieNames.customer);
 }
 
