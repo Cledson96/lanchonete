@@ -69,7 +69,7 @@ export type WhatsAppInboxConversationItem = {
   needsReply: boolean;
   customerProfile: { fullName: string };
   owner: { id: string; email: string } | null;
-  order: { code: string } | null;
+  order: { code: string; totalAmount: number } | null;
   messages: Array<{
     content: string;
     direction: "inbound" | "outbound";
@@ -87,7 +87,7 @@ type WhatsAppInboxConversationRecord = {
   externalThreadId: string | null;
   customerProfile: { fullName: string };
   owner: { id: string; email: string } | null;
-  order: { code: string } | null;
+  order: { code: string; totalAmount: number } | null;
   messages: Array<{
     content: string;
     direction: "inbound" | "outbound";
@@ -141,7 +141,12 @@ function serializeInboxConversation(
       fullName: conversation.customerProfile.fullName,
     },
     owner: conversation.owner,
-    order: conversation.order,
+    order: conversation.order
+      ? {
+          code: conversation.order.code,
+          totalAmount: Number(conversation.order.totalAmount),
+        }
+      : null,
     messages: conversation.messages.map((message) => ({
       content: message.content,
       direction: message.direction,
@@ -1175,7 +1180,12 @@ export async function listWhatsAppConversations() {
           email: true,
         },
       },
-      order: true,
+      order: {
+        select: {
+          code: true,
+          totalAmount: true,
+        },
+      },
       messages: {
         orderBy: { createdAt: "desc" },
         take: 1,

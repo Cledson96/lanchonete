@@ -82,12 +82,20 @@ export function PublicComandaExperience({ slug }: Props) {
       return;
     }
 
+    const requestPayload = {
+      ...input,
+      ingredients: Object.entries(input.ingredientCustomizations || {}).map(([ingredientId, quantity]) => ({
+        ingredientId,
+        quantity,
+      })),
+    };
+
     const response = await fetch(`/api/comandas/${comanda.id}/items`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({ items: [input] }),
+      body: JSON.stringify({ items: [requestPayload] }),
     });
     const payload = await parseJson<{ comanda: ComandaDetail }>(response);
     setComanda(payload.comanda);

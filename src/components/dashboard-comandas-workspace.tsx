@@ -432,12 +432,22 @@ export function DashboardComandasWorkspace() {
     quantity: number;
     notes?: string;
     optionItemIds: string[];
+    ingredientCustomizations?: Record<string, number>;
   }) {
     if (!selectedComanda) return;
+    const requestPayload = {
+      ...input,
+      ingredients: input.ingredientCustomizations
+        ? Object.entries(input.ingredientCustomizations).map(([ingredientId, quantity]) => ({
+            ingredientId,
+            quantity,
+          }))
+        : undefined,
+    };
     const response = await fetch(`/api/comandas/${selectedComanda.id}/items`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ items: [input] }),
+      body: JSON.stringify({ items: [requestPayload] }),
     });
     const payload = await parseJson<{ comanda: ComandaDetail }>(response);
     setSelectedComanda(payload.comanda);

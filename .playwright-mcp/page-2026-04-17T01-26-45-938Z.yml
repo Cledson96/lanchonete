@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - paragraph [ref=e4]: Operacao
+      - heading "Entrar no dashboard" [level=1] [ref=e5]
+      - paragraph [ref=e6]: "O login do admin e criado pelo seed do Prisma usando `ADMIN_EMAIL` e `ADMIN_PASSWORD`."
+      - generic [ref=e7]:
+        - textbox "admin@lanchonete.com" [ref=e8]
+        - textbox "Senha" [ref=e9]
+        - button "Entrar" [ref=e10]
+  - button "Open Next.js Dev Tools" [ref=e16] [cursor=pointer]:
+    - img [ref=e17]

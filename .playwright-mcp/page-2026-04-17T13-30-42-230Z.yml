@@ -1,0 +1,66 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - link "Logo da Lanchonete Familia Lanchonete Familia" [ref=e7] [cursor=pointer]:
+          - /url: /dashboard
+          - generic [ref=e8]:
+            - img "Logo da Lanchonete Familia" [ref=e10]
+            - generic [ref=e11]:
+              - generic [ref=e12]: Lanchonete
+              - generic [ref=e13]: Familia
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: Admin ativo
+          - paragraph [ref=e16]: admin@lanchonetefamilia.local
+        - navigation [ref=e17]:
+          - link "Métricas" [ref=e18] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e20]
+            - text: Métricas
+          - link "Operação" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard/operacao
+            - img [ref=e24]
+            - text: Operação
+          - link "Arquivo" [ref=e26] [cursor=pointer]:
+            - /url: /dashboard/pedidos
+            - img [ref=e28]
+            - text: Arquivo
+          - link "Comandas" [ref=e30] [cursor=pointer]:
+            - /url: /dashboard/comandas
+            - img [ref=e32]
+            - text: Comandas
+          - link "Cardápio" [ref=e35] [cursor=pointer]:
+            - /url: /dashboard/cardapio
+            - img [ref=e37]
+            - text: Cardápio
+          - link "Ingredientes" [ref=e39] [cursor=pointer]:
+            - /url: /dashboard/ingredientes
+            - img [ref=e41]
+            - text: Ingredientes
+          - link "WhatsApp" [ref=e43] [cursor=pointer]:
+            - /url: /dashboard/whatsapp
+            - img [ref=e45]
+            - text: WhatsApp
+        - button "Sair do dashboard" [ref=e49]:
+          - img [ref=e51]
+          - text: Sair do dashboard
+    - main [ref=e55]:
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - paragraph [ref=e59]: Salao em tempo real
+          - heading "Comandas ativas" [level=1] [ref=e60]
+          - paragraph [ref=e61]: Abra comandas pelo nome do cliente, compartilhe o QR na mesa e acompanhe a parcial sem sair desta tela.
+        - generic [ref=e62]:
+          - button "Atualizar" [ref=e63]
+          - button "Abrir comanda" [ref=e64]
+      - generic [ref=e65]:
+        - complementary [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - paragraph [ref=e69]: Fila de comandas
+              - paragraph [ref=e70]: Abertas primeiro, com parcial e ultimos lancamentos.
+            - generic [ref=e71]: 0 ativas
+          - generic [ref=e73]: Carregando comandas...
+        - generic [ref=e75]: Selecione uma comanda para ver o detalhe ou abra uma nova para gerar o primeiro QR do salao.
+  - button "Open Next.js Dev Tools" [ref=e81] [cursor=pointer]:
+    - img [ref=e82]

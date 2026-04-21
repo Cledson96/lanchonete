@@ -1,0 +1,241 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Lanchonete Familia" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e6]:
+            - img "Logo da Lanchonete Familia" [ref=e8]
+            - generic [ref=e9]:
+              - generic [ref=e10]: Lanchonete
+              - generic [ref=e11]: Familia
+        - button "Abrir carrinho" [ref=e12] [cursor=pointer]:
+          - img [ref=e13]
+          - generic [ref=e15]: Carrinho
+    - main [ref=e16]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: Aberto agora
+          - generic [ref=e23]: Curitiba · CIC
+        - heading "Lanches artesanais" [level=1] [ref=e24]:
+          - generic [ref=e25]: Lanches
+          - generic [ref=e26]:
+            - text: artesanais
+            - img [ref=e27]
+        - paragraph [ref=e29]: Pão selado na manteiga, maionese caseira e entrega quentinha até você.
+        - link "Ver cardápio" [ref=e31] [cursor=pointer]:
+          - /url: "#cardapio"
+          - text: Ver cardápio
+          - img [ref=e32]
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - img [ref=e39]
+          - generic [ref=e42]:
+            - paragraph [ref=e43]: Localização
+            - paragraph [ref=e44]: R. Gilberto Kaminski, 170 - Cidade Industrial de Curitiba, Curitiba - PR, 81170-260
+        - generic [ref=e45]:
+          - img [ref=e47]
+          - generic [ref=e49]:
+            - paragraph [ref=e50]: Horário
+            - paragraph [ref=e51]: Seg a Dom, das 18h as 23h30
+        - generic [ref=e52]:
+          - img [ref=e54]
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: Entrega
+            - paragraph [ref=e58]: Rápida e quentinha até você
+      - generic [ref=e59]:
+        - generic [ref=e63]:
+          - button "Lanches" [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+            - generic [ref=e67]: Lanches
+          - button "Combo Lanches" [ref=e68] [cursor=pointer]:
+            - img [ref=e69]
+            - generic [ref=e71]: Combo Lanches
+          - button "Lanches Artesanais" [ref=e72] [cursor=pointer]:
+            - img [ref=e73]
+            - generic [ref=e75]: Lanches Artesanais
+          - button "Combos Artesanais" [ref=e76] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e79]: Combos Artesanais
+          - button "Pastel Salgado" [ref=e80] [cursor=pointer]:
+            - img [ref=e81]
+            - generic [ref=e83]: Pastel Salgado
+          - button "Pastel Doce" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e87]: Pastel Doce
+          - button "Pastel Especial" [ref=e88] [cursor=pointer]:
+            - img [ref=e89]
+            - generic [ref=e91]: Pastel Especial
+          - button "Tapioca Salgada" [ref=e92] [cursor=pointer]:
+            - img [ref=e93]
+            - generic [ref=e95]: Tapioca Salgada
+          - button "Tapioca Doce" [ref=e96] [cursor=pointer]:
+            - img [ref=e97]
+            - generic [ref=e99]: Tapioca Doce
+          - button "Salgados" [ref=e100] [cursor=pointer]:
+            - img [ref=e101]
+            - generic [ref=e103]: Salgados
+          - button "Acai" [ref=e104] [cursor=pointer]:
+            - img [ref=e105]
+            - generic [ref=e107]: Acai
+        - generic [ref=e108]:
+          - generic [ref=e110]:
+            - generic [ref=e113]:
+              - heading "Lanches" [level=2] [ref=e114]
+              - paragraph [ref=e115]: Lanches tradicionais servidos no pao ou em versoes especiais da casa.
+            - generic [ref=e116]: 1–8 de 11
+          - generic [ref=e118]:
+            - article [ref=e119]:
+              - button "Ver detalhes de X-Burguer" [ref=e120] [cursor=pointer]:
+                - img "X-Burguer" [ref=e121]
+                - generic [ref=e123]: + opções
+              - generic [ref=e124]:
+                - button "X-Burguer" [ref=e125] [cursor=pointer]:
+                  - heading "X-Burguer" [level=3] [ref=e126]
+                - paragraph [ref=e127]: Pao, hamburguer bovino, queijo, alface, tomate e maionese da casa.
+                - generic [ref=e129]:
+                  - paragraph [ref=e131]: R$ 12,00
+                  - button "Adicionar X-Burguer ao pedido" [ref=e132] [cursor=pointer]:
+                    - img [ref=e133]
+                    - text: Adicionar
+            - article [ref=e135]:
+              - button "Ver detalhes de X-Salada" [ref=e136] [cursor=pointer]:
+                - img "X-Salada" [ref=e137]
+                - generic [ref=e139]: + opções
+              - generic [ref=e140]:
+                - button "X-Salada" [ref=e141] [cursor=pointer]:
+                  - heading "X-Salada" [level=3] [ref=e142]
+                - paragraph [ref=e143]: Pao, hamburguer bovino, queijo, alface, tomate, milho e maionese da casa.
+                - generic [ref=e144]:
+                  - paragraph [ref=e146]: R$ 14,00
+                  - button "Adicionar X-Salada ao pedido" [ref=e147] [cursor=pointer]:
+                    - img [ref=e148]
+                    - text: Adicionar
+            - article [ref=e150]:
+              - button "Ver detalhes de X-Bacon" [ref=e151] [cursor=pointer]:
+                - img "X-Bacon" [ref=e152]
+                - generic [ref=e154]: + opções
+              - generic [ref=e155]:
+                - button "X-Bacon" [ref=e156] [cursor=pointer]:
+                  - heading "X-Bacon" [level=3] [ref=e157]
+                - paragraph [ref=e158]: Pao, hamburguer bovino, queijo, bacon crocante, alface, tomate e maionese da casa.
+                - generic [ref=e159]:
+                  - paragraph [ref=e161]: R$ 17,50
+                  - button "Adicionar X-Bacon ao pedido" [ref=e162] [cursor=pointer]:
+                    - img [ref=e163]
+                    - text: Adicionar
+            - article [ref=e165]:
+              - button "Ver detalhes de X-Frango" [ref=e166] [cursor=pointer]:
+                - img "X-Frango" [ref=e167]
+                - generic [ref=e169]: + opções
+              - generic [ref=e170]:
+                - button "X-Frango" [ref=e171] [cursor=pointer]:
+                  - heading "X-Frango" [level=3] [ref=e172]
+                - paragraph [ref=e173]: Pao, file de frango, queijo, alface, tomate e maionese da casa.
+                - generic [ref=e175]:
+                  - paragraph [ref=e177]: R$ 17,50
+                  - button "Adicionar X-Frango ao pedido" [ref=e178] [cursor=pointer]:
+                    - img [ref=e179]
+                    - text: Adicionar
+            - article [ref=e181]:
+              - button "Ver detalhes de X-Egg" [ref=e182] [cursor=pointer]:
+                - img "X-Egg" [ref=e183]
+                - generic [ref=e185]: + opções
+              - generic [ref=e186]:
+                - button "X-Egg" [ref=e187] [cursor=pointer]:
+                  - heading "X-Egg" [level=3] [ref=e188]
+                - paragraph [ref=e189]: Pao, hamburguer bovino, queijo, ovo, alface, tomate e maionese da casa.
+                - generic [ref=e190]:
+                  - paragraph [ref=e192]: R$ 17,50
+                  - button "Adicionar X-Egg ao pedido" [ref=e193] [cursor=pointer]:
+                    - img [ref=e194]
+                    - text: Adicionar
+            - article [ref=e196]:
+              - button "Ver detalhes de X-Calabresa" [ref=e197] [cursor=pointer]:
+                - img "X-Calabresa" [ref=e198]
+                - generic [ref=e200]: + opções
+              - generic [ref=e201]:
+                - button "X-Calabresa" [ref=e202] [cursor=pointer]:
+                  - heading "X-Calabresa" [level=3] [ref=e203]
+                - paragraph [ref=e204]: Pao, hamburguer bovino, queijo, calabresa, alface, tomate e maionese da casa.
+                - generic [ref=e205]:
+                  - paragraph [ref=e207]: R$ 17,50
+                  - button "Adicionar X-Calabresa ao pedido" [ref=e208] [cursor=pointer]:
+                    - img [ref=e209]
+                    - text: Adicionar
+            - article [ref=e211]:
+              - button "Ver detalhes de X-Tudo" [ref=e212] [cursor=pointer]:
+                - img "X-Tudo" [ref=e213]
+                - generic [ref=e215]: + opções
+              - generic [ref=e216]:
+                - button "X-Tudo" [ref=e217] [cursor=pointer]:
+                  - heading "X-Tudo" [level=3] [ref=e218]
+                - paragraph [ref=e219]: Pao, hamburguer bovino, queijo, presunto, bacon, ovo, calabresa, alface, tomate e maionese da casa.
+                - generic [ref=e220]:
+                  - paragraph [ref=e222]: R$ 30,00
+                  - button "Adicionar X-Tudo ao pedido" [ref=e223] [cursor=pointer]:
+                    - img [ref=e224]
+                    - text: Adicionar
+            - article [ref=e226]:
+              - button "Ver detalhes de X-No Prato" [ref=e227] [cursor=pointer]:
+                - img "X-No Prato" [ref=e228]
+                - generic [ref=e230]: + opções
+              - generic [ref=e231]:
+                - button "X-No Prato" [ref=e232] [cursor=pointer]:
+                  - heading "X-No Prato" [level=3] [ref=e233]
+                - paragraph [ref=e234]: Hamburguer bovino, queijo, ovo, bacon, salada da casa e acompanhamento servido no prato.
+                - generic [ref=e235]:
+                  - paragraph [ref=e237]: R$ 35,00
+                  - button "Adicionar X-No Prato ao pedido" [ref=e238] [cursor=pointer]:
+                    - img [ref=e239]
+                    - text: Adicionar
+          - generic [ref=e241]:
+            - button "Anterior" [disabled] [ref=e242]:
+              - img [ref=e243]
+              - text: Anterior
+            - button "1" [ref=e245] [cursor=pointer]
+            - button "2" [ref=e246] [cursor=pointer]
+            - button "Próxima" [ref=e247] [cursor=pointer]:
+              - text: Próxima
+              - img [ref=e248]
+      - generic [ref=e251]:
+        - generic [ref=e252]:
+          - generic [ref=e253]:
+            - generic [ref=e254]:
+              - img "Logo da Lanchonete Familia" [ref=e256]
+              - generic [ref=e257]:
+                - generic [ref=e258]: Lanchonete
+                - generic [ref=e259]: Familia
+            - paragraph [ref=e260]: Lanches, combos, pasteis, tapiocas e acai em uma vitrine simples, rapida e feita para pedir.
+          - generic [ref=e261]:
+            - paragraph [ref=e262]: Onde nos encontrar
+            - generic [ref=e263]:
+              - img [ref=e265]
+              - paragraph [ref=e268]: R. Gilberto Kaminski, 170 - Cidade Industrial de Curitiba, Curitiba - PR, 81170-260
+            - generic [ref=e269]:
+              - img [ref=e271]
+              - paragraph [ref=e273]: Seg a Dom, das 18h as 23h30
+          - generic [ref=e274]:
+            - paragraph [ref=e275]: Entrega
+            - generic [ref=e276]:
+              - img [ref=e278]
+              - paragraph [ref=e280]: Rápida e quentinha até você
+        - generic [ref=e281]:
+          - paragraph [ref=e282]: © 2026 Lanchonete Familia. Feito com carinho em Curitiba.
+          - link "↑ Voltar ao cardápio" [ref=e283] [cursor=pointer]:
+            - /url: "#cardapio"
+    - dialog "Carrinho de compras" [ref=e284]:
+      - generic [ref=e285]:
+        - generic [ref=e286]:
+          - img [ref=e288]
+          - heading "Seu carrinho" [level=2] [ref=e290]
+        - button "Fechar carrinho" [ref=e291] [cursor=pointer]:
+          - img [ref=e292]
+      - generic [ref=e295]:
+        - img [ref=e297]
+        - generic [ref=e299]:
+          - paragraph [ref=e300]: Carrinho vazio
+          - paragraph [ref=e301]: Que tal adicionar um burger artesanal?
+        - button "Ver cardápio" [ref=e302] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e308] [cursor=pointer]:
+    - img [ref=e309]

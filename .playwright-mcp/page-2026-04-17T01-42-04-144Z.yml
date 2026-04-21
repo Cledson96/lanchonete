@@ -1,0 +1,115 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - link "Logo da Lanchonete Familia Lanchonete Familia" [ref=e7] [cursor=pointer]:
+          - /url: /dashboard
+          - generic [ref=e8]:
+            - img "Logo da Lanchonete Familia" [ref=e10]
+            - generic [ref=e11]:
+              - generic [ref=e12]: Lanchonete
+              - generic [ref=e13]: Familia
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: Admin ativo
+          - paragraph [ref=e16]: admin@lanchonetefamilia.local
+        - navigation [ref=e17]:
+          - link "Métricas" [ref=e18] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e20]
+            - text: Métricas
+          - link "Operação" [ref=e23] [cursor=pointer]:
+            - /url: /dashboard/operacao
+            - img [ref=e25]
+            - text: Operação
+          - link "Arquivo" [ref=e27] [cursor=pointer]:
+            - /url: /dashboard/pedidos
+            - img [ref=e29]
+            - text: Arquivo
+          - link "Comandas" [ref=e31] [cursor=pointer]:
+            - /url: /dashboard/comandas
+            - img [ref=e33]
+            - text: Comandas
+          - link "Cardápio" [ref=e35] [cursor=pointer]:
+            - /url: /dashboard/cardapio
+            - img [ref=e37]
+            - text: Cardápio
+          - link "Ingredientes" [ref=e39] [cursor=pointer]:
+            - /url: /dashboard/ingredientes
+            - img [ref=e41]
+            - text: Ingredientes
+          - link "WhatsApp" [ref=e43] [cursor=pointer]:
+            - /url: /dashboard/whatsapp
+            - img [ref=e45]
+            - text: WhatsApp
+        - button "Sair do dashboard" [ref=e49]:
+          - img [ref=e51]
+          - text: Sair do dashboard
+    - main [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - paragraph [ref=e58]: Leitura gerencial
+          - heading "Métricas de atendimento" [level=1] [ref=e59]
+        - generic [ref=e60]:
+          - link "Ir para operação" [ref=e61] [cursor=pointer]:
+            - /url: /dashboard/operacao
+          - link "Ver comandas" [ref=e62] [cursor=pointer]:
+            - /url: /dashboard/comandas
+      - generic [ref=e63]:
+        - article [ref=e64]:
+          - img [ref=e69]
+          - paragraph [ref=e71]: Novos agora
+          - paragraph [ref=e72]: "4"
+        - article [ref=e73]:
+          - img [ref=e75]
+          - paragraph [ref=e78]: Em preparo
+          - paragraph [ref=e79]: "0"
+        - article [ref=e80]:
+          - img [ref=e82]
+          - paragraph [ref=e84]: Saiu p/ entrega
+          - paragraph [ref=e85]: "1"
+        - article [ref=e86]:
+          - img [ref=e88]
+          - paragraph [ref=e90]: Comandas abertas
+          - paragraph [ref=e91]: "0"
+        - article [ref=e92]:
+          - img [ref=e94]
+          - paragraph [ref=e96]: Concluídos hoje
+          - paragraph [ref=e97]: "0"
+        - article [ref=e98]:
+          - img [ref=e100]
+          - paragraph [ref=e102]: Cancelados hoje
+          - paragraph [ref=e103]: "0"
+      - article [ref=e104]:
+        - generic [ref=e105]:
+          - img [ref=e107]
+          - generic [ref=e109]:
+            - paragraph [ref=e110]: Financeiro do dia
+            - paragraph [ref=e111]: Soma dos pedidos finalizados hoje
+        - paragraph [ref=e112]: R$ 0,00
+      - generic [ref=e113]:
+        - article [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e116]:
+              - paragraph [ref=e117]: Hoje por canal
+              - heading "Origem dos pedidos" [level=2] [ref=e118]
+            - generic [ref=e119]: 5 total
+          - generic [ref=e122]:
+            - paragraph [ref=e123]: web
+            - generic [ref=e124]:
+              - generic [ref=e125]: 100%
+              - generic [ref=e126]: 5 pedidos
+              - generic [ref=e127]: R$ 235,50
+        - article [ref=e130]:
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - paragraph [ref=e133]: Hoje por tipo
+              - heading "Entrega × retirada" [level=2] [ref=e134]
+            - generic [ref=e135]: 5 total
+          - generic [ref=e138]:
+            - paragraph [ref=e139]: delivery
+            - generic [ref=e140]:
+              - generic [ref=e141]: 100%
+              - generic [ref=e142]: 5 pedidos
+              - generic [ref=e143]: R$ 235,50
+  - button "Open Next.js Dev Tools" [ref=e151] [cursor=pointer]:
+    - img [ref=e152]

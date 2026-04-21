@@ -1,0 +1,99 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - link "Logo da Lanchonete Familia Lanchonete Familia" [ref=e7] [cursor=pointer]:
+          - /url: /dashboard
+          - generic [ref=e8]:
+            - img "Logo da Lanchonete Familia" [ref=e10]
+            - generic [ref=e11]:
+              - generic [ref=e12]: Lanchonete
+              - generic [ref=e13]: Familia
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: Admin ativo
+          - paragraph [ref=e16]: admin@lanchonetefamilia.local
+        - navigation [ref=e17]:
+          - link "Métricas" [ref=e18] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e20]
+            - text: Métricas
+          - link "Operação" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard/operacao
+            - img [ref=e24]
+            - text: Operação
+          - link "Arquivo" [ref=e27] [cursor=pointer]:
+            - /url: /dashboard/pedidos
+            - img [ref=e29]
+            - text: Arquivo
+          - link "Comandas" [ref=e31] [cursor=pointer]:
+            - /url: /dashboard/comandas
+            - img [ref=e33]
+            - text: Comandas
+          - link "Cardápio" [ref=e35] [cursor=pointer]:
+            - /url: /dashboard/cardapio
+            - img [ref=e37]
+            - text: Cardápio
+          - link "Ingredientes" [ref=e39] [cursor=pointer]:
+            - /url: /dashboard/ingredientes
+            - img [ref=e41]
+            - text: Ingredientes
+          - link "WhatsApp" [ref=e43] [cursor=pointer]:
+            - /url: /dashboard/whatsapp
+            - img [ref=e45]
+            - text: WhatsApp
+        - button "Sair do dashboard" [ref=e49]:
+          - img [ref=e51]
+          - text: Sair do dashboard
+    - main [ref=e55]:
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - paragraph [ref=e59]: Operacao em tempo real
+          - heading "Operacao" [level=1] [ref=e60]
+          - paragraph [ref=e61]: "Acompanhe todos os pedidos em tempo real: novos, em preparo, prontos e saindo para entrega em um unico fluxo."
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - text: Canal
+            - combobox "Canal" [ref=e64]:
+              - option "Todos" [selected]
+              - option "Web"
+              - option "WhatsApp"
+              - option "Local"
+          - generic [ref=e65]:
+            - text: Tipo
+            - combobox "Tipo" [ref=e66]:
+              - option "Todos" [selected]
+              - option "Delivery"
+              - option "Retirada"
+              - option "Local"
+          - button "Atualizar" [ref=e67]
+      - generic [ref=e68]:
+        - article [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - paragraph [ref=e72]: Novos
+              - paragraph [ref=e73]: 0 pedidos
+            - generic [ref=e74]: novo
+          - generic [ref=e76]: Carregando fila...
+        - article [ref=e77]:
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - paragraph [ref=e80]: Em preparo
+              - paragraph [ref=e81]: 0 pedidos
+            - generic [ref=e82]: em preparo
+          - generic [ref=e84]: Carregando fila...
+        - article [ref=e85]:
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - paragraph [ref=e88]: Prontos
+              - paragraph [ref=e89]: 0 pedidos
+            - generic [ref=e90]: pronto
+          - generic [ref=e92]: Carregando fila...
+        - article [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]:
+              - paragraph [ref=e96]: Saindo
+              - paragraph [ref=e97]: 0 pedidos
+            - generic [ref=e98]: saiu para entrega
+          - generic [ref=e100]: Carregando fila...
+  - button "Open Next.js Dev Tools" [ref=e106] [cursor=pointer]:
+    - img [ref=e107]
