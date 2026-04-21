@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/http";
+import { SimpleCache } from "@/lib/simple-cache";
 
 type GeocodeInput = {
   street: string;
@@ -15,7 +16,7 @@ type GeocodeResult = {
   displayName: string;
 };
 
-const geocodeCache = new Map<string, GeocodeResult>();
+const geocodeCache = new SimpleCache<GeocodeResult>(60 * 60 * 1000);
 
 function buildCacheKey(input: GeocodeInput) {
   return [
