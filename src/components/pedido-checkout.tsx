@@ -1197,13 +1197,13 @@ export function PedidoCheckout() {
             )}
 
             {fulfillmentType === "delivery" ? (
-              <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-5 py-4">
+              <div className={`mt-5 rounded-[1.4rem] border px-5 py-4 ${deliveryQuoteError ? "border-red-200 bg-red-50" : "border-[var(--line)] bg-white/85"}`}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-[var(--foreground)]">
-                      Status do frete
+                    <p className={`text-sm font-semibold ${deliveryQuoteError ? "text-red-800" : "text-[var(--foreground)]"}`}>
+                      {deliveryQuoteError ? "Endereco fora da area de entrega" : "Status do frete"}
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                    <p className={`mt-1 text-sm leading-6 ${deliveryQuoteError ? "text-red-700" : "text-[var(--muted)]"}`}>
                       {deliveryQuoteLoading
                         ? "Calculando frete..."
                         : deliveryQuote
@@ -1218,6 +1218,11 @@ export function PedidoCheckout() {
                       {deliveryQuote.estimatedMinMinutes && deliveryQuote.estimatedMaxMinutes
                         ? `${deliveryQuote.estimatedMinMinutes}-${deliveryQuote.estimatedMaxMinutes} min`
                         : "Entrega disponivel"}
+                    </span>
+                  ) : null}
+                  {deliveryQuoteError ? (
+                    <span className="rounded-full bg-red-100 px-4 py-2 text-[0.8rem] font-bold text-red-700">
+                      Nao atendemos
                     </span>
                   ) : null}
                 </div>
@@ -1451,6 +1456,13 @@ export function PedidoCheckout() {
                 O botao libera quando itens, dados, telefone e frete estiverem
                 validados.
               </p>
+              {fulfillmentType === "delivery" && !deliveryQuote && !deliveryQuoteLoading ? (
+                <p className="text-sm leading-6 text-amber-700">
+                  {deliveryQuoteError
+                    ? "Ajuste o endereco para um CEP atendido ou mude para retirada."
+                    : "Complete o endereco para calcular o frete e liberar o botao."}
+                </p>
+              ) : null}
             </div>
 
             {submitError ? (

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import type { WhatsAppInboxConversationItem, WhatsAppInboxPriority } from "@/lib/services/whatsapp-service";
 
 /* ═══════════════════════════════════════════════
    Types
@@ -21,23 +22,12 @@ type SessionInfo = {
   events: SessionEvent[];
 };
 
-type ConversationItem = {
-  id: string;
-  phone: string;
-  state: string;
-  updatedAt: string;
-  customerProfile: { fullName: string };
-  order: { code: string } | null;
-  messages: Array<{
-    content: string;
-    direction: "inbound" | "outbound";
-    createdAt: string;
-  }>;
-};
+type ConversationItem = WhatsAppInboxConversationItem;
 
 type Props = {
   initialSession: SessionInfo;
   initialConversations: ConversationItem[];
+  currentAdmin: { id: string; email: string } | null;
 };
 
 async function parseJson<T>(response: Response): Promise<T> {
@@ -54,6 +44,20 @@ function formatRelative(iso: string) {
   const h = Math.floor(min / 60);
   if (h < 24) return `${h}h`;
   return `${Math.floor(h / 24)}d`;
+}
+
+function formatWaitingTime(iso: string | null) {
+  if (!iso) return null;
+
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.max(1, Math.floor(diffMs / 60000));
+
+  if (min < 60) return `${min} min sem resposta`;
+
+  const hours = Math.floor(min / 60);
+  if (hours < 24) return `${hours}h sem resposta`;
+
+  return `${Math.floor(hours / 24)}d sem resposta`;
 }
 
 /* ═══════════════════════════════════════════════
@@ -110,6 +114,28 @@ function humanizeConvState(state: string) {
   return map[state] || state;
 }
 
+function priorityTone(priority: WhatsAppInboxPriority) {
+  if (priority === "high") {
+    return "border-red-200 bg-red-50 text-red-700";
+  }
+
+  if (priority === "low") {
+    return "border-slate-200 bg-slate-50 text-slate-600";
+  }
+
+  return "border-amber-200 bg-amber-50 text-amber-700";
+}
+
+function humanizePriority(priority: WhatsAppInboxPriority) {
+  const map: Record<WhatsAppInboxPriority, string> = {
+    low: "Baixa",
+    normal: "Normal",
+    high: "Alta",
+  };
+
+  return map[priority];
+}
+
 function isHumanHandoff(state: string) {
   return state === "human_handoff";
 }
@@ -122,13 +148,15 @@ function hasInboundLastMessage(conversation: ConversationItem) {
    Main component
 ═══════════════════════════════════════════════ */
 
-export function DashboardWhatsAppPanel({ initialSession, initialConversations }: Props) {
+export function DashboardWhatsAppPanel({ initialSession, initialConversations, currentAdmin }: Props) {
   const [session, setSession] = useState(initialSession);
   const [conversations, setConversations] = useState(initialConversations);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [pendingConversationId, setPendingConversationId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [convSearch, setConvSearch] = useState("");
+  const [needsReplyOnly, setNeedsReplyOnly] = useState(false);
 
   const refresh = useCallback(async () => {
     const [sessionRes, convRes] = await Promise.all([
@@ -140,6 +168,33 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
     setSession(sessionPayload.session);
     setConversations(convPayload.conversations);
   }, []);
+
+  const updateConversationInbox = useCallback(
+    async (conversationId: string, payload: { priority?: WhatsAppInboxPriority; ownerId?: string | null }, successMessage: string) => {
+      try {
+        setPendingConversationId(conversationId);
+        setError(null);
+        setFeedback(null);
+
+        const response = await fetch(`/api/dashboard/whatsapp/conversations/${conversationId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        await parseJson<{ conversation: ConversationItem }>(response);
+        await refresh();
+        setFeedback(successMessage);
+      } catch (actionError) {
+        setError(actionError instanceof Error ? actionError.message : "Falha ao atualizar a conversa.");
+      } finally {
+        setPendingConversationId(null);
+      }
+    },
+    [refresh],
+  );
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -181,6 +236,7 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
   const isConnected = session.status.toLowerCase().includes("conect");
 
   const filteredConversations = conversations.filter((c) => {
+    if (needsReplyOnly && !c.needsReply) return false;
     if (!convSearch.trim()) return true;
     const q = convSearch.trim().toLowerCase();
     return (
@@ -329,14 +385,25 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold tracking-tight">Conversas</p>
-              <p className="mt-0.5 text-[0.65rem] text-[var(--muted)]">{conversations.length} no total</p>
+              <p className="mt-0.5 text-[0.65rem] text-[var(--muted)]">
+                {conversations.length} no total · {conversations.filter((conversation) => conversation.needsReply).length} precisando resposta
+              </p>
             </div>
-            <input
-              className="w-40 rounded-lg border border-[var(--line)] bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[var(--brand-orange)] sm:w-56"
-              onChange={(e) => setConvSearch(e.target.value)}
-              placeholder="Buscar…"
-              value={convSearch}
-            />
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                className={`rounded-full border px-3 py-1.5 text-[0.65rem] font-semibold transition ${needsReplyOnly ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]" : "border-[var(--line)] bg-white text-[var(--muted)] hover:bg-[var(--background)]"}`}
+                onClick={() => setNeedsReplyOnly((current) => !current)}
+                type="button"
+              >
+                Precisa responder
+              </button>
+              <input
+                className="w-40 rounded-lg border border-[var(--line)] bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[var(--brand-orange)] sm:w-56"
+                onChange={(e) => setConvSearch(e.target.value)}
+                placeholder="Buscar…"
+                value={convSearch}
+              />
+            </div>
           </div>
 
           <div className="mt-3 space-y-2">
@@ -351,23 +418,32 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
                 const lastMessage = conversation.messages[0];
                 const inboundLastMessage = hasInboundLastMessage(conversation);
                 const humanHandoff = isHumanHandoff(conversation.state);
+                const waitingTime = conversation.needsReply ? formatWaitingTime(conversation.lastInboundAt) : null;
+                const ownedByCurrentAdmin = conversation.owner?.id === currentAdmin?.id;
+                const isUpdatingConversation = pendingConversationId === conversation.id;
 
                 return (
-                  <Link
-                    className={`group block overflow-hidden rounded-xl border bg-white transition hover:border-[var(--brand-orange)]/40 hover:shadow-sm ${
+                  <article
+                    className={`overflow-hidden rounded-xl border bg-white transition hover:border-[var(--brand-orange)]/40 hover:shadow-sm ${
                       inboundLastMessage
                         ? "border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/[0.04]"
                         : "border-[var(--line)]"
                     }`}
-                    href={`/dashboard/whatsapp/${conversation.id}`}
                     key={conversation.id}
                   >
-                    <div className={`flex items-start justify-between gap-3 border-l-4 p-3 ${inboundLastMessage ? "border-[var(--brand-orange)]" : "border-transparent"}`}>
+                    <Link
+                      className={`group block ${inboundLastMessage ? "border-l-4 border-[var(--brand-orange)]" : "border-l-4 border-transparent"}`}
+                      href={`/dashboard/whatsapp/${conversation.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-3 p-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="truncate text-sm font-bold">{conversation.customerProfile.fullName}</p>
                           <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--muted)]">
                             {humanizeConvState(conversation.state)}
+                          </span>
+                          <span className={`rounded-full border px-1.5 py-0.5 text-[0.6rem] font-semibold ${priorityTone(conversation.priority)}`}>
+                            {humanizePriority(conversation.priority)}
                           </span>
                           {humanHandoff ? (
                             <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-violet-700">
@@ -386,7 +462,23 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
                             </span>
                           ) : null}
                         </div>
-                        <p className="mt-0.5 font-mono text-[0.65rem] text-[var(--muted)]">{conversation.phone}</p>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[0.65rem] text-[var(--muted)]">
+                          <p className="font-mono">{conversation.phone}</p>
+                          {conversation.owner ? (
+                            <span className="rounded-full bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700">
+                              {ownedByCurrentAdmin ? "Com você" : `Resp.: ${conversation.owner.email}`}
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 font-semibold text-[var(--muted)]">
+                              Sem responsável
+                            </span>
+                          )}
+                          {waitingTime ? (
+                            <span className="rounded-full bg-red-50 px-1.5 py-0.5 font-semibold text-red-700">
+                              {waitingTime}
+                            </span>
+                          ) : null}
+                        </div>
                         {lastMessage ? (
                           <p className="mt-1 line-clamp-1 text-xs text-[var(--foreground)]">
                             <span className="text-[var(--muted)]">
@@ -401,8 +493,61 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations }:
                       <span className="shrink-0 text-[0.65rem] text-[var(--muted)]">
                         {formatRelative(conversation.updatedAt)}
                       </span>
+                      </div>
+                    </Link>
+
+                    <div className="flex flex-wrap items-center gap-2 border-t border-[var(--line)] bg-[var(--background)] px-3 py-2">
+                      <label className="flex items-center gap-2 text-[0.65rem] font-semibold text-[var(--muted)]">
+                        Prioridade
+                        <select
+                          className="rounded-full border border-[var(--line)] bg-white px-2 py-1 text-[0.65rem] font-semibold text-[var(--foreground)] outline-none"
+                          disabled={isUpdatingConversation}
+                          onChange={(event) => {
+                            void updateConversationInbox(
+                              conversation.id,
+                              { priority: event.target.value as WhatsAppInboxPriority },
+                              "Prioridade atualizada.",
+                            );
+                          }}
+                          value={conversation.priority}
+                        >
+                          <option value="low">Baixa</option>
+                          <option value="normal">Normal</option>
+                          <option value="high">Alta</option>
+                        </select>
+                      </label>
+
+                      <div className="ml-auto flex flex-wrap gap-2">
+                        {ownedByCurrentAdmin ? (
+                          <button
+                            className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-[0.65rem] font-semibold text-[var(--muted)] transition hover:bg-white disabled:opacity-60"
+                            disabled={isUpdatingConversation}
+                            onClick={() =>
+                              void updateConversationInbox(conversation.id, { ownerId: null }, "Conversa liberada para a fila.")
+                            }
+                            type="button"
+                          >
+                            Liberar
+                          </button>
+                        ) : currentAdmin ? (
+                          <button
+                            className="rounded-full bg-[var(--brand-orange)] px-3 py-1.5 text-[0.65rem] font-semibold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:opacity-60"
+                            disabled={isUpdatingConversation}
+                            onClick={() =>
+                              void updateConversationInbox(
+                                conversation.id,
+                                { ownerId: currentAdmin.id },
+                                ownedByCurrentAdmin ? "Conversa mantida com você." : "Conversa assumida por você.",
+                              )
+                            }
+                            type="button"
+                          >
+                            {conversation.owner ? "Assumir" : "Pegar atendimento"}
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
-                  </Link>
+                  </article>
                 );
               })
             )}

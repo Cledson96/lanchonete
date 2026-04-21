@@ -12,7 +12,8 @@
     "prisma:format": "DOTENV_CONFIG_PATH=.env.local prisma format --schema=prisma/schema.prisma",
     "prisma:validate": "DOTENV_CONFIG_PATH=.env.local prisma validate --schema=prisma/schema.prisma",
     "prisma:generate": "DOTENV_CONFIG_PATH=.env.local prisma generate --schema=prisma/schema.prisma",
-    "prisma:seed": "DOTENV_CONFIG_PATH=.env.local node --import tsx prisma/seed.ts"
+    "prisma:seed": "DOTENV_CONFIG_PATH=.env.local node --import tsx prisma/seed.ts",
+    "db:start": "bash ./scripts/db/start-local-db.sh"
   },
   "repository": {
     "type": "git",

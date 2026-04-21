@@ -289,3 +289,8 @@ export const updateOrderItemUnitStatusSchema = z.object({
 export const sendWhatsAppConversationMessageSchema = z.object({
   content: stringField.min(1).max(2000),
 });
+
+export const updateWhatsAppConversationInboxSchema = z.object({
+  priority: z.enum(["low", "normal", "high"]).optional(),
+  ownerId: z.union([stringField.min(1), z.null()]).optional(),
+});

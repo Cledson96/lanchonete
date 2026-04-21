@@ -629,17 +629,19 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
     return () => window.clearInterval(interval);
   }, [refreshOrders]);
 
+  const operationalOrders = useMemo(() => orders.filter((order) => order.items.length > 0), [orders]);
+
   const columns = useMemo(() => {
     return columnsByView[view].map((column) => ({
       ...column,
-      orders: orders
+      orders: operationalOrders
         .filter((order) => order.status === column.status)
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     }));
-  }, [orders, view]);
+  }, [operationalOrders, view]);
 
   const kitchenColumns = useMemo(() => {
-    const items = buildKitchenItems(orders);
+    const items = buildKitchenItems(operationalOrders);
 
     return (columnsByView.kitchen as KitchenColumnConfig[]).map((column) => ({
       ...column,
@@ -647,7 +649,7 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
         .filter((item) => item.unitStatus === column.status)
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     }));
-  }, [orders]);
+  }, [operationalOrders]);
 
   const showOrderBoard = view !== "kitchen";
   const showKitchenBoard = view === "operation" || view === "kitchen";

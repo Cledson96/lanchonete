@@ -449,17 +449,17 @@ export function DashboardOrderDetailSheet({
                     <div>
                       <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-violet-700">Comanda vinculada</p>
                       <p className="mt-1 text-base font-semibold text-violet-950">
-                        {order.comanda.name?.trim() || `Comanda ${order.comanda.code.slice(0, 8)}`}
+                        {order.comanda.name?.trim() || `Comanda ${order.comanda.code?.slice(0, 8) || "—"}`}
                       </p>
                     </div>
-                    <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[0.7rem] font-semibold text-violet-700">
-                      {order.comanda.entries.length} lançamento(s)
-                    </span>
+                      <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[0.7rem] font-semibold text-violet-700">
+                        {order.comanda.entries?.length || 0} lançamento(s)
+                      </span>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-violet-700/80">Código</p>
-                      <p className="mt-0.5 font-semibold text-violet-950">{order.comanda.code.slice(0, 8)}</p>
+                      <p className="mt-0.5 font-semibold text-violet-950">{order.comanda.code?.slice(0, 8) || "—"}</p>
                     </div>
                     <div>
                       <p className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-violet-700/80">Total da comanda</p>
@@ -590,8 +590,8 @@ export function DashboardOrderDetailSheet({
 
                 <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-white">
                   {order.items.map((item, idx) => {
-                    const extras = item.selectedOptions.filter((o) => o.optionItem.name);
-                    const modifiedIngredients = item.ingredientCustomizations.filter((i) => i.quantity !== 1);
+                    const extras = (item.selectedOptions || []).filter((o) => o.optionItem.name);
+                    const modifiedIngredients = (item.ingredientCustomizations || []).filter((i) => i.quantity !== 1);
                     const itemSummary = describeOperationalSummary(item.operationalSummary);
 
                     return (
@@ -605,7 +605,7 @@ export function DashboardOrderDetailSheet({
                               {item.quantity}×
                             </span>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold leading-tight">{item.menuItem.name}</p>
+                              <p className="text-sm font-semibold leading-tight">{item.menuItem?.name || "Item"}</p>
                               <p className="mt-0.5 text-[0.7rem] text-[var(--muted)]">
                                 Unitário {formatMoney(toNumber(item.unitPrice))}
                               </p>
@@ -670,7 +670,7 @@ export function DashboardOrderDetailSheet({
                           </div>
 
                           <div className="mt-3 space-y-2">
-                            {item.units.map((unit) => {
+                            {(item.units || []).map((unit) => {
                               const unitActions = getUnitActions(unit.status, order.type);
 
                               return (
@@ -727,13 +727,13 @@ export function DashboardOrderDetailSheet({
               </section>
 
               {/* Histórico (timeline) */}
-              {order.statusEvents.length ? (
+              {(order.statusEvents || []).length ? (
                 <section>
                   <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
                     Histórico
                   </p>
                   <ol className="relative space-y-3 border-l-2 border-[var(--line)] pl-4">
-                    {order.statusEvents.map((event) => (
+                    {(order.statusEvents || []).map((event) => (
                       <li key={event.id} className="relative">
                         <span className="absolute -left-[1.4rem] top-1 h-3 w-3 rounded-full border-2 border-[var(--brand-orange)] bg-white" />
                         <div className="flex items-baseline justify-between gap-2">

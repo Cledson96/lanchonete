@@ -73,6 +73,12 @@ enum ConversationChannel {
   whatsapp
 }
 
+enum WhatsAppConversationPriority {
+  low
+  normal
+  high
+}
+
 enum WhatsAppMessageDirection {
   inbound
   outbound
@@ -98,6 +104,7 @@ model User {
   statusEvents    OrderStatusEvent[] @relation("StatusChangedBy")
   acceptedOrders  Order[]            @relation("AcceptedBy")
   commandas       Comanda[]          @relation("OpenedBy")
+  assignedWhatsAppConversations WhatsAppConversation[] @relation("WhatsAppConversationOwner")
 }
 
 model CustomerProfile {
@@ -473,7 +480,9 @@ model WhatsAppConversation {
   id                String              @id @default(cuid())
   customerProfileId String
   orderId           String?             @unique
+  ownerId           String?
   channel           ConversationChannel @default(whatsapp)
+  priority          WhatsAppConversationPriority @default(normal)
   phone             String
   externalThreadId  String?             @unique
   state             String
@@ -485,8 +494,12 @@ model WhatsAppConversation {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   customerProfile   CustomerProfile     @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  owner             User?               @relation("WhatsAppConversationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   order             Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
   messages          WhatsAppMessage[]
+
+  @@index([priority, updatedAt])
+  @@index([ownerId])
 }
 
 model WhatsAppMessage {

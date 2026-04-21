@@ -57,6 +57,44 @@ type SendResult = {
   externalMessageId?: string;
 };
 
+export type WhatsAppInboxPriority = "low" | "normal" | "high";
+
+export type WhatsAppInboxConversationItem = {
+  id: string;
+  phone: string;
+  state: string;
+  updatedAt: string;
+  lastInboundAt: string | null;
+  priority: WhatsAppInboxPriority;
+  needsReply: boolean;
+  customerProfile: { fullName: string };
+  owner: { id: string; email: string } | null;
+  order: { code: string } | null;
+  messages: Array<{
+    content: string;
+    direction: "inbound" | "outbound";
+    createdAt: string;
+  }>;
+};
+
+type WhatsAppInboxConversationRecord = {
+  id: string;
+  phone: string;
+  state: string;
+  updatedAt: Date;
+  lastInboundAt: Date | null;
+  priority: WhatsAppInboxPriority;
+  externalThreadId: string | null;
+  customerProfile: { fullName: string };
+  owner: { id: string; email: string } | null;
+  order: { code: string } | null;
+  messages: Array<{
+    content: string;
+    direction: "inbound" | "outbound";
+    createdAt: Date;
+  }>;
+};
+
 const PAYMENT_OPTIONS = [
   { key: "1", value: "pix", label: "Pix" },
   { key: "2", value: "cartao_credito", label: "Cartao de credito" },
@@ -79,6 +117,37 @@ function getDefaultContext(): BotContext {
 
 function isGroupThread(threadId?: string | null) {
   return threadId?.endsWith(WHATSAPP_GROUP_THREAD_SUFFIX) ?? false;
+}
+
+function isConversationPendingReply(conversation: {
+  state: string;
+  messages: Array<{ direction: "inbound" | "outbound" }>;
+}) {
+  return conversation.state !== "finalizado" && conversation.messages[0]?.direction === "inbound";
+}
+
+function serializeInboxConversation(
+  conversation: WhatsAppInboxConversationRecord,
+): WhatsAppInboxConversationItem {
+  return {
+    id: conversation.id,
+    phone: conversation.phone,
+    state: conversation.state,
+    updatedAt: conversation.updatedAt.toISOString(),
+    lastInboundAt: conversation.lastInboundAt?.toISOString() || null,
+    priority: conversation.priority,
+    needsReply: isConversationPendingReply(conversation),
+    customerProfile: {
+      fullName: conversation.customerProfile.fullName,
+    },
+    owner: conversation.owner,
+    order: conversation.order,
+    messages: conversation.messages.map((message) => ({
+      content: message.content,
+      direction: message.direction,
+      createdAt: message.createdAt.toISOString(),
+    })),
+  };
 }
 
 function parseBotContext(value: Prisma.JsonValue | null | undefined): BotContext {
@@ -1100,6 +1169,12 @@ export async function listWhatsAppConversations() {
     orderBy: [{ lastMessageAt: "desc" }, { updatedAt: "desc" }],
     include: {
       customerProfile: true,
+      owner: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
       order: true,
       messages: {
         orderBy: { createdAt: "desc" },
@@ -1108,7 +1183,9 @@ export async function listWhatsAppConversations() {
     },
   });
 
-  return conversations.filter((conversation) => !isGroupThread(conversation.externalThreadId));
+  return (conversations as WhatsAppInboxConversationRecord[])
+    .filter((conversation) => !isGroupThread(conversation.externalThreadId))
+    .map(serializeInboxConversation);
 }
 
 export async function getWhatsAppConversationById(id: string) {
@@ -1116,10 +1193,57 @@ export async function getWhatsAppConversationById(id: string) {
     where: { id },
     include: {
       customerProfile: true,
+      owner: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
       order: true,
       messages: {
         orderBy: { createdAt: "asc" },
         take: 100,
+      },
+    },
+  });
+}
+
+export async function updateWhatsAppConversationInbox(
+  conversationId: string,
+  input: {
+    priority?: WhatsAppInboxPriority;
+    ownerId?: string | null;
+  },
+) {
+  if (typeof input.ownerId !== "undefined" && input.ownerId !== null) {
+    const owner = await prisma.user.findUnique({
+      where: { id: input.ownerId },
+      select: { id: true, isActive: true, role: true },
+    });
+
+    if (!owner || !owner.isActive || !["admin", "atendimento"].includes(owner.role)) {
+      throw new ApiError(422, "Responsavel invalido para a conversa.");
+    }
+  }
+
+  return prisma.whatsAppConversation.update({
+    where: { id: conversationId },
+    data: {
+      ...(typeof input.priority !== "undefined" ? { priority: input.priority } : {}),
+      ...(typeof input.ownerId !== "undefined" ? { ownerId: input.ownerId } : {}),
+    },
+    include: {
+      customerProfile: true,
+      owner: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      order: true,
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
       },
     },
   });

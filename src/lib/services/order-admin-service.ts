@@ -68,6 +68,97 @@ const orderInclude = {
   },
 } as const;
 
+const readyStatusTransitions = new Set<OrderStatus>(["novo", "em_preparo"]);
+
+async function loadOrderOperationalState(tx: Prisma.TransactionClient, orderId: string) {
+  const order = await tx.order.findUnique({
+    where: { id: orderId },
+    include: {
+      items: {
+        include: {
+          units: {
+            orderBy: { sequence: "asc" as const },
+          },
+        },
+      },
+      comanda: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  return order ? attachOrderOperationalSummary(order) : null;
+}
+
+async function syncLinkedComandaStatus(tx: Prisma.TransactionClient, orderId: string, status: OrderStatus) {
+  if (status !== "pronto") {
+    return;
+  }
+
+  await tx.comanda.updateMany({
+    where: { orderId },
+    data: { status: "pronto" },
+  });
+}
+
+async function promoteOrderWhenAllUnitsReady(tx: Prisma.TransactionClient, orderId: string, now: Date) {
+  const order = await loadOrderOperationalState(tx, orderId);
+
+  if (!order || !order.operationalSummary.isFullyReady) {
+    return null;
+  }
+
+  if (readyStatusTransitions.has(order.status)) {
+    const updated = await tx.order.update({
+      where: { id: orderId },
+      data: {
+        status: "pronto",
+        acceptedAt: order.status === "novo" && !order.acceptedAt ? now : order.acceptedAt,
+        preparedAt: now,
+        statusEvents: {
+          create: {
+            fromStatus: order.status,
+            toStatus: "pronto",
+            note: "Todos os itens ficaram prontos.",
+          },
+        },
+      },
+      include: {
+        customerProfile: true,
+        items: {
+          include: {
+            menuItem: true,
+            units: {
+              orderBy: { sequence: "asc" },
+            },
+            selectedOptions: {
+              include: {
+                optionItem: true,
+              },
+            },
+            ingredientCustomizations: {
+              include: {
+                ingredient: true,
+              },
+            },
+          },
+        },
+        statusEvents: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    await syncLinkedComandaStatus(tx, orderId, "pronto");
+
+    return attachOrderOperationalSummary(updated as typeof updated & { comanda?: null });
+  }
+
+  return null;
+}
+
 function syncUnitStatusesForOrderTransition(tx: Prisma.TransactionClient, orderId: string, toStatus: OrderStatus, now: Date) {
   if (toStatus === "em_preparo") {
     return tx.orderItemUnit.updateMany({
@@ -282,21 +373,28 @@ export async function transitionOrderItemUnitStatus(input: {
 
   const now = new Date();
 
-  await prisma.orderItemUnit.update({
-    where: { id: unit.id },
-    data: {
-      status: input.toStatus,
-      ...buildUnitTimestampPatch(input.toStatus, now),
-    },
+  return prisma.$transaction(async (tx) => {
+    await tx.orderItemUnit.update({
+      where: { id: unit.id },
+      data: {
+        status: input.toStatus,
+        ...buildUnitTimestampPatch(input.toStatus, now),
+      },
+    });
+
+    const promoted = await promoteOrderWhenAllUnitsReady(tx, input.orderId, now);
+    if (promoted) {
+      return promoted;
+    }
+
+    const order = await loadOrderOperationalState(tx, input.orderId);
+
+    if (!order) {
+      throw new ApiError(404, "Pedido nao encontrado.");
+    }
+
+    return order;
   });
-
-  const order = await getOrderById(input.orderId);
-
-  if (!order) {
-    throw new ApiError(404, "Pedido nao encontrado.");
-  }
-
-  return order;
 }
 
 export async function getDashboardMetrics() {
@@ -427,6 +525,18 @@ export async function transitionOrderStatus(input: {
   const now = new Date();
 
   const updatedOrder = await prisma.$transaction(async (tx) => {
+    if (input.toStatus === "pronto") {
+      const orderState = await loadOrderOperationalState(tx, order.id);
+
+      if (!orderState) {
+        throw new ApiError(404, "Pedido nao encontrado.");
+      }
+
+      if (!orderState.operationalSummary.isFullyReady) {
+        throw new ApiError(422, "Existem itens ainda nao prontos na cozinha.");
+      }
+    }
+
     await syncUnitStatusesForOrderTransition(tx, order.id, input.toStatus, now);
 
     const updated = await tx.order.update({
@@ -467,6 +577,8 @@ export async function transitionOrderStatus(input: {
         },
       },
     });
+
+    await syncLinkedComandaStatus(tx, order.id, input.toStatus);
 
     return attachOrderOperationalSummary(updated as typeof updated & { comanda?: null });
   });

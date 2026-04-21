@@ -1,31 +1,20 @@
 import { DashboardWhatsAppPanel } from "@/components/dashboard-whatsapp-panel";
+import { getAdminSession } from "@/lib/auth/session";
 import { getWhatsAppSession, listWhatsAppConversations } from "@/lib/services/whatsapp-service";
 
 export const runtime = "nodejs";
 
 export default async function DashboardWhatsAppPage() {
-  const [session, conversations] = await Promise.all([
+  const [adminSession, session, conversations] = await Promise.all([
+    getAdminSession(),
     getWhatsAppSession(),
     listWhatsAppConversations(),
   ]);
 
   return (
     <DashboardWhatsAppPanel
-      initialConversations={conversations.map((conversation) => ({
-        id: conversation.id,
-        phone: conversation.phone,
-        state: conversation.state,
-        updatedAt: conversation.updatedAt.toISOString(),
-        customerProfile: {
-          fullName: conversation.customerProfile.fullName,
-        },
-        order: conversation.order ? { code: conversation.order.code } : null,
-        messages: conversation.messages.map((message) => ({
-          content: message.content,
-          direction: message.direction,
-          createdAt: message.createdAt.toISOString(),
-        })),
-      }))}
+      currentAdmin={adminSession ? { id: adminSession.sub, email: adminSession.email } : null}
+      initialConversations={conversations}
       initialSession={session}
     />
   );
