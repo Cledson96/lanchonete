@@ -8,6 +8,7 @@ import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
+import { formatMoney, optionalTrimmed } from "@/lib/utils";
 
 type FulfillmentType = "delivery" | "retirada";
 type PaymentMethod =
@@ -175,18 +176,6 @@ function normalizePhoneForCompare(value: string) {
   }
 
   return digits;
-}
-
-function optionalTrimmed(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? trimmed : undefined;
-}
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
 }
 
 function labelField(field: string) {

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { formatMoney } from "@/lib/utils";
 
 type OptionGroupForDialog = {
   id: string;
@@ -41,10 +42,6 @@ type MenuItemDetailDialogProps = {
   optionGroups?: OptionGroupForDialog[];
   ingredients?: IngredientForDialog[];
 };
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
