@@ -623,8 +623,18 @@ export function DashboardOrdersWorkspace({ view, title, description }: Props) {
   }, [refreshOrders]);
 
   useEffect(() => {
+    let consecutiveErrors = 0;
     const interval = window.setInterval(() => {
-      void refreshOrders(true).catch(() => undefined);
+      void refreshOrders(true)
+        .then(() => {
+          consecutiveErrors = 0;
+        })
+        .catch(() => {
+          consecutiveErrors++;
+          if (consecutiveErrors >= 5) {
+            window.clearInterval(interval);
+          }
+        });
     }, 7000);
     return () => window.clearInterval(interval);
   }, [refreshOrders]);

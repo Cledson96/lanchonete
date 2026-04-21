@@ -389,8 +389,18 @@ export function DashboardComandasWorkspace() {
   }, [refreshList]);
 
   useEffect(() => {
+    let consecutiveErrors = 0;
     const interval = window.setInterval(() => {
-      void refreshList(true).catch(() => undefined);
+      void refreshList(true)
+        .then(() => {
+          consecutiveErrors = 0;
+        })
+        .catch(() => {
+          consecutiveErrors++;
+          if (consecutiveErrors >= 5) {
+            window.clearInterval(interval);
+          }
+        });
     }, 7000);
     return () => window.clearInterval(interval);
   }, [refreshList]);

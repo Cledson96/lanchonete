@@ -1,4 +1,5 @@
-import { handleRouteError, ok } from "@/lib/http";
+import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { rateLimitByIp } from "@/lib/rate-limit";
 import { readRequestBody } from "@/lib/request";
 import { addItemsToComanda } from "@/lib/services/comanda-service";
 import { addComandaItemsSchema } from "@/lib/validators";
@@ -12,6 +13,11 @@ export async function POST(
   { params }: ComandaRouteContext,
 ) {
   try {
+    const limit = rateLimitByIp(request);
+    if (!limit.success) {
+      throw new ApiError(429, "Muitas requisicoes. Tente novamente em alguns segundos.");
+    }
+
     const { id } = await params;
     const input = await readRequestBody(request, addComandaItemsSchema);
     const comanda = await addItemsToComanda(id, input.items);

@@ -64,12 +64,25 @@ export function PublicComandaExperience({ slug }: Props) {
   }, [refresh]);
 
   useEffect(() => {
+    if (!comanda) return;
+    if (!canEditComanda(comanda.status)) return;
+
+    let consecutiveErrors = 0;
     const interval = window.setInterval(() => {
-      void refresh().catch(() => undefined);
+      void refresh()
+        .then(() => {
+          consecutiveErrors = 0;
+        })
+        .catch(() => {
+          consecutiveErrors++;
+          if (consecutiveErrors >= 5) {
+            window.clearInterval(interval);
+          }
+        });
     }, 7000);
 
     return () => window.clearInterval(interval);
-  }, [refresh]);
+  }, [refresh, comanda]);
 
   async function handleAddItem(input: {
     menuItemId: string;
