@@ -90,21 +90,8 @@ export async function createOrder(input: CreateOrderInput) {
     : [];
   const categoryMap = new Map(categories.map((category) => [category.id, category]));
 
-  const typedMenuItems = menuItems as unknown as Array<{
-    id: string;
-    name: string;
-    price: { toString(): string } | number;
-    categoryId: string;
-    availableWeekdays: string[];
-    optionGroups: Array<{
-      optionGroup: {
-        options: Array<{ id: string }>;
-      };
-    }>;
-    ingredients: Array<{
-      ingredientId: string;
-    }>;
-  }>;
+  type MenuItemForValidation = typeof menuItems[number];
+  const typedMenuItems: MenuItemForValidation[] = menuItems;
 
   if (menuItems.length !== input.items.length) {
     throw new ApiError(404, "Um ou mais itens do pedido nao existem.");
