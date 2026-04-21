@@ -340,7 +340,9 @@ export function DashboardComandasWorkspace() {
     loading: false,
   });
 
-  const activeCommandas = useMemo(() => sortCommandas(commandas), [commandas]);
+  const openCommandas = useMemo(() => sortCommandas(commandas.filter((c) => canEditComanda(c.status))), [commandas]);
+  const closedCommandas = useMemo(() => sortCommandas(commandas.filter((c) => !canEditComanda(c.status))), [commandas]);
+  const [showClosed, setShowClosed] = useState(false);
 
   const refreshList = useCallback(async (keepSelection = true) => {
     const [commandasResponse, menuResponse] = await Promise.all([
@@ -394,10 +396,10 @@ export function DashboardComandasWorkspace() {
   }, [refreshList]);
 
   useEffect(() => {
-    if (!selectedId && activeCommandas[0]) {
-      void openComanda(activeCommandas[0].id);
+    if (!selectedId && openCommandas[0]) {
+      void openComanda(openCommandas[0].id);
     }
-  }, [activeCommandas, openComanda, selectedId]);
+  }, [openCommandas, openComanda, selectedId]);
 
   useEffect(() => {
     if (!feedback) return;
@@ -526,9 +528,25 @@ export function DashboardComandasWorkspace() {
         {/* Coluna: fila de comandas */}
         <aside className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 shadow-sm">
           <div className="flex items-center justify-between px-1 pb-2">
-            <p className="text-sm font-bold tracking-tight">Fila</p>
+            <div className="flex items-center gap-2">
+              <button
+                className={`text-sm font-bold tracking-tight transition ${!showClosed ? "text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                onClick={() => setShowClosed(false)}
+                type="button"
+              >
+                Abertas
+              </button>
+              <span className="text-[var(--line)]">|</span>
+              <button
+                className={`text-sm font-bold tracking-tight transition ${showClosed ? "text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                onClick={() => setShowClosed(true)}
+                type="button"
+              >
+                Fechadas
+              </button>
+            </div>
             <span className="rounded-full bg-[var(--background)] px-2 py-0.5 text-xs font-semibold text-[var(--muted)]">
-              {activeCommandas.length}
+              {showClosed ? closedCommandas.length : openCommandas.length}
             </span>
           </div>
 
@@ -537,8 +555,8 @@ export function DashboardComandasWorkspace() {
               <div className="rounded-xl border border-dashed border-[var(--line)] px-3 py-6 text-center text-xs text-[var(--muted)]">
                 Carregando…
               </div>
-            ) : activeCommandas.length ? (
-              activeCommandas.map((comanda) => {
+            ) : (showClosed ? closedCommandas : openCommandas).length ? (
+              (showClosed ? closedCommandas : openCommandas).map((comanda: ComandaDetail) => {
                 const selected = selectedId === comanda.id;
                 const active = canEditComanda(comanda.status);
                 const entryCount = comanda.entries.reduce((sum, e) => sum + e.quantity, 0);
