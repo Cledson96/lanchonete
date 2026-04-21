@@ -1,8 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { isMenuItemAvailableNow } from "@/lib/menu-item-availability";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
+import { SimpleCache } from "@/lib/simple-cache";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const publicMenuCache = new SimpleCache<any[]>(30_000);
 
 export async function getPublicMenu() {
+  const cached = publicMenuCache.get("menu");
+  if (cached) return cached;
+
   const categories = await prisma.category.findMany({
     where: {
       isActive: true,
@@ -43,7 +50,7 @@ export async function getPublicMenu() {
     },
   });
 
-  return categories
+  const result = categories
     .filter((category) => isCategoryAvailableNow(category as { availableFrom?: string | null; availableUntil?: string | null }))
     .map((category) => ({
       ...category,
@@ -63,6 +70,9 @@ export async function getPublicMenu() {
         })),
     }))
     .filter((category) => category.menuItems.length > 0);
+
+  publicMenuCache.set("menu", result);
+  return result;
 }
 
 export async function getAdminCategories() {

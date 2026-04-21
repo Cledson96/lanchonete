@@ -77,13 +77,19 @@ export async function geocodeBrazilianAddress(
     url.searchParams.set("countrycodes", "br");
     url.searchParams.set("addressdetails", "1");
 
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+
     const response = await fetch(url, {
       headers: {
         "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
         "User-Agent": "lanchonete-familia/1.0 (checkout-distance-delivery)",
       },
       cache: "force-cache",
+      signal: controller.signal,
     });
+
+    window.clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new ApiError(502, "Nao foi possivel consultar o servico de geolocalizacao.");

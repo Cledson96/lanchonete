@@ -1,7 +1,16 @@
-const fallbackSecret = "local-dev-secret-change-me";
+function resolveAuthSecret(): string {
+  const secret = process.env.APP_AUTH_SECRET;
+  if (secret) return secret;
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("APP_AUTH_SECRET e obrigatorio em producao.");
+  }
+
+  return "local-dev-secret-change-me";
+}
 
 export const config = {
-  authSecret: process.env.APP_AUTH_SECRET || fallbackSecret,
+  authSecret: resolveAuthSecret(),
   adminEmail: process.env.ADMIN_EMAIL || "",
   adminPhone: process.env.ADMIN_PHONE || "",
   adminPassword: process.env.ADMIN_PASSWORD || "",

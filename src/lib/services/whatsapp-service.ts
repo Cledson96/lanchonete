@@ -687,7 +687,7 @@ async function handleMenuCategorySelection(
     [
       `Categoria: *${category.name}*`,
       "Escolha um item digitando o numero:",
-      ...category.menuItems.map((item, index) => `${index + 1}. ${item.name} — ${formatMoney(item.price)}`),
+      ...category.menuItems.map((item: { name: string; price: number }, index: number) => `${index + 1}. ${item.name} — ${formatMoney(item.price)}`),
     ].join("\n"),
   );
 }
