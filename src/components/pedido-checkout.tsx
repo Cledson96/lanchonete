@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";
@@ -22,6 +22,7 @@ type DeliveryQuote = {
   serviceable: boolean;
   feeAmount: number;
   distanceKm: number;
+  distanceMethod?: "same_address" | "route";
   estimatedMinMinutes?: number | null;
   estimatedMaxMinutes?: number | null;
   rule: {
@@ -35,20 +36,22 @@ type DeliveryQuote = {
   };
   store: {
     name: string;
+    street?: string;
+    number?: string;
     city: string;
     state: string;
+    zipCode?: string | null;
     maxDeliveryDistanceKm: number;
   };
 };
 
 type ViaCepResponse = {
-  cep?: string;
-  logradouro?: string;
-  complemento?: string;
-  bairro?: string;
-  localidade?: string;
-  uf?: string;
-  erro?: boolean;
+  zipCode: string;
+  street: string;
+  complement?: string | null;
+  neighborhood: string;
+  city: string;
+  state: string;
 };
 
 type RequestVerificationResponse = {
@@ -97,10 +100,6 @@ type CustomerMeResponse = {
     lastPaymentMethod?: PaymentMethod | null;
     lastOrderType?: FulfillmentType | "local" | null;
   } | null;
-};
-
-type CustomerLookupResponse = {
-  customer: CheckoutCustomerSnapshot | null;
 };
 
 type CreateOrderResponse = {
@@ -265,9 +264,6 @@ export function PedidoCheckout() {
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [devCodePreview, setDevCodePreview] = useState<string | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
-  const [customerLookupLoading, setCustomerLookupLoading] = useState(false);
-  const [customerLookupMessage, setCustomerLookupMessage] = useState<string | null>(null);
-  const [customerLookupPhone, setCustomerLookupPhone] = useState("");
 
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
@@ -284,6 +280,7 @@ export function PedidoCheckout() {
   const [neighborhoodLocked, setNeighborhoodLocked] = useState(false);
   const [cityLocked, setCityLocked] = useState(false);
   const [stateLocked, setStateLocked] = useState(false);
+  const lastZipLookupRef = useRef("");
 
   const [deliveryQuote, setDeliveryQuote] = useState<DeliveryQuote | null>(null);
   const [deliveryQuoteLoading, setDeliveryQuoteLoading] = useState(false);
@@ -308,6 +305,20 @@ export function PedidoCheckout() {
     setStateLocked(false);
   }, []);
 
+  const lockAddressFieldsFromValues = useCallback((values: {
+    street?: string | null;
+    complement?: string | null;
+    neighborhood?: string | null;
+    city?: string | null;
+    state?: string | null;
+  }) => {
+    setStreetLocked(Boolean(values.street?.trim()));
+    setComplementLocked(Boolean(values.complement?.trim()));
+    setNeighborhoodLocked(Boolean(values.neighborhood?.trim()));
+    setCityLocked(Boolean(values.city?.trim()));
+    setStateLocked(Boolean(values.state?.trim()));
+  }, []);
+
   const applyAddress = useCallback((address?: CheckoutAddress | null) => {
     if (!address) return;
 
@@ -319,19 +330,9 @@ export function PedidoCheckout() {
     setStateCode(address.state || "");
     setZipCode(address.zipCode || "");
     setReference(address.reference || "");
-  }, []);
-
-  const clearAddress = useCallback(() => {
-    setStreet("");
-    setNumber("");
-    setComplement("");
-    setNeighborhood("");
-    setCity("");
-    setStateCode("");
-    setZipCode("");
-    setReference("");
-    resetAddressLocks();
-  }, [resetAddressLocks]);
+    lockAddressFieldsFromValues(address);
+    lastZipLookupRef.current = digitsOnly(address.zipCode || "");
+  }, [lockAddressFieldsFromValues]);
 
   const applyCustomerSnapshot = useCallback((
     customer: CheckoutCustomerSnapshot,
@@ -340,8 +341,6 @@ export function PedidoCheckout() {
     setCustomerName(customer.fullName || "");
     setPaymentMethod(customer.lastPaymentMethod || "pix");
     applyAddress(customer.defaultAddress);
-    setCustomerLookupPhone(customer.phone);
-    setCustomerLookupMessage("Cliente encontrado. Preenchemos os dados salvos.");
 
     if (options?.preserveVerified) {
       setVerificationConfirmed(true);
@@ -350,15 +349,24 @@ export function PedidoCheckout() {
     }
   }, [applyAddress]);
 
+  const syncCustomerFromSession = useCallback(async (options?: { preserveVerified?: boolean }) => {
+    const payload = await readJson<CustomerMeResponse>("/api/customer/me");
+
+    if (!payload.customer) {
+      return false;
+    }
+
+    setCustomerPhone(payload.customer.phone);
+    applyCustomerSnapshot(payload.customer, options);
+    return true;
+  }, [applyCustomerSnapshot]);
+
   useEffect(() => {
     let active = true;
 
-    readJson<CustomerMeResponse>("/api/customer/me")
-      .then((payload) => {
-        if (!active || !payload.customer) return;
-
-        setCustomerPhone(payload.customer.phone);
-        applyCustomerSnapshot(payload.customer, { preserveVerified: true });
+    syncCustomerFromSession({ preserveVerified: true })
+      .then((hasSessionCustomer) => {
+        if (!active || hasSessionCustomer) return;
       })
       .catch(() => {
         if (!active) return;
@@ -372,7 +380,7 @@ export function PedidoCheckout() {
     return () => {
       active = false;
     };
-  }, [applyCustomerSnapshot]);
+  }, [syncCustomerFromSession]);
 
   useEffect(() => {
     const normalizedCurrentPhone = normalizePhoneForCompare(customerPhone);
@@ -387,62 +395,6 @@ export function PedidoCheckout() {
   }, [customerPhone, verifiedPhone]);
 
   useEffect(() => {
-    const normalizedPhone = normalizePhoneForCompare(customerPhone);
-
-    if (digitsOnly(customerPhone).length < 10) {
-      setCustomerLookupLoading(false);
-      setCustomerLookupMessage(null);
-      return;
-    }
-
-    if (normalizedPhone === verifiedPhone || normalizedPhone === customerLookupPhone) {
-      return;
-    }
-
-    const timeout = window.setTimeout(async () => {
-      setCustomerLookupLoading(true);
-      setCustomerLookupMessage(null);
-
-      try {
-        const payload = await readJson<CustomerLookupResponse>("/api/customer/lookup", {
-          method: "POST",
-          body: JSON.stringify({
-            phone: customerPhone,
-          }),
-        });
-
-        if (payload.customer) {
-          applyCustomerSnapshot(payload.customer);
-        } else {
-          setCustomerLookupPhone(normalizedPhone);
-          setCustomerLookupMessage(
-            "Nao encontramos cadastro anterior para esse telefone. Pode continuar e preencher os dados.",
-          );
-          setCustomerName("");
-          setPaymentMethod("pix");
-          clearAddress();
-        }
-      } catch (error) {
-        setCustomerLookupMessage(
-          error instanceof Error ? error.message : "Nao foi possivel consultar o cadastro.",
-        );
-      } finally {
-        setCustomerLookupLoading(false);
-      }
-    }, 450);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [
-    customerPhone,
-    verifiedPhone,
-    customerLookupPhone,
-    applyCustomerSnapshot,
-    clearAddress,
-  ]);
-
-  useEffect(() => {
     if (fulfillmentType !== "delivery") {
       setZipLookupLoading(false);
       setZipLookupMessage(null);
@@ -452,6 +404,16 @@ export function PedidoCheckout() {
     if (!cleanZipCode) {
       setZipLookupLoading(false);
       setZipLookupMessage(null);
+      lastZipLookupRef.current = "";
+      setStreet("");
+      setComplement("");
+      setNeighborhood("");
+      setCity("");
+      setStateCode("");
+      setNumber("");
+      setReference("");
+      setDeliveryQuote(null);
+      setDeliveryQuoteError(null);
       resetAddressLocks();
       return;
     }
@@ -459,50 +421,71 @@ export function PedidoCheckout() {
     if (cleanZipCode.length < 8) {
       setZipLookupLoading(false);
       setZipLookupMessage("Digite um CEP completo para buscar o endereco.");
+      setStreet("");
+      setComplement("");
+      setNeighborhood("");
+      setCity("");
+      setStateCode("");
+      setNumber("");
+      setReference("");
+      setDeliveryQuote(null);
+      setDeliveryQuoteError(null);
       resetAddressLocks();
       return;
     }
+
+    const zipChanged = lastZipLookupRef.current !== cleanZipCode;
+
+    if (zipChanged) {
+      setStreet("");
+      setComplement("");
+      setNeighborhood("");
+      setCity("");
+      setStateCode("");
+      setDeliveryQuote(null);
+      setDeliveryQuoteError(null);
+      resetAddressLocks();
+      setZipLookupMessage("Buscando endereco pelo CEP...");
+    }
+
+    let active = true;
 
     const timeout = window.setTimeout(async () => {
       setZipLookupLoading(true);
       setZipLookupMessage(null);
 
       try {
-        const response = await fetch(`https://viacep.com.br/ws/${cleanZipCode}/json/`, {
-          headers: {
-            Accept: "application/json",
+        const payload = await readJson<ViaCepResponse>(
+          `/api/zip-code/lookup?zipCode=${cleanZipCode}`,
+          {
+            method: "GET",
           },
-        });
+        );
 
-        if (!response.ok) {
-          throw new Error("Nao foi possivel consultar o CEP.");
-        }
+        const nextStreet = payload.street.trim();
+        const nextComplement = payload.complement?.trim() || "";
+        const nextNeighborhood = payload.neighborhood.trim();
+        const nextCity = payload.city.trim();
+        const nextState = payload.state.trim();
 
-        const payload = (await response.json()) as ViaCepResponse;
-
-        if (payload.erro) {
-          throw new Error("CEP nao encontrado.");
-        }
-
-        const nextStreet = payload.logradouro?.trim() || "";
-        const nextComplement = payload.complemento?.trim() || "";
-        const nextNeighborhood = payload.bairro?.trim() || "";
-        const nextCity = payload.localidade?.trim() || "";
-        const nextState = payload.uf?.trim() || "";
+        if (!active) return;
 
         setStreet(nextStreet);
         setComplement(nextComplement);
         setNeighborhood(nextNeighborhood);
         setCity(nextCity);
         setStateCode(nextState);
-
-        setStreetLocked(Boolean(nextStreet));
-        setComplementLocked(Boolean(nextComplement));
-        setNeighborhoodLocked(Boolean(nextNeighborhood));
-        setCityLocked(Boolean(nextCity));
-        setStateLocked(Boolean(nextState));
+        lockAddressFieldsFromValues({
+          street: nextStreet,
+          complement: nextComplement,
+          neighborhood: nextNeighborhood,
+          city: nextCity,
+          state: nextState,
+        });
+        lastZipLookupRef.current = cleanZipCode;
         setZipLookupMessage("Endereco carregado pelo CEP. Edite apenas o que vier em branco.");
       } catch (error) {
+        if (!active) return;
         resetAddressLocks();
         setZipLookupMessage(
           error instanceof Error
@@ -510,14 +493,17 @@ export function PedidoCheckout() {
             : "Nao foi possivel preencher o endereco pelo CEP.",
         );
       } finally {
-        setZipLookupLoading(false);
+        if (active) {
+          setZipLookupLoading(false);
+        }
       }
     }, 350);
 
     return () => {
+      active = false;
       window.clearTimeout(timeout);
     };
-  }, [cleanZipCode, fulfillmentType, zipCode, resetAddressLocks]);
+  }, [cleanZipCode, fulfillmentType, lockAddressFieldsFromValues, resetAddressLocks]);
 
   useEffect(() => {
     if (fulfillmentType !== "delivery") {
@@ -691,7 +677,12 @@ export function PedidoCheckout() {
       setVerificationConfirmed(true);
       setVerifiedPhone(payload.customer.phone);
       setCustomerName((current) => current || payload.customer.fullName || "");
-      setVerificationMessage("Telefone validado com sucesso.");
+      const hasSessionCustomer = await syncCustomerFromSession({ preserveVerified: true });
+      setVerificationMessage(
+        hasSessionCustomer
+          ? "Telefone validado com sucesso. Carregamos seu cadastro salvo."
+          : "Telefone validado com sucesso.",
+      );
     } catch (error) {
       setVerificationConfirmed(false);
       setVerifiedPhone("");
@@ -805,8 +796,8 @@ export function PedidoCheckout() {
                   Informe seu telefone
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                  Se este numero ja tiver historico na {brandContent.shortName},
-                  vamos puxar nome, endereco padrao e a ultima forma de pagamento.
+                  Depois de validar o numero, buscamos seu cadastro salvo para preencher
+                  nome, endereco padrao e a ultima forma de pagamento.
                 </p>
               </div>
               <span className={`rounded-full px-4 py-2 text-[0.8rem] font-bold ${verificationConfirmed ? "bg-[var(--brand-green)]/10 text-[var(--brand-green-dark)]" : "bg-[var(--muted)]/5 text-[var(--muted)]"}`}>
@@ -830,22 +821,14 @@ export function PedidoCheckout() {
 
               <div className="flex items-end">
                 <div className="rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-6 text-[var(--muted)]">
-                  {customerLookupLoading
-                    ? "Buscando cadastro..."
-                    : isLoadingCustomer
-                      ? "Verificando sessao..."
-                      : verificationConfirmed
-                        ? "Telefone liberado para finalizar."
-                        : "Vamos buscar o historico assim que o numero estiver completo."}
+                  {isLoadingCustomer
+                    ? "Verificando sessao..."
+                    : verificationConfirmed
+                      ? "Telefone validado e pronto para finalizar."
+                      : "Valide o telefone para carregar o cadastro salvo."}
                 </div>
               </div>
             </div>
-
-            {customerLookupMessage ? (
-              <div className="mt-4 rounded-[1.3rem] border border-[var(--line)] bg-white/88 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
-                {customerLookupMessage}
-              </div>
-            ) : null}
           </section>
 
           <section className="panel rounded-[2rem] px-6 py-6 md:px-8">

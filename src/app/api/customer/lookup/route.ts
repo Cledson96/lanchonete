@@ -1,3 +1,4 @@
+import { requireCustomer } from "@/lib/auth/customer";
 import { handleRouteError, ok } from "@/lib/http";
 import { readRequestBody } from "@/lib/request";
 import { getCustomerCheckoutProfileByPhone } from "@/lib/services/customer-service";
@@ -5,7 +6,16 @@ import { customerLookupSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
   try {
+    const session = await requireCustomer();
     const input = await readRequestBody(request, customerLookupSchema);
+
+    if (session.phone !== input.phone) {
+      return new Response(
+        JSON.stringify({ error: { message: "Telefone fora da sessao validada." } }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     const customer = await getCustomerCheckoutProfileByPhone(input.phone);
     const defaultAddress = customer?.defaultAddress || customer?.addresses[0] || null;
 

@@ -182,10 +182,12 @@ export async function addItemsToComanda(
     throw new ApiError(409, "Comanda nao aceita novos itens.");
   }
 
+  const uniqueMenuItemIds = [...new Set(items.map((item) => item.menuItemId))];
+
   const menuItems = await prisma.menuItem.findMany({
     where: {
       id: {
-        in: items.map((item) => item.menuItemId),
+        in: uniqueMenuItemIds,
       },
       isActive: true,
     },
@@ -209,7 +211,7 @@ export async function addItemsToComanda(
     },
   });
 
-  if (menuItems.length !== items.length) {
+  if (menuItems.length !== uniqueMenuItemIds.length) {
     throw new ApiError(404, "Um ou mais itens da comanda nao existem.");
   }
 

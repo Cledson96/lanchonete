@@ -1326,8 +1326,8 @@ async function seedDeliveryFeeRules() {
       neighborhood: "Cidade Industrial de Curitiba",
       city: "Curitiba",
       state: "PR",
-      latitude: -25.469685,
-      longitude: -49.335548,
+      latitude: -25.5149,
+      longitude: -49.331093,
       maxDeliveryDistanceKm: 5,
     },
     update: {
@@ -1338,8 +1338,8 @@ async function seedDeliveryFeeRules() {
       neighborhood: "Cidade Industrial de Curitiba",
       city: "Curitiba",
       state: "PR",
-      latitude: -25.469685,
-      longitude: -49.335548,
+      latitude: -25.5149,
+      longitude: -49.331093,
       maxDeliveryDistanceKm: 5,
     },
   });

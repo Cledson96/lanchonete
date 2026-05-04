@@ -18,6 +18,8 @@ type WhatsAppRuntimeEventType =
   | "ready"
   | "auth_failure"
   | "disconnected"
+  | "loading_screen"
+  | "change_state"
   | "message"
   | "message_ack"
   | "send"
@@ -38,6 +40,8 @@ export type WhatsAppSessionInfo = {
   connectedName: string | null;
   qrAvailable: boolean;
   qrDataUrl: string | null;
+  isStarting: boolean;
+  startedAt: string | null;
   lastEventAt: string | null;
   lastError: string | null;
   events: WhatsAppRuntimeEvent[];
@@ -94,10 +98,12 @@ class WhatsAppClientManager {
   private qrString: string | null = null;
   private connectedPhone: string | null = null;
   private connectedName: string | null = null;
+  private startedAt: string | null = null;
   private lastEventAt: string | null = null;
   private lastError: string | null = null;
   private initialized = false;
   private initPromise: Promise<void> | null = null;
+  private initRunId = 0;
   private inboundListeners = new Set<InboundListener>();
   private ackListeners = new Set<AckListener>();
   private readonly events: WhatsAppRuntimeEvent[] = [];
@@ -152,16 +158,21 @@ class WhatsAppClientManager {
     client.on("qr", (qr) => {
       this.status = "aguardando_qr";
       this.qrString = qr;
+      this.lastError = null;
       this.recordEvent("qr", "QR atualizado para pareamento.");
     });
 
     client.on("authenticated", () => {
+      this.lastError = null;
       this.recordEvent("authenticated", "Sessao autenticada com sucesso.");
     });
 
     client.on("ready", async () => {
       this.status = "conectado";
       this.qrString = null;
+      this.startedAt = null;
+      this.initialized = true;
+      this.lastError = null;
       this.recordEvent("ready", "Cliente WhatsApp conectado.");
 
       try {
@@ -177,14 +188,21 @@ class WhatsAppClientManager {
     client.on("auth_failure", (message) => {
       this.status = "erro";
       this.qrString = null;
-      this.recordEvent("auth_failure", message || "Falha na autenticacao da sessao.");
+      this.startedAt = null;
+      this.initialized = false;
+      this.recordEvent(
+        "auth_failure",
+        message || "Falha na autenticacao da sessao. Use Resetar para gerar um QR novo.",
+      );
     });
 
     client.on("disconnected", (reason) => {
       this.status = "desconectado";
+      this.client = null;
       this.connectedPhone = null;
       this.connectedName = null;
       this.qrString = null;
+      this.startedAt = null;
       this.initialized = false;
       this.initPromise = null;
       this.recordEvent("disconnected", String(reason || "Cliente desconectado."));
@@ -204,12 +222,25 @@ class WhatsAppClientManager {
       }
     });
 
+    client.on("loading_screen", (percent, message) => {
+      this.recordEvent(
+        "loading_screen",
+        `Carregando WhatsApp ${String(percent)}%${message ? `: ${String(message)}` : "."}`,
+      );
+    });
+
     client.on("change_state", (state) => {
-      this.recordEvent("init", `Estado interno do cliente: ${String(state)}.`);
+      this.recordEvent("change_state", `Estado interno do cliente: ${String(state)}.`);
     });
 
     this.client = client;
     return client;
+  }
+
+  start() {
+    void this.ensureStarted().catch((error) => {
+      console.error("[whatsapp:start]", error);
+    });
   }
 
   async ensureStarted() {
@@ -222,33 +253,55 @@ class WhatsAppClientManager {
     }
 
     this.status = "inicializando";
+    this.startedAt = new Date().toISOString();
+    this.lastError = null;
     this.recordEvent("init", "Inicializando cliente WhatsApp.");
+
+    const runId = ++this.initRunId;
 
     this.initPromise = (async () => {
       await mkdir(sessionDir(), { recursive: true });
       const client = this.ensureClient();
       await client.initialize();
-      this.initialized = true;
+      if (runId === this.initRunId) {
+        this.initialized = true;
+      }
     })()
       .catch((error) => {
-        this.status = "erro";
-        this.initialized = false;
-        this.recordEvent(
-          "error",
-          error instanceof Error ? error.message : "Erro ao inicializar o cliente WhatsApp.",
-        );
+        if (runId === this.initRunId) {
+          this.status = "erro";
+          this.startedAt = null;
+          this.initialized = false;
+          this.recordEvent(
+            "error",
+            error instanceof Error
+              ? error.message
+              : "Erro ao inicializar o cliente WhatsApp.",
+          );
+        }
         throw error;
       })
       .finally(() => {
-        this.initPromise = null;
+        if (runId === this.initRunId) {
+          this.initPromise = null;
+        }
       });
 
     return this.initPromise;
   }
 
   async disconnect() {
+    this.initRunId++;
+
     if (!this.client) {
       this.status = "desconectado";
+      this.startedAt = null;
+      this.initialized = false;
+      this.initPromise = null;
+      this.qrString = null;
+      this.connectedPhone = null;
+      this.connectedName = null;
+      this.lastError = null;
       return;
     }
 
@@ -259,9 +312,11 @@ class WhatsAppClientManager {
       this.initialized = false;
       this.initPromise = null;
       this.status = "desconectado";
+      this.startedAt = null;
       this.connectedPhone = null;
       this.connectedName = null;
       this.qrString = null;
+      this.lastError = null;
       this.recordEvent("disconnected", "Cliente encerrado manualmente.");
     }
   }
@@ -327,6 +382,10 @@ class WhatsAppClientManager {
       connectedName: this.connectedName,
       qrAvailable: Boolean(this.qrString),
       qrDataUrl: this.qrString ? await QRCode.toDataURL(this.qrString) : null,
+      isStarting: Boolean(
+        this.initPromise || this.status === "inicializando" || this.status === "aguardando_qr",
+      ),
+      startedAt: this.startedAt,
       lastEventAt: this.lastEventAt,
       lastError: this.lastError,
       events: [...this.events],

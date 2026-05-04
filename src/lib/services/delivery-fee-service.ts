@@ -1,6 +1,11 @@
 import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
-import { geocodeBrazilianAddress, haversineDistanceInKm } from "@/lib/geocoding";
+import {
+  drivingDistanceInKm,
+  geocodeBrazilianAddress,
+  haversineDistanceInKm,
+} from "@/lib/geocoding";
+import { config } from "@/lib/config";
 import { decimal, numberFromDecimal } from "@/lib/utils";
 
 type DeliveryQuoteInput = {
@@ -16,6 +21,48 @@ type DeliveryQuoteInput = {
 function normalize(text?: string | null) {
   return (text || "").trim().toLowerCase();
 }
+
+function normalizeStreet(text?: string | null) {
+  return normalize(text)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b(rua|r\.|avenida|av\.|travessa|tv\.)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isSameStoreAddress(
+  store: {
+    street: string;
+    number: string;
+    city: string;
+    state: string;
+    zipCode?: string | null;
+  },
+  input: DeliveryQuoteInput,
+) {
+  return (
+    normalizeStreet(store.street) === normalizeStreet(input.street) &&
+    normalize(store.number) === normalize(input.number) &&
+    normalize(store.city) === normalize(input.city) &&
+    normalize(store.state) === normalize(input.state) &&
+    normalize((store.zipCode || "").replace(/\D/g, "")) ===
+      normalize((input.zipCode || "").replace(/\D/g, ""))
+  );
+}
+
+function isNearSamePoint(
+  origin: { latitude: number; longitude: number },
+  destination: { latitude: number; longitude: number },
+) {
+  return haversineDistanceInKm(origin, destination) <= 0.2;
+}
+
+function applyRoutingSafetyFactor(distanceKm: number) {
+  return distanceKm * config.routingDistanceSafetyFactor;
+}
+
+const STORE_COORDINATE_MAX_DRIFT_KM = 0.5;
 
 async function getMainStoreProfile() {
   const storeDelegate = (
@@ -47,17 +94,6 @@ async function getMainStoreProfile() {
 
 async function resolveStoreCoordinates() {
   const store = await getMainStoreProfile();
-  const latitude = numberFromDecimal(store.latitude);
-  const longitude = numberFromDecimal(store.longitude);
-
-  if (latitude !== null && longitude !== null) {
-    return {
-      store,
-      latitude,
-      longitude,
-    };
-  }
-
   const geocoded = await geocodeBrazilianAddress({
     street: store.street,
     number: store.number,
@@ -66,6 +102,31 @@ async function resolveStoreCoordinates() {
     state: store.state,
     zipCode: store.zipCode,
   });
+
+  const savedLatitude = numberFromDecimal(store.latitude);
+  const savedLongitude = numberFromDecimal(store.longitude);
+
+  if (savedLatitude !== null && savedLongitude !== null) {
+    const savedCoordinates = {
+      latitude: savedLatitude,
+      longitude: savedLongitude,
+    };
+    const geocodedCoordinates = {
+      latitude: geocoded.latitude,
+      longitude: geocoded.longitude,
+    };
+
+    if (
+      haversineDistanceInKm(savedCoordinates, geocodedCoordinates) <=
+      STORE_COORDINATE_MAX_DRIFT_KM
+    ) {
+      return {
+        store,
+        latitude: savedLatitude,
+        longitude: savedLongitude,
+      };
+    }
+  }
 
   const storeDelegate = (
     prisma as typeof prisma & {
@@ -99,27 +160,58 @@ async function resolveStoreCoordinates() {
 
 export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
   const { store, latitude, longitude } = await resolveStoreCoordinates();
+  let distanceMethod: "same_address" | "route" = "same_address";
 
-  const customerCoordinates = await geocodeBrazilianAddress({
-    street: input.street,
-    number: input.number,
-    neighborhood: input.neighborhood,
-    city: input.city,
-    state: input.state,
-    zipCode: input.zipCode,
-  });
+  const distanceKm = isSameStoreAddress(store, input)
+    ? 0
+    : await (async () => {
+        const customerCoordinates = await geocodeBrazilianAddress({
+          street: input.street,
+          number: input.number,
+          neighborhood: input.neighborhood,
+          city: input.city,
+          state: input.state,
+          zipCode: input.zipCode,
+        });
 
-  const distanceKm = haversineDistanceInKm(
-    { latitude, longitude },
-    {
-      latitude: customerCoordinates.latitude,
-      longitude: customerCoordinates.longitude,
-    },
-  );
+        if (
+          isNearSamePoint(
+            { latitude, longitude },
+            {
+              latitude: customerCoordinates.latitude,
+              longitude: customerCoordinates.longitude,
+            },
+          )
+        ) {
+          distanceMethod = "same_address";
+          return 0;
+        }
 
+        try {
+          distanceMethod = "route";
+          return applyRoutingSafetyFactor(
+            await drivingDistanceInKm(
+              { latitude, longitude },
+              {
+                latitude: customerCoordinates.latitude,
+                longitude: customerCoordinates.longitude,
+              },
+            ),
+          );
+        } catch (error) {
+          throw new ApiError(
+            502,
+            error instanceof Error
+              ? error.message
+              : "Nao foi possivel consultar a rota para calcular a entrega.",
+          );
+        }
+      })();
+
+  const normalizedDistanceKm = Number(distanceKm.toFixed(2));
   const maxDeliveryDistanceKm = numberFromDecimal(store.maxDeliveryDistanceKm) ?? 5;
 
-  if (distanceKm > maxDeliveryDistanceKm) {
+  if (normalizedDistanceKm > maxDeliveryDistanceKm) {
     throw new ApiError(
       422,
       `Area de entrega nao atendida. Entregamos ate ${maxDeliveryDistanceKm.toFixed(0)} km da loja.`,
@@ -143,7 +235,7 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
 
   const matchedRule = rules.find((rule) => {
     const maxDistanceRuleKm = numberFromDecimal(rule.maxDistanceKm);
-    return maxDistanceRuleKm !== null && distanceKm <= maxDistanceRuleKm;
+    return maxDistanceRuleKm !== null && normalizedDistanceKm <= maxDistanceRuleKm;
   });
 
   if (!matchedRule) {
@@ -177,7 +269,8 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
     feeAmount,
     estimatedMinMinutes: matchedRule.estimatedMinMinutes,
     estimatedMaxMinutes: matchedRule.estimatedMaxMinutes,
-    distanceKm: Number(distanceKm.toFixed(2)),
+    distanceKm: normalizedDistanceKm,
+    distanceMethod,
     rule: {
       id: matchedRule.id,
       label: matchedRule.label,
@@ -193,8 +286,11 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
     },
     store: {
       name: store.name,
+      street: store.street,
+      number: store.number,
       city: store.city,
       state: store.state,
+      zipCode: store.zipCode,
       maxDeliveryDistanceKm,
     },
   };

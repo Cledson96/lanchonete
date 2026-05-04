@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/http";
 import { SimpleCache } from "@/lib/simple-cache";
+import { config } from "@/lib/config";
 
 type GeocodeInput = {
   street: string;
@@ -17,6 +18,7 @@ type GeocodeResult = {
 };
 
 const geocodeCache = new SimpleCache<GeocodeResult>(60 * 60 * 1000);
+const routeDistanceCache = new SimpleCache<number>(30 * 60 * 1000);
 
 function buildCacheKey(input: GeocodeInput) {
   return [
@@ -60,6 +62,18 @@ function buildQueryVariants(input: GeocodeInput) {
   ].filter(Boolean);
 }
 
+function buildRouteCacheKey(
+  origin: { latitude: number; longitude: number },
+  destination: { latitude: number; longitude: number },
+) {
+  return [
+    origin.latitude.toFixed(6),
+    origin.longitude.toFixed(6),
+    destination.latitude.toFixed(6),
+    destination.longitude.toFixed(6),
+  ].join("|");
+}
+
 export async function geocodeBrazilianAddress(
   input: GeocodeInput,
 ): Promise<GeocodeResult> {
@@ -79,18 +93,22 @@ export async function geocodeBrazilianAddress(
     url.searchParams.set("addressdetails", "1");
 
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    const response = await fetch(url, {
-      headers: {
-        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-        "User-Agent": "lanchonete-familia/1.0 (checkout-distance-delivery)",
-      },
-      cache: "force-cache",
-      signal: controller.signal,
-    });
+    let response: Response;
 
-    window.clearTimeout(timeoutId);
+    try {
+      response = await fetch(url, {
+        headers: {
+          "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+          "User-Agent": "lanchonete-familia/1.0 (checkout-distance-delivery)",
+        },
+        cache: "force-cache",
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new ApiError(502, "Nao foi possivel consultar o servico de geolocalizacao.");
@@ -119,6 +137,68 @@ export async function geocodeBrazilianAddress(
   }
 
   throw new ApiError(422, "Nao foi possivel localizar esse endereco para calcular o frete.");
+}
+
+export async function drivingDistanceInKm(
+  origin: { latitude: number; longitude: number },
+  destination: { latitude: number; longitude: number },
+) {
+  const cacheKey = buildRouteCacheKey(origin, destination);
+  const cached = routeDistanceCache.get(cacheKey);
+
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const url = new URL(
+    `/route/v1/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
+    config.routingServiceUrl,
+  );
+  url.searchParams.set("overview", "false");
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      headers: {
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+      },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!response.ok) {
+    throw new ApiError(502, "Nao foi possivel consultar a rota para calcular a entrega.");
+  }
+
+  const payload = (await response.json()) as {
+    code?: string;
+    routes?: Array<{
+      distance?: number;
+    }>;
+  };
+
+  if (payload.code !== "Ok") {
+    throw new ApiError(422, "Nao encontramos rota viaria para esse endereco.");
+  }
+
+  const distanceMeters = payload.routes?.[0]?.distance;
+
+  if (typeof distanceMeters !== "number" || !Number.isFinite(distanceMeters)) {
+    throw new ApiError(422, "Nao foi possivel medir a distancia da rota para esse endereco.");
+  }
+
+  const distanceKm = distanceMeters / 1000;
+  routeDistanceCache.set(cacheKey, distanceKm);
+  routeDistanceCache.set(buildRouteCacheKey(destination, origin), distanceKm);
+
+  return distanceKm;
 }
 
 export function haversineDistanceInKm(

@@ -3,7 +3,6 @@ import { ApiError } from "@/lib/http";
 import { normalizeMenuWeekdays } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";
 import { decimal, optionalNullable, slugify } from "@/lib/utils";
-import { invalidatePublicMenuCache } from "./menu-service";
 
 function hasOwn<T extends object>(value: T, key: keyof T) {
   return Object.prototype.hasOwnProperty.call(value, key);

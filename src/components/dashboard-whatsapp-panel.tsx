@@ -17,6 +17,8 @@ type SessionInfo = {
   connectedName: string | null;
   qrAvailable: boolean;
   qrDataUrl: string | null;
+  isStarting: boolean;
+  startedAt: string | null;
   lastEventAt: string | null;
   lastError: string | null;
   events: SessionEvent[];
@@ -94,8 +96,8 @@ function WhatsAppIcon() {
 
 function statusTone(status: string) {
   const s = status.toLowerCase();
-  if (s.includes("conect")) return { dot: "bg-emerald-500", bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" };
-  if (s.includes("qr") || s.includes("pareand") || s.includes("aguard"))
+  if (isConnectedStatus(status)) return { dot: "bg-emerald-500", bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" };
+  if (s.includes("qr") || s.includes("pareand") || s.includes("aguard") || s.includes("inicial"))
     return { dot: "bg-amber-500", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" };
   if (s.includes("err") || s.includes("falha"))
     return { dot: "bg-red-500", bg: "bg-red-50", text: "text-red-700", border: "border-red-200" };
@@ -144,6 +146,23 @@ function hasInboundLastMessage(conversation: ConversationItem) {
   return conversation.messages[0]?.direction === "inbound";
 }
 
+function isConnectedStatus(status: string) {
+  return status.toLowerCase() === "conectado";
+}
+
+function isSessionStarting(session: SessionInfo) {
+  const status = session.status.toLowerCase();
+  return session.isStarting || status.includes("inicializando") || status.includes("qr") || status.includes("aguard");
+}
+
+function hasSessionStartTimedOut(session: SessionInfo) {
+  if (!session.startedAt || session.qrDataUrl || isConnectedStatus(session.status)) {
+    return false;
+  }
+
+  return Date.now() - new Date(session.startedAt).getTime() > 20_000;
+}
+
 /* ═══════════════════════════════════════════════
    Main component
 ═══════════════════════════════════════════════ */
@@ -168,6 +187,10 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
     setSession(sessionPayload.session);
     setConversations(convPayload.conversations);
   }, []);
+
+  const sessionStarting = isSessionStarting(session);
+  const sessionStartTimedOut = hasSessionStartTimedOut(session);
+  const isConnected = isConnectedStatus(session.status);
 
   const updateConversationInbox = useCallback(
     async (conversationId: string, payload: { priority?: WhatsAppInboxPriority; ownerId?: string | null }, successMessage: string) => {
@@ -199,9 +222,9 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
   useEffect(() => {
     const interval = window.setInterval(() => {
       void refresh().catch(() => undefined);
-    }, 5000);
+    }, sessionStarting ? 1000 : 5000);
     return () => window.clearInterval(interval);
-  }, [refresh]);
+  }, [refresh, sessionStarting]);
 
   useEffect(() => {
     if (!feedback) return;
@@ -220,7 +243,7 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
       await refresh();
       setFeedback(
         action === "connect"
-          ? "Cliente inicializado. Se aparecer o QR, escaneie com o WhatsApp da loja."
+          ? "Cliente iniciando. O QR aparecerá aqui assim que o WhatsApp gerar o pareamento."
           : action === "disconnect"
           ? "Sessão desconectada."
           : "Sessão apagada. Um novo QR será gerado na próxima conexão."
@@ -232,8 +255,31 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
     }
   }
 
+  async function resetAndConnect() {
+    try {
+      setPendingAction("reset-connect");
+      setError(null);
+      setFeedback(null);
+
+      await parseJson<{ session: SessionInfo }>(
+        await fetch("/api/whatsapp/session/reset", { method: "POST" }),
+      );
+
+      const response = await fetch("/api/whatsapp/session/connect", { method: "POST" });
+      const payload = await parseJson<{ session: SessionInfo }>(response);
+      setSession(payload.session);
+      await refresh();
+      setFeedback("Sessão limpa. O QR aparecerá aqui assim que o WhatsApp gerar o pareamento.");
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : "Falha ao resetar e reconectar.");
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
   const tone = statusTone(session.status);
-  const isConnected = session.status.toLowerCase().includes("conect");
+  const shouldResetBeforeConnect =
+    session.status.toLowerCase() === "desconectado" || session.status.toLowerCase() === "erro";
 
   const filteredConversations = conversations.filter((c) => {
     if (needsReplyOnly && !c.needsReply) return false;
@@ -294,7 +340,7 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
                 Status da sessão
               </p>
               <div className="mt-1 flex items-center gap-2">
-                <span className={`flex h-2 w-2 rounded-full ${tone.dot} ${isConnected ? "animate-pulse" : ""}`} />
+                <span className={`flex h-2 w-2 rounded-full ${tone.dot} ${isConnected || sessionStarting ? "animate-pulse" : ""}`} />
                 <span className="text-base font-bold capitalize">{session.status}</span>
               </div>
             </div>
@@ -325,15 +371,31 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
             </p>
           </div>
 
+          {sessionStartTimedOut ? (
+            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[0.7rem] font-medium leading-5 text-amber-800">
+              O WhatsApp está inicializando há mais de 60s sem QR. Isso costuma indicar sessão local travada; use resetar para limpar e gerar um QR novo.
+            </div>
+          ) : null}
+
           <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
             <button
               className="flex-1 rounded-full bg-[var(--brand-orange)] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-initial"
               disabled={pendingAction !== null}
-              onClick={() => void runAction("connect")}
+              onClick={() => void (shouldResetBeforeConnect ? resetAndConnect() : runAction("connect"))}
               type="button"
             >
-              {pendingAction === "connect" ? "Conectando…" : isConnected ? "Reconectar" : "Conectar / Gerar QR"}
+              {pendingAction === "connect" || pendingAction === "reset-connect" ? "Conectando…" : isConnected ? "Reconectar" : "Conectar / Gerar QR"}
             </button>
+            {sessionStartTimedOut ? (
+              <button
+                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={pendingAction !== null}
+                onClick={() => void resetAndConnect()}
+                type="button"
+              >
+                {pendingAction === "reset-connect" ? "Resetando..." : "Resetar sessão e gerar novo QR"}
+              </button>
+            ) : null}
             <button
               className="rounded-full border border-[var(--line)] bg-white px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)] disabled:cursor-not-allowed disabled:opacity-60"
               disabled={pendingAction !== null}
@@ -368,7 +430,11 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
               />
             ) : (
               <p className="px-3 text-center text-[0.7rem] leading-4 text-[var(--muted)]">
-                {isConnected ? "Sessão conectada. Use 'Resetar' para trocar de conta." : "Clique em conectar para gerar o QR."}
+                {isConnected
+                  ? "Sessão conectada. Use 'Resetar' para trocar de conta."
+                  : sessionStarting
+                    ? "Gerando QR..."
+                    : "Clique em conectar para gerar o QR."}
               </p>
             )}
           </div>
@@ -565,10 +631,10 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
                 Nenhum evento ainda.
               </div>
             ) : (
-              session.events.slice(0, 12).map((event) => (
+              session.events.slice(0, 12).map((event, index) => (
                 <div
                   className="rounded-lg border border-[var(--line)] bg-white px-2.5 py-2"
-                  key={`${event.type}-${event.at}`}
+                  key={`${event.type}-${event.at}-${index}-${event.detail}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[var(--foreground)]">

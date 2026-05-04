@@ -203,6 +203,10 @@ export function getOpenApiDocument(baseUrl?: string) {
             deliveryFeeRuleId: { type: "string" },
             feeAmount: { type: "number" },
             distanceKm: { type: "number" },
+            distanceMethod: {
+              type: "string",
+              enum: ["same_address", "route"],
+            },
             estimatedMinMinutes: { type: "integer", nullable: true },
             estimatedMaxMinutes: { type: "integer", nullable: true },
             rule: {
@@ -226,8 +230,11 @@ export function getOpenApiDocument(baseUrl?: string) {
               type: "object",
               properties: {
                 name: { type: "string" },
+                street: { type: "string" },
+                number: { type: "string" },
                 city: { type: "string" },
                 state: { type: "string" },
+                zipCode: { type: "string", nullable: true },
                 maxDeliveryDistanceKm: { type: "number" },
               },
               required: ["name", "city", "state", "maxDeliveryDistanceKm"],
@@ -238,6 +245,7 @@ export function getOpenApiDocument(baseUrl?: string) {
             "deliveryFeeRuleId",
             "feeAmount",
             "distanceKm",
+            "distanceMethod",
             "rule",
             "store",
           ],

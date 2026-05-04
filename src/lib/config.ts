@@ -22,6 +22,11 @@ export const config = {
   whatsappAllowedCountryCode:
     process.env.WHATSAPP_ALLOWED_COUNTRY_CODE || "55",
   whatsappBotEnabled: process.env.WHATSAPP_BOT_ENABLED !== "false",
+  routingServiceUrl:
+    process.env.ROUTING_SERVICE_URL || "https://router.project-osrm.org",
+  routingDistanceSafetyFactor: Number(
+    process.env.ROUTING_DISTANCE_SAFETY_FACTOR || "1.08",
+  ),
   storePixKey: process.env.STORE_PIX_KEY || "",
 };
 

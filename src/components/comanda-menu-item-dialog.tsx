@@ -76,13 +76,6 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
   useEffect(() => {
     if (!open || !item) return;
 
-    setNotes("");
-    setQuantity(1);
-    setSelectedOptions(
-      Object.fromEntries(item.optionGroups.map((group) => [group.id, [] as string[]])),
-    );
-    setIngredientQtys(Object.fromEntries(item.ingredients.map((ing) => [ing.id, ing.quantity])));
-
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onCloseRef.current();
     }
@@ -253,7 +246,6 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                 <div className="mb-4 space-y-4">
                   <SectionLabel>Adicionais</SectionLabel>
                   {currentItem.optionGroups.map((group) => {
-                    const current = selectedOptions[group.id] || [];
                     const isRadio = group.maxSelections === 1;
 
                     return (

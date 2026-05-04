@@ -54,11 +54,12 @@ export async function createOrder(input: CreateOrderInput) {
   }
 
   const customerPhone = normalizePhone(input.customerPhone);
+  const uniqueMenuItemIds = [...new Set(input.items.map((item) => item.menuItemId))];
 
   const menuItems = await prisma.menuItem.findMany({
     where: {
       id: {
-        in: input.items.map((item) => item.menuItemId),
+        in: uniqueMenuItemIds,
       },
       isActive: true,
     },
@@ -93,7 +94,7 @@ export async function createOrder(input: CreateOrderInput) {
   type MenuItemForValidation = typeof menuItems[number];
   const typedMenuItems: MenuItemForValidation[] = menuItems;
 
-  if (menuItems.length !== input.items.length) {
+  if (menuItems.length !== uniqueMenuItemIds.length) {
     throw new ApiError(404, "Um ou mais itens do pedido nao existem.");
   }
 

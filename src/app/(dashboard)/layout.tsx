@@ -4,6 +4,8 @@ import { getAdminSession } from "@/lib/auth/session";
 import { BrandLogo } from "@/components/brand-logo";
 import { DashboardNav } from "@/components/dashboard-nav";
 
+export const dynamic = "force-dynamic";
+
 function LogoutIcon() {
   return (
     <svg fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" className="h-4 w-4 shrink-0">

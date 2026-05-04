@@ -243,6 +243,7 @@ function normalizeInboundText(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getSelectionNumber(text: string) {
   const digits = digitsOnly(text);
   if (!digits) {
@@ -651,6 +652,7 @@ async function createWhatsAppOrder(params: {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleMenuCategorySelection(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -692,6 +694,7 @@ async function handleMenuCategorySelection(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleMenuItemSelection(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -734,6 +737,7 @@ async function handleMenuItemSelection(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleQuantitySelection(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -768,6 +772,7 @@ async function handleQuantitySelection(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleItemNote(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -804,6 +809,7 @@ async function handleItemNote(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleCartMenu(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -838,6 +844,7 @@ async function handleCartMenu(
   await sendConversationMessage(conversation, "Digite 1, 2 ou 3 para continuar.");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleOrderType(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -864,6 +871,7 @@ async function handleOrderType(
   await sendConversationMessage(conversation, "Digite 1 para entrega ou 2 para retirada.");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleCepInput(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -893,6 +901,7 @@ async function handleCepInput(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleAddressNumber(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -917,6 +926,7 @@ async function handleAddressNumber(
   await sendConversationMessage(conversation, paymentMenuText());
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handlePayment(
   conversation: { id: string; phone: string },
   context: BotContext,
@@ -956,6 +966,7 @@ async function handlePayment(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleConfirmation(
   conversation: { id: string; phone: string },
   customer: { id: string; fullName: string; phone: string },
@@ -1121,8 +1132,21 @@ export async function getWhatsAppSession() {
 export async function connectWhatsAppSession() {
   ensureListenersBound();
   const manager = getWhatsAppClientManager();
-  await manager.ensureStarted();
-  return manager.getSessionInfo();
+  manager.start();
+  const deadline = Date.now() + 15_000;
+  let session = await manager.getSessionInfo();
+
+  while (
+    Date.now() < deadline &&
+    session.status === "inicializando" &&
+    !session.qrAvailable &&
+    !session.lastError
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    session = await manager.getSessionInfo();
+  }
+
+  return session;
 }
 
 export async function disconnectWhatsAppSession() {
