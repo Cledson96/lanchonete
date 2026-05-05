@@ -5,7 +5,7 @@ import { MenuBrowser } from "@/components/menu-browser";
 import { brandContent } from "@/lib/brand-content";
 import { getPublicMenu } from "@/lib/services/menu-service";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 function ChevronDownIcon() {
   return (
