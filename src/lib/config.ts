@@ -14,7 +14,8 @@ export const config = {
   adminEmail: process.env.ADMIN_EMAIL || "",
   adminPhone: process.env.ADMIN_PHONE || "",
   adminPassword: process.env.ADMIN_PASSWORD || "",
-  publicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  publicSiteUrl:
+    process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   whatsappSessionPath:
     process.env.WHATSAPP_SESSION_PATH || ".runtime/whatsapp-session",
   whatsappHeadless: process.env.WHATSAPP_HEADLESS !== "false",

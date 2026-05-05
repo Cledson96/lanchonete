@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loginAdmin } from "@/lib/auth/admin";
 import { ApiError, handleRouteError, ok } from "@/lib/http";
 import { rateLimitByIp } from "@/lib/rate-limit";
+import { publicRedirectUrl } from "@/lib/redirect-url";
 import { isFormRequest, readRequestBody } from "@/lib/request";
 import { adminLoginSchema } from "@/lib/validators";
 
@@ -17,13 +18,13 @@ export async function POST(request: Request) {
     const admin = await loginAdmin(input.email, input.password);
 
     if (isForm) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(publicRedirectUrl("/dashboard", request));
     }
 
     return ok({ admin });
   } catch (error) {
     if (isFormRequest(request)) {
-      const url = new URL("/dashboard/login", request.url);
+      const url = publicRedirectUrl("/dashboard/login", request);
       url.searchParams.set("error", "Credenciais invalidas");
       return NextResponse.redirect(url);
     }
