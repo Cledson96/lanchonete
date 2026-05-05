@@ -205,7 +205,20 @@ Depois que o site abrir em `https://seu-dominio`:
 A sessao fica no volume `whatsapp-session`, montado em
 `/app/.runtime/whatsapp-session`, e deve sobreviver a deploys e restarts.
 
-## 9. Comandos uteis na VPS
+## 9. Uploads do cardapio
+
+As imagens enviadas pelo dashboard para itens do cardapio ficam em
+`/app/public/uploads/menu` dentro do container. O Docker Compose monta essa pasta
+no volume persistente `menu-uploads`, entao deploys, pulls de imagem e restarts
+nao apagam os uploads.
+
+Para listar volumes:
+
+```bash
+docker volume ls | grep lanchonete
+```
+
+## 10. Comandos uteis na VPS
 
 ```bash
 cd /opt/lanchonete
