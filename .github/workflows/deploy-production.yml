@@ -14,7 +14,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/lanchonete
+  IMAGE_NAME: ghcr.io/cledson96/lanchonete
 
 jobs:
   deploy:
