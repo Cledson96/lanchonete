@@ -1,8 +1,8 @@
 # Deploy automatico na VPS
 
-Este projeto usa Docker Compose na VPS e GitHub Actions para publicar uma imagem
-no GitHub Container Registry. Depois do setup inicial, todo push na branch `main`
-faz deploy automatico.
+Este projeto usa Docker Compose na VPS, Nginx como proxy central e GitHub
+Actions para publicar uma imagem no GitHub Container Registry. Depois do setup
+inicial, todo push na branch `main` faz deploy automatico.
 
 ## 1. Modelo de branches
 
@@ -39,7 +39,8 @@ O workflow usa `GITHUB_TOKEN` para publicar em `ghcr.io/cledson96/lanchonete`.
 ## 3. Preparar a VPS uma vez
 
 Use Ubuntu/Debian recente, aponte o DNS do dominio para o IP da VPS e libere as
-portas `80` e `443`.
+portas `80` e `443`. O container do Next.js fica acessivel apenas em
+`127.0.0.1:3001`; o Nginx publico da VPS faz o proxy.
 
 Instale Docker e Compose:
 
@@ -78,8 +79,8 @@ docker login ghcr.io
 
 Edite `/opt/lanchonete/.env.production` e troque, no minimo:
 
-- `APP_DOMAIN`
 - `APP_IMAGE=ghcr.io/cledson96/lanchonete:latest`
+- `APP_HOST_PORT=127.0.0.1:3001`
 - `DATABASE_URL`
 - `APP_AUTH_SECRET`
 - `NEXT_PUBLIC_SITE_URL`
@@ -103,7 +104,58 @@ DATABASE_URL=postgresql://lanchonete_app:SENHA@host.docker.internal:5432/lanchon
 O `docker-compose.yml` ja inclui `host.docker.internal:host-gateway` para esse
 acesso funcionar de dentro do container.
 
-## 5. Primeiro deploy
+## 5. Configurar Nginx
+
+Instale Nginx e Certbot, se ainda nao estiverem instalados:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y nginx certbot python3-certbot-nginx
+```
+
+Crie o site do subdominio:
+
+```bash
+sudo nano /etc/nginx/sites-available/lanchonete.cledson.com.br
+```
+
+Conteudo:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name lanchonete.cledson.com.br;
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+Ative e valide:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/lanchonete.cledson.com.br /etc/nginx/sites-enabled/lanchonete.cledson.com.br
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Depois que o DNS `lanchonete.cledson.com.br` apontar para a VPS, emita HTTPS:
+
+```bash
+sudo certbot --nginx -d lanchonete.cledson.com.br
+```
+
+## 6. Primeiro deploy
 
 Depois que o primeiro push na `main` publicar a imagem, rode uma vez na VPS:
 
@@ -118,7 +170,13 @@ docker compose --env-file .env.production up -d
 O seed nao roda automaticamente nos deploys seguintes para nao mexer em dados
 operacionais sem intencao.
 
-## 6. Deploys automaticos
+O app deve responder localmente em:
+
+```bash
+curl -I http://127.0.0.1:3001
+```
+
+## 7. Deploys automaticos
 
 Em todo push na `main`, o GitHub Actions:
 
@@ -131,9 +189,11 @@ Em todo push na `main`, o GitHub Actions:
 7. roda `npx prisma migrate deploy`.
 8. roda `docker compose up -d`.
 
+O Nginx continua rodando no host e aponta sempre para `127.0.0.1:3001`.
+
 Para acompanhar, abra `Actions > Deploy production` no GitHub.
 
-## 7. WhatsApp
+## 8. WhatsApp
 
 Depois que o site abrir em `https://seu-dominio`:
 
@@ -145,13 +205,15 @@ Depois que o site abrir em `https://seu-dominio`:
 A sessao fica no volume `whatsapp-session`, montado em
 `/app/.runtime/whatsapp-session`, e deve sobreviver a deploys e restarts.
 
-## 8. Comandos uteis na VPS
+## 9. Comandos uteis na VPS
 
 ```bash
 cd /opt/lanchonete
 docker compose --env-file .env.production ps
 docker compose --env-file .env.production logs -f app
-docker compose --env-file .env.production logs -f caddy
+curl -I http://127.0.0.1:3001
+sudo nginx -t
+sudo systemctl status nginx
 ```
 
 Rodar seed manualmente:

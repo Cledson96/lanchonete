@@ -10,28 +10,10 @@ services:
       WHATSAPP_SESSION_PATH: .runtime/whatsapp-session
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    expose:
-      - "3000"
+    ports:
+      - "${APP_HOST_PORT:-127.0.0.1:3001}:3000"
     volumes:
       - whatsapp-session:/app/.runtime/whatsapp-session
 
-  caddy:
-    image: caddy:2.8-alpine
-    restart: unless-stopped
-    environment:
-      APP_DOMAIN: ${APP_DOMAIN:?APP_DOMAIN is required}
-    depends_on:
-      - app
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-
 volumes:
   whatsapp-session:
-  caddy-data:
-  caddy-config:
