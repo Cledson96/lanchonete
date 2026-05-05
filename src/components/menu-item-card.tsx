@@ -156,13 +156,13 @@ export function MenuItemCard({
   return (
     <>
       <article
-        className="menu-card group flex h-full flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-md)]"
+        className="menu-card group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[var(--brand-orange)]/25 hover:shadow-[var(--shadow-md)]"
         style={{ boxShadow: "var(--shadow-sm)" }}
       >
         {/* Imagem */}
         <button
           aria-label={`Ver detalhes de ${name}`}
-          className="relative h-44 cursor-pointer overflow-hidden bg-[var(--cream)] text-left"
+          className="relative h-48 cursor-pointer overflow-hidden bg-[var(--cream)] text-left"
           onClick={openDetails}
           type="button"
         >
@@ -174,8 +174,7 @@ export function MenuItemCard({
             src={resolveMenuItemImage(imageUrl)}
           />
 
-          {/* Gradiente base suave */}
-          <span className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/25 to-transparent" />
+          <span className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
 
           {/* Badges — só os que adicionam valor real */}
           {displayCompare ? (
@@ -191,16 +190,16 @@ export function MenuItemCard({
           ) : null}
 
           {(hasOptions || hasIngredients) && weekdaysLabel === "todos os dias" ? (
-            <span className="absolute bottom-2.5 right-3 rounded-full bg-[var(--brand-orange)]/85 px-2 py-0.5 text-[0.6rem] font-semibold text-white backdrop-blur-sm">
+            <span className="absolute bottom-3 right-3 rounded-full bg-white/92 px-2.5 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.06em] text-[var(--brand-orange-dark)] shadow-sm backdrop-blur-sm">
               + opções
             </span>
           ) : null}
         </button>
 
         {/* Conteúdo */}
-        <div className="flex flex-1 flex-col p-3.5">
+        <div className="flex flex-1 flex-col p-4">
           <button className="cursor-pointer text-left" onClick={openDetails} type="button">
-            <h3 className="text-[0.95rem] font-bold leading-snug text-[var(--foreground)] transition-colors duration-150 group-hover:text-[var(--brand-orange-dark)] line-clamp-2">
+            <h3 className="line-clamp-2 text-[1rem] font-extrabold leading-snug text-[var(--foreground)] transition-colors duration-150 group-hover:text-[var(--brand-orange-dark)]">
               {name}
             </h3>
           </button>
@@ -214,19 +213,19 @@ export function MenuItemCard({
           <div className="flex-1" />
 
           {/* Preço + botão */}
-          <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="mt-3 flex items-end justify-between gap-2">
             <div>
               {displayCompare ? (
                 <p className="text-[0.7rem] text-[var(--muted)] line-through leading-none mb-0.5">{displayCompare}</p>
               ) : null}
-              <p className="text-[1.15rem] font-extrabold leading-none text-[var(--accent)]">
+              <p className="menu-price text-[1.28rem] font-extrabold leading-none text-[var(--accent)]">
                 {displayPrice}
               </p>
             </div>
 
             <button
               aria-label={`Adicionar ${name} ao pedido`}
-              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-3.5 py-2 text-[0.78rem] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-green-dark)] active:scale-[0.96]"
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-4 py-2.5 text-[0.8rem] font-extrabold text-white shadow-[0_8px_18px_rgba(234,106,28,0.22)] transition-all duration-200 hover:bg-[var(--brand-orange-dark)] active:scale-[0.96]"
               onClick={openDetails}
               type="button"
             >

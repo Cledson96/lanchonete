@@ -53,22 +53,22 @@ export function CategoryNav({
   onSelect,
 }: CategoryNavProps) {
   const activeClasses =
-    "bg-[var(--brand-orange)] text-white border border-[var(--brand-orange)] shadow-[0_4px_14px_rgba(234,106,28,0.32)]";
+    "bg-[var(--foreground)] text-white border border-[var(--foreground)] shadow-[0_6px_18px_rgba(36,18,8,0.18)]";
   const inactiveClasses =
-    "bg-white text-[var(--ink-soft)] border border-[var(--line)] hover:border-[var(--brand-orange)] hover:text-[var(--brand-orange-dark)] hover:bg-[var(--accent-light)]";
+    "bg-white text-[var(--ink-soft)] border border-[var(--line)] hover:border-[var(--brand-orange)] hover:text-[var(--brand-orange-dark)] hover:bg-white";
 
   return (
-    <div className="sticky top-[59px] z-30 bg-[var(--background)]/95 backdrop-blur-xl shadow-[0_1px_0_rgba(36,18,8,0.07)]">
-      <div className="shell py-3">
+    <div className="sticky top-[59px] z-30 bg-[var(--background)]/92 backdrop-blur-xl shadow-[0_1px_0_rgba(36,18,8,0.07)]">
+      <div className="shell py-2.5">
         {/* Desktop: flex-wrap */}
-        <div className="hidden flex-wrap items-center gap-2 lg:flex">
+        <div className="hidden flex-wrap items-center gap-1.5 lg:flex">
           {categories.map((category) => {
             const isActive = category.id === activeCategoryId;
             return (
               <button
                 key={category.id}
                 aria-current={isActive ? "true" : undefined}
-                className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold transition-all duration-200 ${
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.76rem] font-bold transition-all duration-200 ${
                   isActive ? activeClasses : inactiveClasses
                 }`}
                 onClick={() => onSelect(category.id)}
@@ -83,14 +83,14 @@ export function CategoryNav({
 
         {/* Mobile: horizontal scroll */}
         <div className="relative overflow-x-auto lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-w-max items-center gap-2 pr-10">
+          <div className="flex min-w-max items-center gap-1.5 pr-10">
             {categories.map((category) => {
               const isActive = category.id === activeCategoryId;
               return (
                 <button
                   key={category.id}
                   aria-current={isActive ? "true" : undefined}
-                  className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold transition-all duration-200 ${
+                  className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.76rem] font-bold transition-all duration-200 ${
                     isActive ? activeClasses : inactiveClasses
                   }`}
                   onClick={() => onSelect(category.id)}

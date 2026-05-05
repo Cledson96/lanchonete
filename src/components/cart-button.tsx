@@ -4,11 +4,16 @@ import { useCart } from "@/lib/cart-store";
 
 export function CartButton() {
   const { openCart, totalItems } = useCart();
+  const hasItems = totalItems > 0;
 
   return (
     <button
       aria-label={`Abrir carrinho${totalItems > 0 ? ` (${totalItems} itens)` : ""}`}
-      className="relative flex cursor-pointer items-center gap-2 rounded-full bg-[var(--accent)] px-3.5 py-2 text-[0.82rem] font-semibold text-white transition-all duration-200 hover:bg-[var(--accent-strong)] active:scale-95"
+      className={`relative flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-2 text-[0.82rem] font-bold text-white transition-all duration-200 active:scale-95 ${
+        hasItems
+          ? "bg-[var(--brand-green)] shadow-[0_8px_20px_rgba(127,181,57,0.28)] hover:bg-[var(--brand-green-dark)]"
+          : "bg-[var(--accent)] hover:bg-[var(--accent-strong)]"
+      }`}
       onClick={openCart}
       type="button"
     >
@@ -28,7 +33,7 @@ export function CartButton() {
       </svg>
       <span className="hidden sm:inline">Carrinho</span>
       {totalItems > 0 && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[0.65rem] font-bold text-[var(--accent)]">
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[0.65rem] font-extrabold text-[var(--brand-green-dark)]">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}

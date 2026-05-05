@@ -84,7 +84,7 @@ export function MenuBrowser({ categories }: Props) {
     : 0;
 
   return (
-    <section className="pb-16" id="cardapio">
+    <section className="pb-14" id="cardapio">
       <CategoryNav
         activeCategoryId={activeCategoryId}
         categories={categories.map((category) => ({
@@ -95,22 +95,22 @@ export function MenuBrowser({ categories }: Props) {
         onSelect={handleSelectCategory}
       />
 
-      <div className="shell pt-7">
+      <div className="shell pt-5">
         {/* Section header */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex items-end justify-between gap-4">
             {/* Título com acento laranja */}
             <div className="flex items-center gap-3">
               <span
                 aria-hidden="true"
-                className="block h-8 w-1 rounded-full bg-gradient-to-b from-[var(--brand-orange)] to-[var(--brand-green)]"
+                className="block h-9 w-1 rounded-full bg-gradient-to-b from-[var(--brand-orange)] to-[var(--brand-green)]"
               />
               <div>
-                <h2 className="text-[1.35rem] font-extrabold leading-tight tracking-tight text-[var(--foreground)]">
+                <h2 className="text-[1.45rem] font-extrabold leading-tight tracking-tight text-[var(--foreground)]">
                   {activeCategory?.name || "Cardápio"}
                 </h2>
                 {activeCategory?.description ? (
-                  <p className="mt-0.5 text-[0.8rem] leading-snug text-[var(--muted)] max-w-sm">
+                  <p className="mt-0.5 max-w-sm text-[0.8rem] leading-snug text-[var(--muted)]">
                     {activeCategory.description}
                   </p>
                 ) : null}
@@ -128,7 +128,7 @@ export function MenuBrowser({ categories }: Props) {
         </div>
 
         {/* Grid */}
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {paginatedItems.map((item) => (
             <MenuItemCard
               key={item.id}

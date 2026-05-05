@@ -11,8 +11,8 @@ export default function PublicLayout({
   return (
     <CartProvider>
       <div className="min-h-screen bg-[var(--background)]">
-        <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--background)]/85 backdrop-blur-2xl">
-          <div className="shell flex items-center justify-between gap-4 py-3">
+        <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--background)]/92 backdrop-blur-2xl">
+          <div className="shell flex items-center justify-between gap-4 py-2">
             <Link aria-label="Lanchonete Familia" href="/">
               <BrandLogo compact />
             </Link>
