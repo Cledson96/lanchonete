@@ -942,14 +942,12 @@ function ItemCard({
     >
       {/* Imagem */}
       <div className="relative h-36 w-full bg-[var(--background)]">
-        {item.imageUrl ? (
-          <Image alt={item.name} className="object-cover" fill sizes="320px" src={resolveMenuItemImage(item.imageUrl)} />
-        ) : (
-          <div className="flex h-full items-center justify-center text-xs text-[var(--muted)]">
-            <ImageIcon />
-            <span className="ml-1">Sem imagem</span>
-          </div>
-        )}
+        <Image alt={item.name} className="object-cover" fill sizes="320px" src={resolveMenuItemImage(item.imageUrl)} />
+        {!item.imageUrl ? (
+          <span className="absolute bottom-2 left-2 rounded-full bg-white/92 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[var(--muted)] shadow-sm">
+            Sem foto
+          </span>
+        ) : null}
         <div className="absolute left-2 top-2 flex flex-wrap gap-1">
           <span className="rounded-full bg-white/95 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[var(--foreground)]">
             {item.category.name}
