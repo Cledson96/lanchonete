@@ -21,10 +21,11 @@ export function BrandLogo({
       >
         <Image
           alt="Logo da Lanchonete Familia"
-          className="object-cover"
-          fill
+          className="block rounded-full object-contain"
+          height={markSize}
           sizes={`${markSize}px`}
-          src="/branding/logo-mark-orange.png"
+          src="/branding/logo-mark-orange-160.png"
+          width={markSize}
         />
       </span>
 
