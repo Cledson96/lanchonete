@@ -28,8 +28,12 @@ export const metadata: Metadata = {
   description:
     "Burgers artesanais, sucos e combinacoes caprichadas para pedir no site ou no WhatsApp.",
   icons: {
-    icon: "/branding/logo-mark-orange-160.png",
-    shortcut: "/branding/logo-mark-orange-160.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
 };
 

@@ -19,6 +19,16 @@ const prisma = new PrismaClient({
   }),
 });
 
+const businessWeekdays = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
+
 type OptionSeed = {
   name: string;
   slug: string;
@@ -41,7 +51,7 @@ type MenuItemSeed = {
   name: string;
   slug: string;
   description?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   price: number;
   sortOrder: number;
   isFeatured?: boolean;
@@ -60,16 +70,16 @@ type CategorySeed = {
 };
 
 const menuImages = {
-  classicBurger: "/landing/hero-burger.jpg",
-  comboBurgerFries: "/menu-catalog/combo-burger-fries.webp",
-  gourmetBurger: "/menu-catalog/gourmet-bacon-burger.webp",
-  chickenBurger: "/menu-catalog/x-frango.webp",
-  mistoBauru: "/menu-catalog/misto-bauru.webp",
-  omelete: "/menu-catalog/omelete.webp",
-  pastelSalgado: "/menu-catalog/pastel-salgado.webp",
-  tapiocaSalgada: "/menu-catalog/tapioca-salgada.webp",
-  doceCrepe: "/menu-catalog/doce-crepe-morango.webp",
-  acai: "/menu-catalog/acai.webp",
+  classicBurger: null,
+  comboBurgerFries: null,
+  gourmetBurger: null,
+  chickenBurger: null,
+  mistoBauru: null,
+  omelete: null,
+  pastelSalgado: null,
+  tapiocaSalgada: null,
+  doceCrepe: null,
+  acai: null,
 } as const;
 
 const optionGroups: OptionGroupSeed[] = [
@@ -1315,7 +1325,7 @@ async function syncCategoriesAndItems(optionGroupIds: Map<string, string>) {
 }
 
 async function seedDeliveryFeeRules() {
-  await prisma.storeProfile.upsert({
+  const store = await prisma.storeProfile.upsert({
     where: { slug: "loja-principal" },
     create: {
       slug: "loja-principal",
@@ -1343,6 +1353,25 @@ async function seedDeliveryFeeRules() {
       maxDeliveryDistanceKm: 5,
     },
   });
+
+  for (const weekday of businessWeekdays) {
+    await prisma.storeBusinessHour.upsert({
+      where: {
+        storeProfileId_weekday: {
+          storeProfileId: store.id,
+          weekday,
+        },
+      },
+      create: {
+        storeProfileId: store.id,
+        weekday,
+        opensAt: "18:00",
+        closesAt: "23:30",
+        isOpen: true,
+      },
+      update: {},
+    });
+  }
 
   await prisma.deliveryFeeRule.updateMany({
     data: { isActive: false },

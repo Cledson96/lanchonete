@@ -4,6 +4,7 @@ import { CartDrawer } from "@/components/cart-drawer";
 import { MenuBrowser } from "@/components/menu-browser";
 import { brandContent } from "@/lib/brand-content";
 import { getPublicMenu } from "@/lib/services/menu-service";
+import { getPublicStoreStatus } from "@/lib/services/store-settings-service";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,10 @@ function PhoneIcon() {
 }
 
 export default async function HomePage() {
-  const categories = await getPublicMenu();
+  const [categories, storeStatus] = await Promise.all([
+    getPublicMenu(),
+    getPublicStoreStatus(),
+  ]);
 
   const browserCategories = categories.map((category) => ({
     id: category.id,
@@ -116,8 +120,8 @@ export default async function HomePage() {
             <div className="relative">
               <div className="hero-reveal mb-2 flex flex-wrap items-center gap-2">
                 <span className="hero-status">
-                  <span className="hero-status__dot" />
-                  Aberto agora
+                  <span className={`hero-status__dot ${storeStatus.isOpen ? "" : "bg-red-400"}`} />
+                  {storeStatus.isOpen ? "Aberto agora" : "Fechado agora"}
                 </span>
                 <span className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/70">
                   Curitiba · CIC
@@ -205,7 +209,7 @@ export default async function HomePage() {
                 </span>
                 <div className="min-w-0">
                   <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--green-deep)]">Horário</p>
-                  <p className="text-[0.82rem] font-medium text-[var(--foreground)]">{brandContent.hours}</p>
+                  <p className="text-[0.82rem] font-medium text-[var(--foreground)]">{storeStatus.hoursLabel}</p>
                 </div>
               </div>
 
@@ -257,7 +261,7 @@ export default async function HomePage() {
                     <ClockIcon />
                   </span>
                   <p className="text-[0.85rem] text-[#c8aa88]">
-                    {brandContent.hours}
+                    {storeStatus.hoursLabel}
                   </p>
                 </div>
               </div>

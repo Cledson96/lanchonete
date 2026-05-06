@@ -5,6 +5,7 @@ import { buildOrderItemUnits } from "@/lib/order-item-units";
 import { groupRepeatedIds } from "@/lib/option-item-quantity";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
+import { assertStoreIsOpenForOrders } from "@/lib/services/store-settings-service";
 import { decimal, normalizePhone, optionalNullable } from "@/lib/utils";
 
 type CreateOrderItemInput = {
@@ -47,6 +48,10 @@ function generateOrderCode() {
 export async function createOrder(input: CreateOrderInput) {
   if (!input.items.length) {
     throw new ApiError(422, "Pedido sem itens.");
+  }
+
+  if (input.channel !== "local") {
+    await assertStoreIsOpenForOrders();
   }
 
   if (input.type === "delivery" && !input.address) {

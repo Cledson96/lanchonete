@@ -162,6 +162,22 @@ model StoreProfile {
   maxDeliveryDistanceKm Decimal  @default(5) @db.Decimal(5, 2)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  businessHours         StoreBusinessHour[]
+}
+
+model StoreBusinessHour {
+  id             String       @id @default(cuid())
+  storeProfileId String
+  weekday        String
+  opensAt        String
+  closesAt       String
+  isOpen         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  storeProfile   StoreProfile @relation(fields: [storeProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([storeProfileId, weekday])
+  @@index([weekday])
 }
 
 model Category {

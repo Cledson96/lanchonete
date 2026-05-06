@@ -7,6 +7,7 @@ import {
 } from "@/lib/geocoding";
 import { config } from "@/lib/config";
 import { decimal, numberFromDecimal } from "@/lib/utils";
+import { getMainStoreProfile } from "@/lib/services/store-settings-service";
 
 type DeliveryQuoteInput = {
   street: string;
@@ -63,34 +64,6 @@ function applyRoutingSafetyFactor(distanceKm: number) {
 }
 
 const STORE_COORDINATE_MAX_DRIFT_KM = 0.5;
-
-async function getMainStoreProfile() {
-  const storeDelegate = (
-    prisma as typeof prisma & {
-      storeProfile?: {
-        findUnique: typeof prisma.deliveryFeeRule.findUnique;
-        update: typeof prisma.deliveryFeeRule.update;
-      };
-    }
-  ).storeProfile;
-
-  if (!storeDelegate) {
-    throw new ApiError(
-      500,
-      "Configuracao de loja indisponivel no runtime. Rode npm run prisma:generate e reinicie o servidor.",
-    );
-  }
-
-  const store = await storeDelegate.findUnique({
-    where: { slug: "loja-principal" },
-  });
-
-  if (!store) {
-    throw new ApiError(500, "Loja principal nao configurada para calculo de entrega.");
-  }
-
-  return store;
-}
 
 async function resolveStoreCoordinates() {
   const store = await getMainStoreProfile();

@@ -45,6 +45,11 @@ type DeliveryQuote = {
   };
 };
 
+type StoreStatus = {
+  isOpen: boolean;
+  hoursLabel: string;
+};
+
 type ViaCepResponse = {
   zipCode: string;
   street: string;
@@ -239,7 +244,11 @@ async function readJson<T>(input: RequestInfo, init?: RequestInit) {
   return payload as T;
 }
 
-export function PedidoCheckout() {
+export function PedidoCheckout({
+  initialStoreStatus,
+}: {
+  initialStoreStatus?: StoreStatus;
+}) {
   const {
     state,
     removeItem,
@@ -288,6 +297,9 @@ export function PedidoCheckout() {
 
   const [submitPending, setSubmitPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [storeStatus, setStoreStatus] = useState<StoreStatus>(
+    initialStoreStatus || { isOpen: true, hoursLabel: brandContent.hours },
+  );
 
   const subtotal = totalPrice;
   const deliveryFeeAmount =
@@ -615,8 +627,27 @@ export function PedidoCheckout() {
     paymentMethod &&
     isDeliveryAddressValid &&
     isMenuAvailableNow &&
+    storeStatus.isOpen &&
     !submitPending &&
     !deliveryQuoteLoading;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    readJson<StoreStatus>("/api/store/status", { cache: "no-store" })
+      .then((payload) => {
+        if (!cancelled) {
+          setStoreStatus(payload);
+        }
+      })
+      .catch(() => {
+        // Backend validation remains authoritative if this refresh fails.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleRequestVerification() {
     setVerificationPending(true);
@@ -1412,6 +1443,12 @@ export function PedidoCheckout() {
                 </div>
               ) : null}
 
+              {!storeStatus.isOpen ? (
+                <div className="rounded-[1.1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  A loja esta fechada agora. Horario de atendimento: {storeStatus.hoursLabel}.
+                </div>
+              ) : null}
+
               <button
                 className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--brand-green)] px-5 py-4 text-[1rem] font-bold text-white transition-all duration-300 hover:bg-[var(--brand-green-dark)] hover:shadow-[0_8px_25px_rgba(140,198,63,0.4)] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0"
                 disabled={!canSubmit}
@@ -1425,8 +1462,8 @@ export function PedidoCheckout() {
                 </span>
               </button>
               <p className="text-sm leading-6 text-[var(--muted)]">
-                O botao libera quando itens, dados, telefone e frete estiverem
-                validados.
+                O botao libera quando itens, dados, telefone, frete e horario da loja
+                estiverem validados.
               </p>
               {fulfillmentType === "delivery" && !deliveryQuote && !deliveryQuoteLoading ? (
                 <p className="text-sm leading-6 text-amber-700">
@@ -1446,7 +1483,7 @@ export function PedidoCheckout() {
             <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
               <p className="font-semibold text-[var(--foreground)]">Retirada na loja</p>
               <p className="mt-2">{brandContent.location}</p>
-              <p>{brandContent.hours}</p>
+              <p>{storeStatus.hoursLabel}</p>
             </div>
           </section>
         </aside>

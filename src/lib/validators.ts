@@ -10,6 +10,10 @@ const timeField = z
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Horario invalido.")
   .optional()
   .transform(optionalTrimmed);
+const requiredTimeField = z
+  .string()
+  .trim()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Horario invalido.");
 
 export const paymentMethodSchema = z.enum([
   "dinheiro",
@@ -263,6 +267,30 @@ export const updateDeliveryFeeRuleSchema = createDeliveryFeeRuleSchema
   .extend({
     id: stringField.min(1),
   });
+
+export const updateStoreSettingsSchema = z.object({
+  store: z.object({
+    name: stringField.min(2),
+    zipCode: z
+      .string()
+      .optional()
+      .transform((value) => normalizeZipCode(value)),
+    street: stringField.min(2),
+    number: stringField.min(1),
+    neighborhood: optionalStringField,
+    city: stringField.min(2),
+    state: stringField.min(2).max(2).transform((value) => value.toUpperCase()),
+    maxDeliveryDistanceKm: z.coerce.number().positive().max(100),
+  }),
+  businessHours: z.array(
+    z.object({
+      weekday: menuWeekdaySchema,
+      opensAt: requiredTimeField,
+      closesAt: requiredTimeField,
+      isOpen: z.coerce.boolean(),
+    }),
+  ).length(MENU_WEEKDAYS.length),
+});
 
 export const addComandaItemsSchema = z.object({
   items: z.array(orderItemSchema).min(1),
