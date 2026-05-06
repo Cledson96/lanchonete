@@ -57,6 +57,7 @@ type MenuItemSeed = {
   isFeatured?: boolean;
   availableWeekdays?: string[];
   optionGroupSlugs?: string[];
+  ingredientSlugs?: string[];
 };
 
 type CategorySeed = {
@@ -67,6 +68,13 @@ type CategorySeed = {
   availableFrom?: string;
   availableUntil?: string;
   items: MenuItemSeed[];
+};
+
+type IngredientSeed = {
+  name: string;
+  slug: string;
+  sortOrder: number;
+  patterns?: string[];
 };
 
 const menuImages = {
@@ -81,6 +89,66 @@ const menuImages = {
   doceCrepe: null,
   acai: null,
 } as const;
+
+const ingredients: IngredientSeed[] = [
+  { name: "Pão", slug: "pao", sortOrder: 1, patterns: ["pao,"] },
+  { name: "Pão de forma", slug: "pao-de-forma", sortOrder: 2, patterns: ["pao de forma"] },
+  { name: "Pão de brioche", slug: "pao-de-brioche", sortOrder: 3, patterns: ["pao de brioche"] },
+  { name: "Hambúrguer bovino", slug: "hamburguer-bovino", sortOrder: 4, patterns: ["hamburguer bovino"] },
+  { name: "Hambúrguer artesanal bovino", slug: "hamburguer-artesanal-bovino", sortOrder: 5, patterns: ["hamburguer artesanal bovino", "hamburgueres artesanais bovinos"] },
+  { name: "Filé de frango", slug: "file-de-frango", sortOrder: 6, patterns: ["file de frango", "filé de frango"] },
+  { name: "Frango desfiado", slug: "frango-desfiado", sortOrder: 7, patterns: ["frango desfiado", "frango,", "frango e", "frango."] },
+  { name: "Alcatra", slug: "alcatra", sortOrder: 8, patterns: ["alcatra"] },
+  { name: "Queijo", slug: "queijo", sortOrder: 9, patterns: ["queijo"] },
+  { name: "Cheddar", slug: "cheddar", sortOrder: 10, patterns: ["cheddar"] },
+  { name: "Presunto", slug: "presunto", sortOrder: 11, patterns: ["presunto"] },
+  { name: "Bacon", slug: "bacon", sortOrder: 12, patterns: ["bacon"] },
+  { name: "Ovo", slug: "ovo", sortOrder: 13, patterns: ["ovo", "ovos"] },
+  { name: "Calabresa", slug: "calabresa", sortOrder: 14, patterns: ["calabresa"] },
+  { name: "Alface", slug: "alface", sortOrder: 15, patterns: ["alface"] },
+  { name: "Tomate", slug: "tomate", sortOrder: 16, patterns: ["tomate"] },
+  { name: "Milho", slug: "milho", sortOrder: 17, patterns: ["milho"] },
+  { name: "Maionese da casa", slug: "maionese-da-casa", sortOrder: 18, patterns: ["maionese da casa", "maionese caseira"] },
+  { name: "Manteiga", slug: "manteiga", sortOrder: 19, patterns: ["manteiga"] },
+  { name: "Cebola caramelizada", slug: "cebola-caramelizada", sortOrder: 20, patterns: ["cebola caramelizada"] },
+  { name: "Molho Billy & Jack", slug: "molho-billy-jack", sortOrder: 21, patterns: ["molho billy & jack"] },
+  { name: "Orégano", slug: "oregano", sortOrder: 22, patterns: ["oregano"] },
+  { name: "Cheiro-verde", slug: "cheiro-verde", sortOrder: 23, patterns: ["cheiro-verde"] },
+  { name: "Massa de pastel", slug: "massa-de-pastel", sortOrder: 24, patterns: ["massa crocante", "pastel doce com"] },
+  { name: "Carne moída", slug: "carne-moida", sortOrder: 25, patterns: ["carne moida"] },
+  { name: "Catupiry", slug: "catupiry", sortOrder: 26, patterns: ["catupiry"] },
+  { name: "Chocolate", slug: "chocolate", sortOrder: 27, patterns: ["chocolate e", "chocolate com", "com chocolate.", "e chocolate."] },
+  { name: "Chocolate branco", slug: "chocolate-branco", sortOrder: 28, patterns: ["chocolate branco"] },
+  { name: "Morango", slug: "morango", sortOrder: 29, patterns: ["morango"] },
+  { name: "Banana", slug: "banana", sortOrder: 30, patterns: ["banana"] },
+  { name: "Canela", slug: "canela", sortOrder: 31, patterns: ["canela"] },
+  { name: "Leite condensado", slug: "leite-condensado", sortOrder: 32, patterns: ["leite condensado"] },
+  { name: "Coco", slug: "coco", sortOrder: 33, patterns: ["coco"] },
+  { name: "Goiabada", slug: "goiabada", sortOrder: 34, patterns: ["goiabada"] },
+  { name: "Massa de tapioca", slug: "massa-de-tapioca", sortOrder: 35, patterns: [] },
+  { name: "Uva", slug: "uva", sortOrder: 36, patterns: ["uva"] },
+  { name: "Nutella", slug: "nutella", sortOrder: 37, patterns: ["nutella"] },
+  { name: "Bombom Ouro Branco", slug: "bombom-ouro-branco", sortOrder: 38, patterns: ["bombom ouro branco"] },
+  { name: "Bombom Sonho de Valsa", slug: "bombom-sonho-de-valsa", sortOrder: 39, patterns: ["bombom sonho de valsa"] },
+  { name: "Requeijão", slug: "requeijao", sortOrder: 40, patterns: ["requeijao"] },
+  { name: "Vina", slug: "vina", sortOrder: 41, patterns: ["vina"] },
+  { name: "Arroz", slug: "arroz", sortOrder: 42, patterns: ["arroz"] },
+  { name: "Feijão", slug: "feijao", sortOrder: 43, patterns: ["feijao"] },
+  { name: "Macarrão", slug: "macarrao", sortOrder: 44, patterns: ["macarrao"] },
+  { name: "Salada", slug: "salada", sortOrder: 45, patterns: ["salada"] },
+  { name: "Batata frita", slug: "batata-frita", sortOrder: 46, patterns: ["batata frita"] },
+  { name: "Contrafilé", slug: "contrafile", sortOrder: 47, patterns: ["contrafile"] },
+  { name: "Bife", slug: "bife", sortOrder: 48, patterns: ["bife"] },
+  { name: "Molho", slug: "molho", sortOrder: 49, patterns: ["servido com molho"] },
+  { name: "Frango ao molho", slug: "frango-ao-molho", sortOrder: 50, patterns: ["frango ao molho"] },
+  { name: "Frango à milanesa", slug: "frango-a-milanesa", sortOrder: 51, patterns: ["frango a milanesa", "frango à milanesa"] },
+  { name: "Carne de panela", slug: "carne-de-panela", sortOrder: 52, patterns: ["carne de panela"] },
+  { name: "Strogonoff", slug: "strogonoff", sortOrder: 53, patterns: ["strogonoff"] },
+  { name: "Coxa e sobrecoxa", slug: "coxa-sobrecoxa", sortOrder: 54, patterns: ["coxa e sobrecoxa"] },
+  { name: "Vinagrete", slug: "vinagrete", sortOrder: 55, patterns: ["vinagrete"] },
+  { name: "Bisteca", slug: "bisteca", sortOrder: 56, patterns: ["bisteca"] },
+  { name: "Filé de frango grelhado", slug: "file-de-frango-grelhado", sortOrder: 57, patterns: ["file de frango grelhado", "filé de frango grelhado"] },
+];
 
 const optionGroups: OptionGroupSeed[] = [
   {
@@ -1131,6 +1199,120 @@ const categories: CategorySeed[] = [
   },
 ];
 
+const explicitIngredientSlugsByItem = new Map<string, string[]>([
+  ["combo-x-salada", ["pao", "hamburguer-bovino", "queijo", "alface", "tomate", "milho", "maionese-da-casa"]],
+  ["combo-x-egg", ["pao", "hamburguer-bovino", "queijo", "ovo", "alface", "tomate", "maionese-da-casa"]],
+  ["combo-x-bacon", ["pao", "hamburguer-bovino", "queijo", "bacon", "alface", "tomate", "maionese-da-casa"]],
+  ["combo-x-frango", ["pao", "file-de-frango", "queijo", "alface", "tomate", "maionese-da-casa"]],
+  ["combo-x-calabresa", ["pao", "hamburguer-bovino", "queijo", "calabresa", "alface", "tomate", "maionese-da-casa"]],
+  [
+    "combo-artesanal-tradicional",
+    [
+      "pao-de-brioche",
+      "manteiga",
+      "maionese-da-casa",
+      "alface",
+      "tomate",
+      "cebola-caramelizada",
+      "hamburguer-artesanal-bovino",
+      "cheddar",
+      "molho-billy-jack",
+    ],
+  ],
+  [
+    "combo-artesanal-bacon",
+    [
+      "pao-de-brioche",
+      "manteiga",
+      "maionese-da-casa",
+      "alface",
+      "tomate",
+      "cebola-caramelizada",
+      "hamburguer-artesanal-bovino",
+      "bacon",
+      "cheddar",
+      "molho-billy-jack",
+    ],
+  ],
+  [
+    "combo-artesanal-calabresa",
+    [
+      "pao-de-brioche",
+      "manteiga",
+      "maionese-da-casa",
+      "alface",
+      "tomate",
+      "cebola-caramelizada",
+      "hamburguer-artesanal-bovino",
+      "calabresa",
+      "cheddar",
+      "molho-billy-jack",
+    ],
+  ],
+  [
+    "combo-artesanal-duplo",
+    [
+      "pao-de-brioche",
+      "manteiga",
+      "maionese-da-casa",
+      "alface",
+      "tomate",
+      "cebola-caramelizada",
+      "hamburguer-artesanal-bovino",
+      "cheddar",
+      "molho-billy-jack",
+    ],
+  ],
+]);
+
+function normalizeSeedText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function inferIngredientSlugs(category: CategorySeed, item: MenuItemSeed) {
+  const explicitSlugs = item.ingredientSlugs || explicitIngredientSlugsByItem.get(item.slug);
+
+  if (explicitSlugs) {
+    return explicitSlugs;
+  }
+
+  const text = normalizeSeedText(`${item.name}. ${item.description ?? ""}`);
+  const slugs = new Set<string>();
+
+  if (category.slug.includes("pastel")) {
+    slugs.add("massa-de-pastel");
+  }
+
+  if (category.slug.includes("tapioca")) {
+    slugs.add("massa-de-tapioca");
+  }
+
+  for (const ingredient of ingredients) {
+    const patterns = ingredient.patterns || [ingredient.name];
+
+    if (patterns.some((pattern) => text.includes(normalizeSeedText(pattern)))) {
+      slugs.add(ingredient.slug);
+    }
+  }
+
+  if (slugs.has("pao-de-brioche") || slugs.has("pao-de-forma")) {
+    slugs.delete("pao");
+  }
+
+  if (slugs.has("hamburguer-artesanal-bovino")) {
+    slugs.delete("hamburguer-bovino");
+  }
+
+  if (slugs.has("file-de-frango") || slugs.has("file-de-frango-grelhado") || slugs.has("frango-ao-molho") || slugs.has("frango-a-milanesa")) {
+    slugs.delete("frango-desfiado");
+  }
+
+  return Array.from(slugs);
+}
+
 async function seedAdmin() {
   const email = process.env.ADMIN_EMAIL;
   const phone = process.env.ADMIN_PHONE;
@@ -1235,7 +1417,34 @@ async function syncOptionGroups() {
   return optionGroupIds;
 }
 
-async function syncCategoriesAndItems(optionGroupIds: Map<string, string>) {
+async function syncIngredients() {
+  const ingredientIds = new Map<string, string>();
+
+  for (const ingredient of ingredients) {
+    const savedIngredient = await prisma.ingredient.upsert({
+      where: { slug: ingredient.slug },
+      create: {
+        name: ingredient.name,
+        slug: ingredient.slug,
+        price: 0,
+        sortOrder: ingredient.sortOrder,
+        isActive: true,
+      },
+      update: {
+        name: ingredient.name,
+        price: 0,
+        sortOrder: ingredient.sortOrder,
+        isActive: true,
+      },
+    });
+
+    ingredientIds.set(ingredient.slug, savedIngredient.id);
+  }
+
+  return ingredientIds;
+}
+
+async function syncCategoriesAndItems(optionGroupIds: Map<string, string>, ingredientIds: Map<string, string>) {
   await prisma.menuItem.updateMany({
     data: { isActive: false },
   });
@@ -1315,6 +1524,31 @@ async function syncCategoriesAndItems(optionGroupIds: Map<string, string>) {
             return {
               menuItemId: savedItem.id,
               optionGroupId,
+              sortOrder: index + 1,
+            };
+          }),
+        });
+      }
+
+      await prisma.menuItemIngredient.deleteMany({
+        where: { menuItemId: savedItem.id },
+      });
+
+      const ingredientSlugs = inferIngredientSlugs(category, item);
+
+      if (ingredientSlugs.length) {
+        await prisma.menuItemIngredient.createMany({
+          data: ingredientSlugs.map((ingredientSlug, index) => {
+            const ingredientId = ingredientIds.get(ingredientSlug);
+
+            if (!ingredientId) {
+              throw new Error(`Ingrediente nao encontrado para slug ${ingredientSlug}.`);
+            }
+
+            return {
+              menuItemId: savedItem.id,
+              ingredientId,
+              quantity: ingredientSlug === "hamburguer-artesanal-bovino" && item.slug === "artesanal-duplo" ? 2 : 1,
               sortOrder: index + 1,
             };
           }),
@@ -1459,7 +1693,8 @@ async function seedDeliveryFeeRules() {
 
 async function seedCatalog() {
   const optionGroupIds = await syncOptionGroups();
-  await syncCategoriesAndItems(optionGroupIds);
+  const ingredientIds = await syncIngredients();
+  await syncCategoriesAndItems(optionGroupIds, ingredientIds);
   await seedDeliveryFeeRules();
 }
 
