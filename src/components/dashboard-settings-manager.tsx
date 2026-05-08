@@ -1,52 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { DeliveryRule, StoreSettings } from "@/lib/contracts/store";
 import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
 import { formatMoney } from "@/lib/utils";
-
-type StoreSettings = {
-  store: {
-    name: string;
-    zipCode?: string | null;
-    street: string;
-    number: string;
-    neighborhood?: string | null;
-    city: string;
-    state: string;
-    maxDeliveryDistanceKm: number;
-  };
-  businessHours: Array<{
-    weekday: string;
-    label: string;
-    short: string;
-    opensAt: string;
-    closesAt: string;
-    isOpen: boolean;
-  }>;
-  deliveryRules: DeliveryRule[];
-  status: {
-    isOpen: boolean;
-    hoursLabel: string;
-  };
-};
-
-type DeliveryRule = {
-  id: string;
-  label: string;
-  neighborhood?: string | null;
-  city: string;
-  state: string;
-  zipCodeStart?: string | null;
-  zipCodeEnd?: string | null;
-  maxDistanceKm: number;
-  feeAmount: number;
-  minimumOrderAmount?: number | null;
-  freeAboveAmount?: number | null;
-  estimatedMinMinutes?: number | null;
-  estimatedMaxMinutes?: number | null;
-  sortOrder: number;
-  isActive: boolean;
-};
 
 type ApiErrorPayload = {
   error?: { message?: string };

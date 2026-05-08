@@ -1,4 +1,11 @@
 import { ApiError } from "@/lib/http";
+import type {
+  DeliveryRule,
+  StoreBusinessHour,
+  StoreProfileSummary,
+  StoreSettings,
+  StoreStatus,
+} from "@/lib/contracts/store";
 import { MENU_WEEKDAYS, type MenuWeekday } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";
 import { decimal, numberFromDecimal } from "@/lib/utils";
@@ -65,7 +72,9 @@ function isWithinWindow(minutes: number, opensAt: string, closesAt: string) {
   return minutes >= opens || minutes < closes;
 }
 
-function serializeStore(store: Awaited<ReturnType<typeof getMainStoreProfile>>) {
+function serializeStore(
+  store: Awaited<ReturnType<typeof getMainStoreProfile>>,
+): StoreProfileSummary {
   return {
     id: store.id,
     slug: store.slug,
@@ -97,7 +106,7 @@ function serializeHours(hours: Array<{
   opensAt: string;
   closesAt: string;
   isOpen: boolean;
-}>) {
+}>): StoreBusinessHour[] {
   return sortHours(hours).map((hour) => ({
     id: hour.id,
     weekday: hour.weekday as MenuWeekday,
@@ -125,7 +134,7 @@ function serializeDeliveryRule(rule: {
   estimatedMaxMinutes: number | null;
   sortOrder: number;
   isActive: boolean;
-}) {
+}): DeliveryRule {
   return {
     ...rule,
     maxDistanceKm: Number(rule.maxDistanceKm),
@@ -171,7 +180,7 @@ export async function ensureDefaultBusinessHours(storeProfileId: string) {
   );
 }
 
-export async function getStoreSettings() {
+export async function getStoreSettings(): Promise<StoreSettings> {
   const store = await getMainStoreProfile();
   await ensureDefaultBusinessHours(store.id);
 
@@ -249,7 +258,7 @@ export async function updateStoreSettings(input: {
   return getStoreSettings();
 }
 
-export function buildHoursLabel(hours: ReturnType<typeof serializeHours>) {
+export function buildHoursLabel(hours: StoreBusinessHour[]) {
   const openHours = hours.filter((hour) => hour.isOpen);
   if (!openHours.length) {
     return "Fechado todos os dias";
@@ -282,7 +291,7 @@ export function buildStoreStatus(rawHours: Array<{
   opensAt: string;
   closesAt: string;
   isOpen: boolean;
-}>) {
+}>): StoreStatus {
   const hours = serializeHours(rawHours);
   const { weekday, minutes } = currentParts();
   const today = hours.find((hour) => hour.weekday === weekday);
@@ -306,7 +315,7 @@ export function buildStoreStatus(rawHours: Array<{
   };
 }
 
-export async function getPublicStoreStatus() {
+export async function getPublicStoreStatus(): Promise<StoreStatus> {
   const store = await getMainStoreProfile();
   await ensureDefaultBusinessHours(store.id);
   const hours = await prisma.storeBusinessHour.findMany({

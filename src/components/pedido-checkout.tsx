@@ -4,121 +4,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type {
+  CheckoutAddress,
+  CheckoutCustomerSnapshot,
+  ConfirmVerificationResponse,
+  CreateOrderResponse,
+  CustomerMeResponse,
+  DeliveryQuote,
+  RequestVerificationResponse,
+  ViaCepResponse,
+} from "@/lib/contracts/checkout";
+import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
+import type { StoreStatus } from "@/lib/contracts/store";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { getCurrentWeekday } from "@/lib/menu-item-availability";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
 import { formatMoney, optionalTrimmed } from "@/lib/utils";
-
-type FulfillmentType = "delivery" | "retirada";
-type PaymentMethod =
-  | "pix"
-  | "cartao_credito"
-  | "cartao_debito"
-  | "dinheiro"
-  | "outro";
-
-type DeliveryQuote = {
-  serviceable: boolean;
-  feeAmount: number;
-  distanceKm: number;
-  distanceMethod?: "same_address" | "route";
-  estimatedMinMinutes?: number | null;
-  estimatedMaxMinutes?: number | null;
-  rule: {
-    id: string;
-    label: string;
-    city: string;
-    state: string;
-    neighborhood?: string | null;
-    minimumOrderAmount?: number | null;
-    freeAboveAmount?: number | null;
-  };
-  store: {
-    name: string;
-    street?: string;
-    number?: string;
-    city: string;
-    state: string;
-    zipCode?: string | null;
-    maxDeliveryDistanceKm: number;
-  };
-};
-
-type StoreStatus = {
-  isOpen: boolean;
-  hoursLabel: string;
-};
-
-type ViaCepResponse = {
-  zipCode: string;
-  street: string;
-  complement?: string | null;
-  neighborhood: string;
-  city: string;
-  state: string;
-};
-
-type RequestVerificationResponse = {
-  phone: string;
-  expiresAt: string;
-  delivered: boolean;
-  provider: "whatsapp-web" | "development";
-  devCodePreview?: string;
-};
-
-type ConfirmVerificationResponse = {
-  customer: {
-    id: string;
-    fullName?: string | null;
-    phone: string;
-  };
-};
-
-type CheckoutAddress = {
-  id: string;
-  street: string;
-  number: string;
-  complement?: string | null;
-  neighborhood: string;
-  city: string;
-  state: string;
-  zipCode?: string | null;
-  reference?: string | null;
-};
-
-type CheckoutCustomerSnapshot = {
-  id: string;
-  fullName?: string | null;
-  phone: string;
-  defaultAddress?: CheckoutAddress | null;
-  lastPaymentMethod?: PaymentMethod | null;
-  lastOrderType?: FulfillmentType | "local" | null;
-};
-
-type CustomerMeResponse = {
-  customer: {
-    id: string;
-    fullName?: string | null;
-    phone: string;
-    defaultAddress?: CheckoutAddress | null;
-    lastPaymentMethod?: PaymentMethod | null;
-    lastOrderType?: FulfillmentType | "local" | null;
-  } | null;
-};
-
-type CreateOrderResponse = {
-  order: {
-    code: string;
-    customerName?: string | null;
-    customerPhone?: string | null;
-    type: FulfillmentType;
-    paymentMethod: PaymentMethod;
-    totalAmount: string | number;
-    subtotalAmount: string | number;
-    deliveryFeeAmount: string | number;
-  };
-};
 
 type ApiErrorPayload = {
   error?: {
@@ -298,7 +201,12 @@ export function PedidoCheckout({
   const [submitPending, setSubmitPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [storeStatus, setStoreStatus] = useState<StoreStatus>(
-    initialStoreStatus || { isOpen: true, hoursLabel: brandContent.hours },
+    initialStoreStatus || {
+      isOpen: true,
+      currentWeekday: getCurrentWeekday(),
+      hoursLabel: brandContent.hours,
+      currentWindow: null,
+    },
   );
 
   const subtotal = totalPrice;
