@@ -53,7 +53,7 @@ jobs:
                 -e SOURCE_ENV \
                 -e TARGET_ENV \
                 -e CONFIRM_COPY_PROD_TO_DEVELOP \
-                postgres:16-bookworm \
+                postgres:18-bookworm \
                 bash ./scripts/db/copy-prod-to-develop-db.sh
             else
               echo "pg_dump/pg_restore/psql not found and docker is not available" >&2
