@@ -1,27 +1,33 @@
 # Deploy automatico na VPS
 
 Este projeto usa Docker Compose na VPS, Nginx como proxy central e GitHub
-Actions para publicar uma imagem no GitHub Container Registry. Depois do setup
-inicial, todo push na branch `main` faz deploy automatico.
+Actions para publicar imagens no GitHub Container Registry. Depois do setup
+inicial, todo push na branch `main` faz deploy automatico de producao e todo
+push na branch `develop` faz deploy automatico do ambiente de desenvolvimento.
 
 ## 1. Modelo de branches
 
-- `development`: branch de trabalho e validacao.
+- `develop`: branch de trabalho e validacao.
 - `main`: producao.
 
 Fluxo recomendado:
 
 ```bash
-git switch development
-git pull origin development
-# trabalhe em feature branches ou direto em development
-git push origin development
+# primeira vez, se a branch ainda nao existir no remoto:
+git branch develop main
+git push -u origin develop
+
+git switch develop
+git pull origin develop
+# trabalhe em feature branches ou direto em develop
+git push origin develop
 
 # quando estiver pronto:
-# abra PR de development para main, ou faca merge local e push em main
+# abra PR de develop para main, ou faca merge local e push em main
 ```
 
-O deploy so roda em push na `main`.
+O deploy de producao roda em push na `main`. O deploy de desenvolvimento roda
+em push na `develop`.
 
 ## 2. Secrets do GitHub
 
@@ -33,8 +39,15 @@ Configure em `Settings > Secrets and variables > Actions`:
 - `VPS_APP_DIR`: pasta do projeto na VPS, exemplo `/opt/lanchonete`.
 - `PRODUCTION_SITE_URL`: URL publica do site, exemplo `https://seudominio.com`.
 - `PRODUCTION_WHATSAPP_URL`: link publico do WhatsApp, exemplo `https://wa.me/55...`.
+- `DEVELOP_VPS_APP_DIR`: pasta do projeto de desenvolvimento na VPS, exemplo `/opt/lanchonete-develop`.
+- `DEVELOP_SITE_URL`: URL publica do ambiente develop, exemplo `https://dev.seudominio.com`.
+- `DEVELOP_WHATSAPP_URL`: link publico do WhatsApp usado no ambiente develop.
 
-O workflow usa `GITHUB_TOKEN` para publicar em `ghcr.io/cledson96/lanchonete`.
+Os workflows usam `GITHUB_TOKEN` para publicar em `ghcr.io/cledson96/lanchonete`.
+As tags usadas sao:
+
+- Producao: `latest` e o SHA do commit.
+- Develop: `develop` e `develop-SHA`.
 
 ## 3. Preparar a VPS uma vez
 
@@ -58,7 +71,7 @@ sudo usermod -aG docker "$USER"
 
 Saia e entre novamente no SSH para o grupo `docker` valer.
 
-Clone o repo no caminho usado em `VPS_APP_DIR`:
+Clone o repo no caminho usado em `VPS_APP_DIR` para producao:
 
 ```bash
 sudo mkdir -p /opt/lanchonete
@@ -66,6 +79,18 @@ sudo chown "$USER:$USER" /opt/lanchonete
 git clone https://github.com/Cledson96/lanchonete.git /opt/lanchonete
 cd /opt/lanchonete
 git checkout main
+cp .env.production.example .env.production
+```
+
+Clone tambem o repo no caminho usado em `DEVELOP_VPS_APP_DIR` para o ambiente
+develop:
+
+```bash
+sudo mkdir -p /opt/lanchonete-develop
+sudo chown "$USER:$USER" /opt/lanchonete-develop
+git clone https://github.com/Cledson96/lanchonete.git /opt/lanchonete-develop
+cd /opt/lanchonete-develop
+git checkout develop
 cp .env.production.example .env.production
 ```
 
@@ -87,6 +112,18 @@ Edite `/opt/lanchonete/.env.production` e troque, no minimo:
 - `ADMIN_EMAIL`, `ADMIN_PHONE`, `ADMIN_PASSWORD`
 - `NEXT_PUBLIC_WHATSAPP_URL`
 - `STORE_PIX_KEY`
+
+Edite tambem `/opt/lanchonete-develop/.env.production` para o ambiente develop.
+Use, no minimo:
+
+- `APP_IMAGE=ghcr.io/cledson96/lanchonete:develop`
+- `APP_HOST_PORT=127.0.0.1:3002`
+- `DATABASE_URL` apontando para um banco separado de desenvolvimento.
+- `APP_AUTH_SECRET` diferente do segredo de producao.
+- `NEXT_PUBLIC_SITE_URL` com a URL de develop.
+- `ADMIN_EMAIL`, `ADMIN_PHONE`, `ADMIN_PASSWORD` de desenvolvimento.
+- `NEXT_PUBLIC_WHATSAPP_URL` de desenvolvimento.
+- `STORE_PIX_KEY` de desenvolvimento.
 
 Gere um segredo forte:
 
@@ -155,6 +192,35 @@ Depois que o DNS `lanchonete.cledson.com.br` apontar para a VPS, emita HTTPS:
 sudo certbot --nginx -d lanchonete.cledson.com.br
 ```
 
+Para o ambiente develop, crie outro site Nginx apontando para a porta definida
+em `APP_HOST_PORT`, por exemplo `127.0.0.1:3002`:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name dev.lanchonete.cledson.com.br;
+
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+Depois que o DNS do subdominio develop apontar para a VPS, emita HTTPS:
+
+```bash
+sudo certbot --nginx -d dev.lanchonete.cledson.com.br
+```
+
 ## 6. Primeiro deploy
 
 Depois que o primeiro push na `main` publicar a imagem, rode uma vez na VPS:
@@ -176,6 +242,22 @@ O app deve responder localmente em:
 curl -I http://127.0.0.1:3001
 ```
 
+Depois que o primeiro push na `develop` publicar a imagem, rode uma vez na VPS:
+
+```bash
+cd /opt/lanchonete-develop
+docker compose --env-file .env.production pull app
+docker compose --env-file .env.production run --rm app npx prisma migrate deploy
+docker compose --env-file .env.production run --rm app npm run prisma:seed
+docker compose --env-file .env.production up -d
+```
+
+O app develop deve responder localmente em:
+
+```bash
+curl -I http://127.0.0.1:3002
+```
+
 ## 7. Deploys automaticos
 
 Em todo push na `main`, o GitHub Actions:
@@ -192,6 +274,22 @@ Em todo push na `main`, o GitHub Actions:
 O Nginx continua rodando no host e aponta sempre para `127.0.0.1:3001`.
 
 Para acompanhar, abra `Actions > Deploy production` no GitHub.
+
+Em todo push na `develop`, o GitHub Actions:
+
+1. roda lint, typecheck, Prisma validate e build.
+2. builda a imagem Docker com as URLs publicas de develop.
+3. publica `ghcr.io/cledson96/lanchonete:develop` e `:develop-SHA`.
+4. entra na VPS por SSH.
+5. atualiza o clone para `develop`.
+6. roda `docker compose pull app`.
+7. roda `npx prisma migrate deploy`.
+8. roda `docker compose up -d`.
+
+O Nginx do ambiente develop deve apontar para `127.0.0.1:3002`, ou para a
+porta configurada em `APP_HOST_PORT` no `.env.production` desse ambiente.
+
+Para acompanhar, abra `Actions > Deploy develop` no GitHub.
 
 ## 8. WhatsApp
 
@@ -225,6 +323,17 @@ cd /opt/lanchonete
 docker compose --env-file .env.production ps
 docker compose --env-file .env.production logs -f app
 curl -I http://127.0.0.1:3001
+sudo nginx -t
+sudo systemctl status nginx
+```
+
+Comandos uteis do ambiente develop:
+
+```bash
+cd /opt/lanchonete-develop
+docker compose --env-file .env.production ps
+docker compose --env-file .env.production logs -f app
+curl -I http://127.0.0.1:3002
 sudo nginx -t
 sudo systemctl status nginx
 ```
