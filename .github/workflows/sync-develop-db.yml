@@ -2,12 +2,6 @@ name: Sync develop database
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
-    paths:
-      - .github/workflows/sync-develop-db.yml
-      - scripts/db/copy-prod-to-develop-db.sh
 
 concurrency:
   group: sync-develop-database
