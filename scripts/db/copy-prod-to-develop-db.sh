@@ -32,12 +32,18 @@ read_database_url() {
   printf '%s' "$value"
 }
 
+postgres_tool_url() {
+  printf '%s' "$1" | sed -E 's/([?&])schema=[^&]*&?/\1/; s/[?&]$//; s/\?&/?/'
+}
+
 require_command pg_dump
 require_command pg_restore
 require_command psql
 
 SOURCE_DATABASE_URL="$(read_database_url "$SOURCE_ENV")"
 TARGET_DATABASE_URL="$(read_database_url "$TARGET_ENV")"
+SOURCE_PG_URL="$(postgres_tool_url "$SOURCE_DATABASE_URL")"
+TARGET_PG_URL="$(postgres_tool_url "$TARGET_DATABASE_URL")"
 
 [ "$SOURCE_DATABASE_URL" != "$TARGET_DATABASE_URL" ] || die "source and target DATABASE_URL are the same"
 
@@ -64,21 +70,21 @@ trap cleanup EXIT
 
 printf 'Creating production dump...\n'
 pg_dump \
-  --dbname "$SOURCE_DATABASE_URL" \
+  --dbname "$SOURCE_PG_URL" \
   --format custom \
   --no-owner \
   --no-acl \
   --file "$dump_file"
 
 printf 'Resetting development schema...\n'
-psql "$TARGET_DATABASE_URL" \
+psql "$TARGET_PG_URL" \
   --set ON_ERROR_STOP=1 \
   --command 'DROP SCHEMA IF EXISTS public CASCADE;' \
   --command 'CREATE SCHEMA public;'
 
 printf 'Restoring dump into development...\n'
 pg_restore \
-  --dbname "$TARGET_DATABASE_URL" \
+  --dbname "$TARGET_PG_URL" \
   --no-owner \
   --no-acl \
   --exit-on-error \
