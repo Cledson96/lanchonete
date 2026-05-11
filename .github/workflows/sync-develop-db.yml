@@ -1,0 +1,42 @@
+name: Sync develop database
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - .github/workflows/sync-develop-db.yml
+      - scripts/db/copy-prod-to-develop-db.sh
+
+concurrency:
+  group: sync-develop-database
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Copy production data to develop
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync database on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          SOURCE_ENV: ${{ secrets.VPS_APP_DIR }}/.env.production
+          TARGET_ENV: ${{ secrets.DEVELOP_VPS_APP_DIR }}/.env.production
+          CONFIRM_COPY_PROD_TO_DEVELOP: "1"
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SOURCE_ENV,TARGET_ENV,CONFIRM_COPY_PROD_TO_DEVELOP
+          script: |
+            set -euo pipefail
+            cd "${{ secrets.DEVELOP_VPS_APP_DIR }}"
+            git fetch origin develop
+            git checkout develop
+            git pull --ff-only origin develop
+            bash ./scripts/db/copy-prod-to-develop-db.sh
