@@ -39,4 +39,23 @@ jobs:
             git fetch origin develop
             git checkout develop
             git pull --ff-only origin develop
-            bash ./scripts/db/copy-prod-to-develop-db.sh
+            if command -v pg_dump >/dev/null 2>&1 && command -v pg_restore >/dev/null 2>&1 && command -v psql >/dev/null 2>&1; then
+              bash ./scripts/db/copy-prod-to-develop-db.sh
+            elif command -v docker >/dev/null 2>&1; then
+              SOURCE_DIR="$(dirname "$SOURCE_ENV")"
+              TARGET_DIR="$(dirname "$TARGET_ENV")"
+              docker run --rm \
+                --network host \
+                --add-host host.docker.internal:host-gateway \
+                -v "$SOURCE_DIR:$SOURCE_DIR:ro" \
+                -v "$TARGET_DIR:$TARGET_DIR:ro" \
+                -w "$(pwd)" \
+                -e SOURCE_ENV \
+                -e TARGET_ENV \
+                -e CONFIRM_COPY_PROD_TO_DEVELOP \
+                postgres:16-bookworm \
+                bash ./scripts/db/copy-prod-to-develop-db.sh
+            else
+              echo "pg_dump/pg_restore/psql not found and docker is not available" >&2
+              exit 1
+            fi
