@@ -41,15 +41,6 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
         run: npm run prisma:generate
 
-      - name: Restore Next.js build cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-develop-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*', 'public/**/*', 'prisma/**/*', 'next.config.ts', 'tsconfig.json', 'postcss.config.mjs') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-develop-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-nextjs-develop-
-
       - name: Lint
         run: npm run lint
 
@@ -61,15 +52,6 @@ jobs:
           APP_AUTH_SECRET: ci-build-secret
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
         run: npm run prisma:validate
-
-      - name: Build Next.js
-        env:
-          APP_AUTH_SECRET: ci-build-secret
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
-          USE_LOCAL_DB_ON_START: "true"
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.DEVELOP_SITE_URL }}
-          NEXT_PUBLIC_WHATSAPP_URL: ${{ secrets.DEVELOP_WHATSAPP_URL }}
-        run: npm run build
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
