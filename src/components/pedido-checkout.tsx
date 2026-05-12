@@ -18,6 +18,14 @@ import type {
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 import {
+  checkoutPaymentOptions,
+  formatCheckoutPhoneNumber,
+  formatCheckoutZipCode,
+  getCheckoutErrorMessage,
+  type CheckoutApiErrorPayload,
+  normalizeCheckoutPhoneForCompare,
+} from "@/lib/checkout-client";
+import {
   buildCheckoutPricingSummary,
   buildCheckoutSuccessParams,
 } from "@/lib/checkout-ui";
@@ -25,113 +33,7 @@ import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
-import { formatMoney, optionalTrimmed } from "@/lib/utils";
-
-type ApiErrorPayload = {
-  error?: {
-    message?: string;
-    details?: {
-      fieldErrors?: Record<string, string[] | undefined>;
-      formErrors?: string[];
-    };
-  };
-};
-
-const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
-  { value: "pix", label: "Pix" },
-  { value: "cartao_credito", label: "Cartao de credito" },
-  { value: "cartao_debito", label: "Cartao de debito" },
-  { value: "dinheiro", label: "Dinheiro" },
-  { value: "outro", label: "Outro" },
-];
-
-function digitsOnly(value: string) {
-  return value.replace(/\D/g, "");
-}
-
-function formatZipCode(value: string) {
-  const digits = digitsOnly(value).slice(0, 8);
-
-  if (digits.length <= 5) {
-    return digits;
-  }
-
-  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-}
-
-function formatPhoneNumber(value: string) {
-  let digits = digitsOnly(value);
-
-  if (digits.startsWith("55") && digits.length > 11) {
-    digits = digits.slice(2);
-  }
-
-  digits = digits.slice(0, 11);
-
-  if (digits.length <= 2) {
-    return digits.length ? `(${digits}` : "";
-  }
-
-  if (digits.length <= 7) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  }
-
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
-
-function normalizePhoneForCompare(value: string) {
-  const digits = digitsOnly(value);
-
-  if (digits.length === 10 || digits.length === 11) {
-    return `55${digits}`;
-  }
-
-  return digits;
-}
-
-function labelField(field: string) {
-  const labels: Record<string, string> = {
-    customerName: "nome",
-    customerPhone: "telefone",
-    type: "tipo do pedido",
-    paymentMethod: "forma de pagamento",
-    items: "itens do pedido",
-    address: "endereco",
-    street: "rua",
-    number: "numero",
-    neighborhood: "bairro",
-    city: "cidade",
-    state: "estado",
-    zipCode: "CEP",
-    code: "codigo",
-    phone: "telefone",
-  };
-
-  return labels[field] || field;
-}
-
-function getErrorMessage(payload: ApiErrorPayload | null) {
-  const fieldErrors = payload?.error?.details?.fieldErrors;
-  const formErrors = payload?.error?.details?.formErrors;
-
-  if (fieldErrors) {
-    const entries = Object.entries(fieldErrors)
-      .flatMap(([field, messages]) =>
-        (messages || []).map((message) => `${labelField(field)}: ${message}`),
-      )
-      .filter(Boolean);
-
-    if (entries.length > 0) {
-      return entries.join(" | ");
-    }
-  }
-
-  if (formErrors?.length) {
-    return formErrors.join(" | ");
-  }
-
-  return payload?.error?.message || "Nao foi possivel concluir a acao.";
-}
+import { digitsOnly, formatMoney, optionalTrimmed } from "@/lib/utils";
 
 async function readJson<T>(input: RequestInfo, init?: RequestInit) {
   const response = await fetch(input, {
@@ -142,10 +44,10 @@ async function readJson<T>(input: RequestInfo, init?: RequestInit) {
     },
   });
 
-  const payload = (await response.json().catch(() => null)) as ApiErrorPayload | null;
+  const payload = (await response.json().catch(() => null)) as CheckoutApiErrorPayload | null;
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload));
+    throw new Error(getCheckoutErrorMessage(payload));
   }
 
   return payload as T;
@@ -309,7 +211,7 @@ export function PedidoCheckout({
   }, [syncCustomerFromSession]);
 
   useEffect(() => {
-    const normalizedCurrentPhone = normalizePhoneForCompare(customerPhone);
+    const normalizedCurrentPhone = normalizeCheckoutPhoneForCompare(customerPhone);
 
     if (verifiedPhone && normalizedCurrentPhone !== verifiedPhone) {
       setVerificationConfirmed(false);
@@ -537,7 +439,7 @@ export function PedidoCheckout({
     customerName.trim().length >= 2 &&
     digitsOnly(customerPhone).length >= 10 &&
     verificationConfirmed &&
-    verifiedPhone === normalizePhoneForCompare(customerPhone) &&
+    verifiedPhone === normalizeCheckoutPhoneForCompare(customerPhone) &&
     paymentMethod &&
     isDeliveryAddressValid &&
     isMenuAvailableNow &&
@@ -752,7 +654,7 @@ export function PedidoCheckout({
                 <input
                   className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                   inputMode="numeric"
-                  onChange={(event) => setCustomerPhone(formatPhoneNumber(event.target.value))}
+                  onChange={(event) => setCustomerPhone(formatCheckoutPhoneNumber(event.target.value))}
                   placeholder="(11) 99999-0000"
                   value={customerPhone}
                 />
@@ -1066,7 +968,7 @@ export function PedidoCheckout({
                   <input
                     className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     inputMode="numeric"
-                    onChange={(event) => setZipCode(formatZipCode(event.target.value))}
+                    onChange={(event) => setZipCode(formatCheckoutZipCode(event.target.value))}
                     placeholder="00000-000"
                     value={zipCode}
                   />
@@ -1273,7 +1175,7 @@ export function PedidoCheckout({
             </h2>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {paymentOptions.map((option) => (
+              {checkoutPaymentOptions.map((option) => (
                 <button
                   key={option.value}
                   className={`cursor-pointer rounded-[1.2rem] border px-4 py-4 text-left transition-all duration-300 ${paymentMethod === option.value ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 shadow-[0_8px_20px_rgba(242,122,34,0.15)] -translate-y-0.5" : "border-[var(--line)] bg-[var(--surface)] hover:border-[var(--brand-orange)]/40 hover:shadow-md hover:-translate-y-0.5"}`}
@@ -1336,7 +1238,7 @@ export function PedidoCheckout({
               <div className="flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
                 <span>Pagamento</span>
                 <span className="font-semibold text-[var(--foreground)]">
-                  {paymentOptions.find((option) => option.value === paymentMethod)?.label}
+                  {checkoutPaymentOptions.find((option) => option.value === paymentMethod)?.label}
                 </span>
               </div>
               <div className="soft-divider pt-3" />
