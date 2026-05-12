@@ -47,6 +47,25 @@ export function numberFromDecimal(value?: Prisma.Decimal | null) {
   return value ? Number(value) : null;
 }
 
+export function coerceNumber(
+  value?: Prisma.Decimal | number | string | null,
+  fallback = 0,
+) {
+  if (value == null || value === "") {
+    return fallback;
+  }
+
+  return value instanceof Prisma.Decimal ? Number(value) : Number(value);
+}
+
+export function coerceNullableNumber(value?: Prisma.Decimal | number | string | null) {
+  if (value == null || value === "") {
+    return null;
+  }
+
+  return coerceNumber(value);
+}
+
 export function formatMoney(value?: Prisma.Decimal | number | string | null) {
   const numeric =
     value instanceof Prisma.Decimal ? Number(value) : Number(value ?? 0);

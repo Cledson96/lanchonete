@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import type { DeliveryRule, StoreSettings } from "@/lib/contracts/store";
 import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
 import { formatMoney } from "@/lib/utils";
@@ -33,6 +33,14 @@ async function readJson<T>(input: RequestInfo, init?: RequestInit) {
 
 function numberOrUndefined(value: number | null | undefined) {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function readInputNumber(event: ChangeEvent<HTMLInputElement>) {
+  return Number(event.target.value);
+}
+
+function readNullableInputNumber(event: ChangeEvent<HTMLInputElement>) {
+  return event.target.value ? Number(event.target.value) : null;
 }
 
 function SettingsIcon() {
@@ -255,7 +263,7 @@ export function DashboardSettingsManager({
             </label>
             <label>
               <span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[var(--muted)]">Raio máximo km</span>
-              <input className="w-full rounded-xl border border-[var(--line)] px-3 py-2.5 outline-none focus:border-[var(--brand-orange)]" min={0.1} step={0.1} type="number" value={store.maxDeliveryDistanceKm} onChange={(e) => setStore((current) => ({ ...current, maxDeliveryDistanceKm: Number(e.target.value) }))} />
+              <input className="w-full rounded-xl border border-[var(--line)] px-3 py-2.5 outline-none focus:border-[var(--brand-orange)]" min={0.1} step={0.1} type="number" value={store.maxDeliveryDistanceKm} onChange={(event) => setStore((current) => ({ ...current, maxDeliveryDistanceKm: readInputNumber(event) }))} />
             </label>
             <label className="sm:col-span-2">
               <span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[var(--muted)]">Rua</span>
@@ -339,15 +347,15 @@ export function DashboardSettingsManager({
               {deliveryRules.map((rule) => (
                 <tr key={rule.id} className="bg-[var(--background)]">
                   <td className="rounded-l-xl px-2 py-2"><input className="w-52 rounded-lg border border-[var(--line)] px-2 py-2" value={rule.label} onChange={(e) => updateRule(rule.id, { label: e.target.value })} /></td>
-                  <td className="px-2 py-2"><input className="w-20 rounded-lg border border-[var(--line)] px-2 py-2" min={0.1} step={0.1} type="number" value={rule.maxDistanceKm} onChange={(e) => updateRule(rule.id, { maxDistanceKm: Number(e.target.value) })} /></td>
-                  <td className="px-2 py-2"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2" min={0} step={0.01} type="number" value={rule.feeAmount} onChange={(e) => updateRule(rule.id, { feeAmount: Number(e.target.value) })} /></td>
-                  <td className="px-2 py-2"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2" min={0} step={0.01} type="number" value={rule.minimumOrderAmount ?? 0} onChange={(e) => updateRule(rule.id, { minimumOrderAmount: Number(e.target.value) })} /></td>
-                  <td className="px-2 py-2"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2" min={0} step={0.01} type="number" value={rule.freeAboveAmount ?? 0} onChange={(e) => updateRule(rule.id, { freeAboveAmount: Number(e.target.value) || null })} /></td>
+                  <td className="px-2 py-2"><input className="w-20 rounded-lg border border-[var(--line)] px-2 py-2" min={0.1} step={0.1} type="number" value={rule.maxDistanceKm} onChange={(event) => updateRule(rule.id, { maxDistanceKm: readInputNumber(event) })} /></td>
+                  <td className="px-2 py-2"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2" min={0} step={0.01} type="number" value={rule.feeAmount} onChange={(event) => updateRule(rule.id, { feeAmount: readInputNumber(event) })} /></td>
+                  <td className="px-2 py-2"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2" min={0} step={0.01} type="number" value={rule.minimumOrderAmount ?? 0} onChange={(event) => updateRule(rule.id, { minimumOrderAmount: readInputNumber(event) })} /></td>
+                  <td className="px-2 py-2"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2" min={0} step={0.01} type="number" value={rule.freeAboveAmount ?? 0} onChange={(event) => updateRule(rule.id, { freeAboveAmount: readNullableInputNumber(event) })} /></td>
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-1">
-                      <input className="w-16 rounded-lg border border-[var(--line)] px-2 py-2" min={0} type="number" value={rule.estimatedMinMinutes ?? 0} onChange={(e) => updateRule(rule.id, { estimatedMinMinutes: Number(e.target.value) })} />
+                      <input className="w-16 rounded-lg border border-[var(--line)] px-2 py-2" min={0} type="number" value={rule.estimatedMinMinutes ?? 0} onChange={(event) => updateRule(rule.id, { estimatedMinMinutes: readInputNumber(event) })} />
                       <span className="text-[var(--muted)]">-</span>
-                      <input className="w-16 rounded-lg border border-[var(--line)] px-2 py-2" min={0} type="number" value={rule.estimatedMaxMinutes ?? 0} onChange={(e) => updateRule(rule.id, { estimatedMaxMinutes: Number(e.target.value) })} />
+                      <input className="w-16 rounded-lg border border-[var(--line)] px-2 py-2" min={0} type="number" value={rule.estimatedMaxMinutes ?? 0} onChange={(event) => updateRule(rule.id, { estimatedMaxMinutes: readInputNumber(event) })} />
                     </div>
                   </td>
                   <td className="px-2 py-2">
@@ -371,8 +379,8 @@ export function DashboardSettingsManager({
           <h3 className="text-sm font-bold">Nova faixa</h3>
           <div className="mt-3 grid gap-3 md:grid-cols-6">
             <input className="rounded-lg border border-[var(--line)] px-3 py-2 md:col-span-2" placeholder="Nome" value={newRule.label} onChange={(e) => setNewRule((current) => ({ ...current, label: e.target.value }))} />
-            <input className="rounded-lg border border-[var(--line)] px-3 py-2" min={0.1} step={0.1} type="number" value={newRule.maxDistanceKm} onChange={(e) => setNewRule((current) => ({ ...current, maxDistanceKm: Number(e.target.value) }))} />
-            <input className="rounded-lg border border-[var(--line)] px-3 py-2" min={0} step={0.01} type="number" value={newRule.feeAmount} onChange={(e) => setNewRule((current) => ({ ...current, feeAmount: Number(e.target.value) }))} />
+            <input className="rounded-lg border border-[var(--line)] px-3 py-2" min={0.1} step={0.1} type="number" value={newRule.maxDistanceKm} onChange={(event) => setNewRule((current) => ({ ...current, maxDistanceKm: readInputNumber(event) }))} />
+            <input className="rounded-lg border border-[var(--line)] px-3 py-2" min={0} step={0.01} type="number" value={newRule.feeAmount} onChange={(event) => setNewRule((current) => ({ ...current, feeAmount: readInputNumber(event) }))} />
             <input className="rounded-lg border border-[var(--line)] px-3 py-2" placeholder="Cidade" value={newRule.city} onChange={(e) => setNewRule((current) => ({ ...current, city: e.target.value }))} />
             <input className="rounded-lg border border-[var(--line)] px-3 py-2 uppercase" maxLength={2} placeholder="UF" value={newRule.state} onChange={(e) => setNewRule((current) => ({ ...current, state: e.target.value.toUpperCase() }))} />
           </div>

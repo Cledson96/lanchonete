@@ -8,8 +8,10 @@ import {
 import { config } from "@/lib/config";
 import { serializeCheckoutDeliveryQuote } from "@/lib/checkout-serializers";
 import type { DeliveryQuote } from "@/lib/contracts/checkout";
+import type { DeliveryRule } from "@/lib/contracts/store";
 import { decimal, numberFromDecimal } from "@/lib/utils";
 import { getMainStoreProfile } from "@/lib/services/store-settings-service";
+import { serializeStoreDeliveryRule } from "@/lib/store-serializers";
 
 type DeliveryQuoteInput = {
   street: string;
@@ -273,8 +275,10 @@ export async function resolveDeliveryFeeRule(
   });
 }
 
-export async function getDeliveryFeeRules() {
-  return prisma.deliveryFeeRule.findMany({
+export async function getDeliveryFeeRules(): Promise<DeliveryRule[]> {
+  const rules = await prisma.deliveryFeeRule.findMany({
     orderBy: [{ maxDistanceKm: "asc" }, { sortOrder: "asc" }, { label: "asc" }],
   });
+
+  return rules.map(serializeStoreDeliveryRule);
 }

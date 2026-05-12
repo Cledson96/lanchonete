@@ -6,6 +6,7 @@ import {
   updateDeliveryFeeRule,
 } from "@/lib/services/menu-admin-service";
 import { getDeliveryFeeRules } from "@/lib/services/delivery-fee-service";
+import { serializeStoreDeliveryRule } from "@/lib/store-serializers";
 import {
   createDeliveryFeeRuleSchema,
   updateDeliveryFeeRuleSchema,
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, createDeliveryFeeRuleSchema);
     const rule = await createDeliveryFeeRule(input);
-    return ok({ rule }, { status: 201 });
+    return ok({ rule: serializeStoreDeliveryRule(rule) }, { status: 201 });
   } catch (error) {
     return handleRouteError(error);
   }
@@ -37,7 +38,7 @@ export async function PATCH(request: Request) {
     await requireAdmin();
     const input = await readRequestBody(request, updateDeliveryFeeRuleSchema);
     const rule = await updateDeliveryFeeRule(input);
-    return ok({ rule });
+    return ok({ rule: serializeStoreDeliveryRule(rule) });
   } catch (error) {
     return handleRouteError(error);
   }
