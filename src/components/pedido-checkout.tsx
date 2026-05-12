@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CheckoutCustomerSnapshot,
   CheckoutStoreStatus,
-  CreateOrderResponse,
 } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import {
@@ -15,41 +14,20 @@ import {
   checkoutPaymentOptions,
   formatCheckoutPhoneNumber,
   getCheckoutUnavailableItems,
-  getCheckoutErrorMessage,
   isCheckoutDeliveryAddressValid,
   isCheckoutVerificationExpired,
-  type CheckoutApiErrorPayload,
 } from "@/lib/checkout-client";
-import {
-  buildCheckoutPricingSummary,
-  buildCheckoutSuccessParams,
-} from "@/lib/checkout-ui";
+import { readCheckoutJson } from "@/lib/checkout-api";
+import { buildCheckoutPricingSummary } from "@/lib/checkout-ui";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
-import { getCurrentWeekday } from "@/lib/menu-item-availability";
 import { useCheckoutDeliveryFlow } from "@/lib/use-checkout-delivery-flow";
 import { useCheckoutCustomerSession } from "@/lib/use-checkout-customer-session";
+import { useCheckoutStoreStatus } from "@/lib/use-checkout-store-status";
+import { useCheckoutSubmit } from "@/lib/use-checkout-submit";
 import { useCheckoutVerification } from "@/lib/use-checkout-verification";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
-import { formatMoney, optionalTrimmed } from "@/lib/utils";
-
-async function readJson<T>(input: RequestInfo, init?: RequestInit) {
-  const response = await fetch(input, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers || {}),
-    },
-  });
-
-  const payload = (await response.json().catch(() => null)) as CheckoutApiErrorPayload | null;
-
-  if (!response.ok) {
-    throw new Error(getCheckoutErrorMessage(payload));
-  }
-
-  return payload as T;
-}
+import { formatMoney } from "@/lib/utils";
 
 export function PedidoCheckout({
   initialStoreStatus,
@@ -105,19 +83,13 @@ export function PedidoCheckout({
   } = useCheckoutDeliveryFlow({
     fulfillmentType,
     subtotalAmount: subtotal,
-    readJson,
+    readJson: readCheckoutJson,
   });
 
-  const [submitPending, setSubmitPending] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [storeStatus, setStoreStatus] = useState<CheckoutStoreStatus>(
-    initialStoreStatus || {
-      isOpen: true,
-      currentWeekday: getCurrentWeekday(),
-      hoursLabel: brandContent.hours,
-      currentWindow: null,
-    },
-  );
+  const { storeStatus } = useCheckoutStoreStatus({
+    initialStoreStatus,
+    readJson: readCheckoutJson,
+  });
 
   const { deliveryFeeAmount, totalAmount } = buildCheckoutPricingSummary({
     subtotalAmount: subtotal,
@@ -132,7 +104,7 @@ export function PedidoCheckout({
   const verification = useCheckoutVerification({
     customerPhone,
     customerName,
-    readJson,
+    readJson: readCheckoutJson,
     setCustomerName,
     syncCustomerFromSession: (options) => syncCustomerFromSessionRef.current(options),
   });
@@ -168,12 +140,14 @@ export function PedidoCheckout({
   }, [applyAddress, verification]);
 
   const { isLoadingCustomer, syncCustomerFromSession } = useCheckoutCustomerSession({
-    readJson,
+    readJson: readCheckoutJson,
     applyCustomerSnapshot,
     setCustomerPhone,
   });
 
-  syncCustomerFromSessionRef.current = syncCustomerFromSession;
+  useEffect(() => {
+    syncCustomerFromSessionRef.current = syncCustomerFromSession;
+  }, [syncCustomerFromSession]);
 
   const isDeliveryAddressValid = useMemo(
     () =>
@@ -206,7 +180,7 @@ export function PedidoCheckout({
 
   const isMenuAvailableNow = unavailableItems.length === 0;
 
-  const canSubmit = canSubmitCheckoutOrder({
+  const canSubmitBase = canSubmitCheckoutOrder({
     itemsCount: state.items.length,
     customerName,
     customerPhone,
@@ -216,82 +190,35 @@ export function PedidoCheckout({
     isDeliveryAddressValid,
     isMenuAvailableNow,
     storeIsOpen: storeStatus.isOpen,
-    submitPending,
+    submitPending: false,
     deliveryQuoteLoading,
   });
 
-  useEffect(() => {
-    let cancelled = false;
+  const { submitPending, submitError, handleSubmitOrder } = useCheckoutSubmit({
+    canSubmitBase,
+    readJson: readCheckoutJson,
+    push: router.push,
+    clearCart,
+    closeCart,
+    items: state.items,
+    customerName,
+    customerPhone,
+    fulfillmentType,
+    paymentMethod,
+    orderNotes,
+    address: {
+      street,
+      number,
+      complement,
+      neighborhood,
+      city,
+      stateCode,
+      zipCode,
+      reference,
+    },
+  });
 
-    readJson<CheckoutStoreStatus>("/api/store/status", { cache: "no-store" })
-      .then((payload) => {
-        if (!cancelled) {
-          setStoreStatus(payload);
-        }
-      })
-      .catch(() => {
-        // Backend validation remains authoritative if this refresh fails.
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  async function handleSubmitOrder() {
-    if (!canSubmit) return;
-
-    setSubmitPending(true);
-    setSubmitError(null);
-
-    try {
-      const payload = await readJson<CreateOrderResponse>("/api/orders", {
-        method: "POST",
-        body: JSON.stringify({
-          customerName,
-          customerPhone,
-          type: fulfillmentType,
-          paymentMethod,
-          notes: orderNotes,
-            items: state.items.map((item) => ({
-              menuItemId: item.menuItemId,
-              quantity: item.quantity,
-              notes: optionalTrimmed(item.notes || ""),
-              optionItemIds: item.optionItemIds || [],
-              ingredients: item.ingredientCustomizations
-                ? Object.entries(item.ingredientCustomizations)
-                    .map(([ingredientId, quantity]) => ({ ingredientId, quantity }))
-                : undefined,
-            })),
-          address:
-            fulfillmentType === "delivery"
-              ? {
-                  street,
-                  number,
-                  complement: optionalTrimmed(complement),
-                  neighborhood,
-                  city,
-                  state: stateCode.toUpperCase(),
-                  zipCode: optionalTrimmed(zipCode),
-                  reference: optionalTrimmed(reference),
-                }
-              : undefined,
-        }),
-      });
-
-      const params = buildCheckoutSuccessParams(payload.order, customerName);
-
-      clearCart();
-      closeCart();
-      router.push(`/pedido/sucesso?${params.toString()}`);
-    } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : "Nao foi possivel finalizar o pedido.",
-      );
-    } finally {
-      setSubmitPending(false);
-    }
-  }
+  const canSubmit = canSubmitBase && !submitPending;
 
   return (
     <main className="shell py-8 md:py-10">
