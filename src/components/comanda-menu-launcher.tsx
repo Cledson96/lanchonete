@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { PublicMenuCategory } from "@/lib/contracts/menu";
 import { formatMoney } from "@/lib/utils";
-import type { PublicMenuCategory } from "@/lib/comanda-ui";
 import { ComandaMenuItemDialog } from "@/components/comanda-menu-item-dialog";
 
 type MenuItem = PublicMenuCategory["menuItems"][number];

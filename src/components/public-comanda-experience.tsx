@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ComandaEntryList } from "@/components/comanda-entry-list";
 import { ComandaMenuLauncher } from "@/components/comanda-menu-launcher";
+import type { PublicMenuCategory, PublicMenuResponse } from "@/lib/contracts/menu";
 import {
   canEditComanda,
   humanizeComandaStatus,
   statusTone,
   type ComandaDetail,
-  type PublicMenuCategory,
 } from "@/lib/comanda-ui";
 import { formatMoney } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ export function PublicComandaExperience({ slug }: Props) {
     ]);
 
     const comandaPayload = await parseJson<{ comanda: ComandaDetail }>(comandaResponse);
-    const menuPayload = await parseJson<{ categories: PublicMenuCategory[] }>(menuResponse);
+    const menuPayload = await parseJson<PublicMenuResponse>(menuResponse);
     setComanda(comandaPayload.comanda);
     setCategories(menuPayload.categories);
   }, [slug]);

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import { ComandaEntryList } from "@/components/comanda-entry-list";
 import { ComandaMenuLauncher } from "@/components/comanda-menu-launcher";
+import type { PublicMenuCategory, PublicMenuResponse } from "@/lib/contracts/menu";
 import {
   canEditComanda,
   humanizeComandaStatus,
@@ -12,7 +13,6 @@ import {
   statusTone,
   type ComandaDetail,
   type PaymentMethod,
-  type PublicMenuCategory,
 } from "@/lib/comanda-ui";
 import { formatMoney } from "@/lib/utils";
 
@@ -350,7 +350,7 @@ export function DashboardComandasWorkspace() {
       fetch("/api/menu", { cache: "no-store" }),
     ]);
     const commandasPayload = await parseJson<{ commandas: ComandaDetail[] }>(commandasResponse);
-    const menuPayload = await parseJson<{ categories: PublicMenuCategory[] }>(menuResponse);
+    const menuPayload = await parseJson<PublicMenuResponse>(menuResponse);
     setCommandas(commandasPayload.commandas);
     setCategories(menuPayload.categories);
     if (keepSelection && selectedId) {

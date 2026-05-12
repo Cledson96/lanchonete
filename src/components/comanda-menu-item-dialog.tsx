@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import type { PublicMenuCategory } from "@/lib/contracts/menu";
 import { formatMoney } from "@/lib/utils";
-import type { PublicMenuCategory } from "@/lib/comanda-ui";
 
 type MenuItem = PublicMenuCategory["menuItems"][number];
 
@@ -57,11 +57,6 @@ function PlusIcon() {
   );
 }
 
-function asNumber(value: number | string | null | undefined) {
-  if (value == null) return 0;
-  return typeof value === "number" ? value : Number(value);
-}
-
 export function ComandaMenuItemDialog({ item, categoryName, open, loading, error, onClose, onSubmit }: Props) {
   const [notes, setNotes] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -97,7 +92,7 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
     return currentItem.ingredients.reduce((total, ing) => {
       const qty = Math.max(0, Math.min(ingredientQtys[ing.id] ?? ing.quantity, ing.quantity));
       const extra = qty - ing.quantity;
-      return extra > 0 ? total + extra * asNumber(ing.price) : total;
+      return extra > 0 ? total + extra * ing.price : total;
     }, 0);
   }, [currentItem, ingredientQtys]);
 
@@ -109,7 +104,7 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
       return (
         total +
         group.options.reduce((groupTotal, option) => {
-          return current.includes(option.id) ? groupTotal + asNumber(option.priceDelta) : groupTotal;
+          return current.includes(option.id) ? groupTotal + option.priceDelta : groupTotal;
         }, 0)
       );
     }, 0);
@@ -135,7 +130,7 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
     return null;
   }
 
-  const totalPrice = (asNumber(currentItem.price) + optionDelta + ingredientDelta) * quantity;
+  const totalPrice = (currentItem.price + optionDelta + ingredientDelta) * quantity;
   const submitDisabled = loading || Boolean(validationError);
 
   function getOptionQuantity(groupId: string, optionId: string) {
@@ -272,7 +267,7 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                                   {option.description ? <p className="text-[0.72rem] text-[var(--muted)]">{option.description}</p> : null}
                                 </div>
 
-                                <span className={`shrink-0 text-[0.78rem] font-semibold ${asNumber(option.priceDelta) > 0 ? "text-[var(--brand-green-dark)]" : "text-[var(--muted)]"}`}>{asNumber(option.priceDelta) > 0 ? `+${formatMoney(asNumber(option.priceDelta))}` : "incluso"}</span>
+                                <span className={`shrink-0 text-[0.78rem] font-semibold ${option.priceDelta > 0 ? "text-[var(--brand-green-dark)]" : "text-[var(--muted)]"}`}>{option.priceDelta > 0 ? `+${formatMoney(option.priceDelta)}` : "incluso"}</span>
 
                                 {isRadio ? (
                                   <button aria-pressed={isSelected} className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 transition-all ${isSelected ? "border-[var(--brand-green)] bg-[var(--brand-green)]" : "border-[var(--line)] bg-white hover:border-[var(--brand-green)]"}`} onClick={() => toggleRadioOption(group.id, option.id)} type="button">

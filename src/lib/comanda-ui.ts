@@ -1,5 +1,4 @@
 import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/order-operations";
-export type { PublicMenuCategory } from "@/lib/contracts/menu";
 
 export type ComandaStatus =
   | "novo"
