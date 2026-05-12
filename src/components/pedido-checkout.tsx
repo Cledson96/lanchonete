@@ -16,12 +16,17 @@ import type {
   ViaCepResponse,
 } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
-import { isCategoryAvailableNow } from "@/lib/category-availability";
 import {
+  buildCheckoutZipState,
+  canRequestCheckoutVerification,
+  canSubmitCheckoutOrder,
   checkoutPaymentOptions,
   formatCheckoutPhoneNumber,
   formatCheckoutZipCode,
+  getCheckoutUnavailableItems,
   getCheckoutErrorMessage,
+  hasCheckoutLocationForQuote,
+  isCheckoutDeliveryAddressValid,
   type CheckoutApiErrorPayload,
   normalizeCheckoutPhoneForCompare,
 } from "@/lib/checkout-client";
@@ -121,9 +126,10 @@ export function PedidoCheckout({
     fulfillmentType,
     deliveryQuote,
   });
-  const cleanZipCode = digitsOnly(zipCode);
-  const isZipCodeComplete = cleanZipCode.length === 8;
-  const canEditAddressFields = fulfillmentType === "delivery" && isZipCodeComplete;
+  const { cleanZipCode, canEditAddressFields } = buildCheckoutZipState({
+    zipCode,
+    fulfillmentType,
+  });
 
   const resetAddressLocks = useCallback(() => {
     setStreetLocked(false);
@@ -341,12 +347,13 @@ export function PedidoCheckout({
       return;
     }
 
-    const hasLocationForQuote =
-      street.trim().length >= 2 &&
-      number.trim().length >= 1 &&
-      city.trim().length >= 2 &&
-      stateCode.trim().length >= 2 &&
-      neighborhood.trim().length >= 2;
+    const hasLocationForQuote = hasCheckoutLocationForQuote({
+      street,
+      number,
+      city,
+      stateCode,
+      neighborhood,
+    });
 
     if (!hasLocationForQuote) {
       setDeliveryQuote(null);
@@ -398,54 +405,55 @@ export function PedidoCheckout({
     subtotal,
   ]);
 
-  const isDeliveryAddressValid = useMemo(() => {
-    if (fulfillmentType !== "delivery") return true;
+  const isDeliveryAddressValid = useMemo(
+    () =>
+      isCheckoutDeliveryAddressValid({
+        fulfillmentType,
+        street,
+        number,
+        neighborhood,
+        city,
+        stateCode,
+        deliveryQuote,
+        deliveryQuoteError,
+      }),
+    [
+      fulfillmentType,
+      street,
+      number,
+      neighborhood,
+      city,
+      stateCode,
+      deliveryQuote,
+      deliveryQuoteError,
+    ],
+  );
 
-    return (
-      street.trim().length >= 2 &&
-      number.trim().length >= 1 &&
-      neighborhood.trim().length >= 2 &&
-      city.trim().length >= 2 &&
-      stateCode.trim().length === 2 &&
-      !!deliveryQuote &&
-      !deliveryQuoteError
-    );
-  }, [
-    fulfillmentType,
-    street,
-    number,
-    neighborhood,
-    city,
-    stateCode,
-    deliveryQuote,
-    deliveryQuoteError,
-  ]);
-
-  const canRequestVerification =
-    digitsOnly(customerPhone).length >= 10 && !verificationPending;
+  const canRequestVerificationAction = canRequestCheckoutVerification({
+    customerPhone,
+    verificationPending,
+  });
 
   const unavailableItems = useMemo(
-    () =>
-      state.items.filter(
-        (item) => item.categoryAvailability && !isCategoryAvailableNow(item.categoryAvailability),
-      ),
+    () => getCheckoutUnavailableItems(state.items),
     [state.items],
   );
 
   const isMenuAvailableNow = unavailableItems.length === 0;
 
-  const canSubmit =
-    state.items.length > 0 &&
-    customerName.trim().length >= 2 &&
-    digitsOnly(customerPhone).length >= 10 &&
-    verificationConfirmed &&
-    verifiedPhone === normalizeCheckoutPhoneForCompare(customerPhone) &&
-    paymentMethod &&
-    isDeliveryAddressValid &&
-    isMenuAvailableNow &&
-    storeStatus.isOpen &&
-    !submitPending &&
-    !deliveryQuoteLoading;
+  const canSubmit = canSubmitCheckoutOrder({
+    itemsCount: state.items.length,
+    customerName,
+    customerPhone,
+    verificationConfirmed,
+    verifiedPhone,
+    paymentMethod,
+    isDeliveryAddressValid,
+    isMenuAvailableNow,
+    storeIsOpen: storeStatus.isOpen,
+    submitPending,
+    deliveryQuoteLoading,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -711,7 +719,7 @@ export function PedidoCheckout({
               <div className="mt-4 grid gap-3 md:grid-cols-[auto_minmax(0,1fr)_auto]">
                 <button
                   className="cursor-pointer rounded-[1rem] bg-[var(--brand-orange)] px-5 py-3 text-[0.88rem] font-bold text-white transition-all shadow-[0_4px_14px_rgba(242,122,34,0.3)] hover:bg-[var(--brand-orange-dark)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(242,122,34,0.4)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:transform-none"
-                  disabled={!canRequestVerification}
+                  disabled={!canRequestVerificationAction}
                   onClick={handleRequestVerification}
                   type="button"
                 >
