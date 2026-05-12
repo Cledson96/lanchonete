@@ -1,4 +1,5 @@
 import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/order-operations";
+export type { PublicMenuCategory } from "@/lib/contracts/menu";
 
 export type ComandaStatus =
   | "novo"
@@ -79,39 +80,6 @@ export type ComandaDetail = {
       deliveredAt?: string | null;
     }>;
     operationalSummary: OperationalSummary;
-  }>;
-};
-
-export type PublicMenuCategory = {
-  id: string;
-  name: string;
-  menuItems: Array<{
-    id: string;
-    name: string;
-    description?: string | null;
-    imageUrl?: string | null;
-    price: number | string;
-    compareAtPrice?: number | string | null;
-    optionGroups: Array<{
-      id: string;
-      name: string;
-      description?: string | null;
-      minSelections: number;
-      maxSelections?: number | null;
-      isRequired: boolean;
-      options: Array<{
-        id: string;
-        name: string;
-        description?: string | null;
-        priceDelta: number | string;
-      }>;
-    }>;
-    ingredients: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      price?: number | string;
-    }>;
   }>;
 };
 

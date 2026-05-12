@@ -3,49 +3,10 @@
 import { useMemo, useState } from "react";
 import { CategoryNav } from "@/components/category-nav";
 import { MenuItemCard } from "@/components/menu-item-card";
-
-type MenuBrowserItem = {
-  id: string;
-  name: string;
-  description: string | null;
-  imageUrl: string | null;
-  price: number;
-  compareAtPrice: number | null;
-  availableWeekdays?: string[];
-  optionGroups?: Array<{
-    id: string;
-    name: string;
-    description?: string | null;
-    minSelections: number;
-    maxSelections?: number | null;
-    isRequired: boolean;
-    options: Array<{
-      id: string;
-      name: string;
-      description?: string | null;
-      priceDelta: number;
-    }>;
-  }>;
-  ingredients?: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-};
-
-type MenuBrowserCategory = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  availableFrom?: string | null;
-  availableUntil?: string | null;
-  menuItems: MenuBrowserItem[];
-};
+import type { PublicMenuCategory } from "@/lib/contracts/menu";
 
 type Props = {
-  categories: MenuBrowserCategory[];
+  categories: PublicMenuCategory[];
 };
 
 const ITEMS_PER_PAGE = 8;

@@ -1,20 +1,14 @@
 import { prisma } from "@/lib/prisma";
+import type { PublicMenuCategory, PublicMenuItem } from "@/lib/contracts/menu";
 import { isMenuItemAvailableNow } from "@/lib/menu-item-availability";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { SimpleCache } from "@/lib/simple-cache";
+import { numberFromDecimal } from "@/lib/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const publicMenuCache = new SimpleCache<any[]>(30_000);
+const publicMenuCache = new SimpleCache<PublicMenuCategory[]>(30_000);
 
-export function invalidatePublicMenuCache(): void {
-  publicMenuCache.invalidate("menu");
-}
-
-export async function getPublicMenu() {
-  const cached = publicMenuCache.get("menu");
-  if (cached) return cached;
-
-  const categories = await prisma.category.findMany({
+async function fetchPublicCategories() {
+  return prisma.category.findMany({
     where: {
       isActive: true,
     },
@@ -53,26 +47,72 @@ export async function getPublicMenu() {
       },
     },
   });
+}
+
+type PublicCategoryRecord = Awaited<ReturnType<typeof fetchPublicCategories>>[number];
+type PublicMenuItemRecord = PublicCategoryRecord["menuItems"][number];
+
+function serializePublicMenuItem(item: PublicMenuItemRecord): PublicMenuItem {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    imageUrl: item.imageUrl,
+    price: numberFromDecimal(item.price) ?? 0,
+    compareAtPrice: numberFromDecimal(item.compareAtPrice),
+    availableWeekdays: item.availableWeekdays ?? [],
+    optionGroups: item.optionGroups.map((link) => ({
+      id: link.optionGroup.id,
+      name: link.optionGroup.name,
+      description: link.optionGroup.description,
+      minSelections: link.optionGroup.minSelections,
+      maxSelections: link.optionGroup.maxSelections,
+      isRequired: link.optionGroup.isRequired,
+      options: link.optionGroup.options.map((option) => ({
+        id: option.id,
+        name: option.name,
+        description: option.description,
+        priceDelta: numberFromDecimal(option.priceDelta) ?? 0,
+      })),
+    })),
+    ingredients: item.ingredients
+      .filter((link) => link.ingredient?.isActive)
+      .map((link) => ({
+        id: link.ingredient.id,
+        name: link.ingredient.name,
+        quantity: link.quantity,
+        price: numberFromDecimal(link.ingredient.price) ?? 0,
+      })),
+  };
+}
+
+function serializePublicCategory(category: PublicCategoryRecord): PublicMenuCategory {
+  return {
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    description: category.description,
+    availableFrom: category.availableFrom,
+    availableUntil: category.availableUntil,
+    menuItems: category.menuItems
+      .filter((item) => isMenuItemAvailableNow(item as { availableWeekdays?: string[] | null }))
+      .map(serializePublicMenuItem),
+  };
+}
+
+export function invalidatePublicMenuCache(): void {
+  publicMenuCache.invalidate("menu");
+}
+
+export async function getPublicMenu(): Promise<PublicMenuCategory[]> {
+  const cached = publicMenuCache.get("menu");
+  if (cached) return cached;
+
+  const categories = await fetchPublicCategories();
 
   const result = categories
     .filter((category) => isCategoryAvailableNow(category as { availableFrom?: string | null; availableUntil?: string | null }))
-    .map((category) => ({
-      ...category,
-      menuItems: category.menuItems
-        .filter((item) => isMenuItemAvailableNow(item as { availableWeekdays?: string[] | null }))
-        .map((item) => ({
-          ...item,
-          optionGroups: item.optionGroups.map((link) => link.optionGroup),
-          ingredients: item.ingredients
-            .filter((link) => link.ingredient?.isActive)
-            .map((link) => ({
-              id: link.ingredient.id,
-              name: link.ingredient.name,
-              quantity: link.quantity,
-              price: Number((link.ingredient as { price?: unknown }).price ?? 0),
-            })),
-        })),
-    }))
+    .map(serializePublicCategory)
     .filter((category) => category.menuItems.length > 0);
 
   publicMenuCache.set("menu", result);
