@@ -49,7 +49,7 @@
     "@hapi/boom": "^10.0.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "@whiskeysockets/baileys": "^7.0.0-rc10",
+    "@whiskeysockets/baileys": "^6.7.21",
     "bcryptjs": "^3.0.2",
     "jose": "^6.2.3",
     "next": "^16.2.4",

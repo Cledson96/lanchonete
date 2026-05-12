@@ -59,12 +59,26 @@ class WhatsAppWorkerClient {
     const headers = new Headers(init?.headers);
     headers.set("authorization", `Bearer ${config.whatsappWorkerToken}`);
 
-    const response = await fetch(new URL(path, config.whatsappWorkerUrl), {
-      ...init,
-      headers,
-      cache: "no-store",
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+    let response: Response;
+
+    try {
+      response = await fetch(new URL(path, config.whatsappWorkerUrl), {
+        ...init,
+        headers,
+        cache: "no-store",
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "TimeoutError") {
+        throw new Error(
+          `Worker do WhatsApp nao respondeu em ${timeoutMs / 1000}s (${config.whatsappWorkerUrl}).`,
+        );
+      }
+
+      throw new Error(
+        `Worker do WhatsApp indisponivel em ${config.whatsappWorkerUrl}. Verifique se o container whatsapp-worker esta rodando no Docker Compose.`,
+      );
+    }
 
     return parseWorkerJson<T>(response);
   }
