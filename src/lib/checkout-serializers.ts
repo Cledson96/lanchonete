@@ -10,6 +10,7 @@ import type {
   CheckoutVerificationCustomer,
 } from "@/lib/contracts/checkout";
 import type { OrderType, PaymentMethod } from "@/lib/contracts/common";
+import { coerceNumber, coerceNullableNumber } from "@/lib/utils";
 
 type CheckoutAddressRecord = {
   id: string;
@@ -84,14 +85,6 @@ type CheckoutDeliveryQuoteRecord = {
   };
 };
 
-function toNumber(value: Prisma.Decimal | number | string | null | undefined) {
-  if (value instanceof Prisma.Decimal) {
-    return Number(value);
-  }
-
-  return Number(value ?? 0);
-}
-
 export function serializeCheckoutAddress(address: CheckoutAddressRecord): CheckoutAddress {
   return {
     id: address.id,
@@ -139,9 +132,9 @@ export function serializeCheckoutOrderSummary(order: CheckoutOrderRecord): Check
     customerPhone: order.customerPhone,
     type: order.type,
     paymentMethod: order.paymentMethod,
-    totalAmount: toNumber(order.totalAmount),
-    subtotalAmount: toNumber(order.subtotalAmount),
-    deliveryFeeAmount: toNumber(order.deliveryFeeAmount),
+    totalAmount: coerceNumber(order.totalAmount),
+    subtotalAmount: coerceNumber(order.subtotalAmount),
+    deliveryFeeAmount: coerceNumber(order.deliveryFeeAmount),
   };
 }
 
@@ -156,11 +149,10 @@ function serializeCheckoutDeliveryQuoteRule(
     neighborhood: rule.neighborhood,
     zipCodeStart: rule.zipCodeStart,
     zipCodeEnd: rule.zipCodeEnd,
-    maxDistanceKm: rule.maxDistanceKm == null ? null : toNumber(rule.maxDistanceKm),
-    feeAmount: toNumber(rule.feeAmount),
-    minimumOrderAmount:
-      rule.minimumOrderAmount == null ? null : toNumber(rule.minimumOrderAmount),
-    freeAboveAmount: rule.freeAboveAmount == null ? null : toNumber(rule.freeAboveAmount),
+    maxDistanceKm: coerceNullableNumber(rule.maxDistanceKm),
+    feeAmount: coerceNumber(rule.feeAmount),
+    minimumOrderAmount: coerceNullableNumber(rule.minimumOrderAmount),
+    freeAboveAmount: coerceNullableNumber(rule.freeAboveAmount),
   };
 }
 
@@ -174,7 +166,7 @@ function serializeCheckoutDeliveryQuoteStore(
     city: store.city,
     state: store.state,
     zipCode: store.zipCode,
-    maxDeliveryDistanceKm: toNumber(store.maxDeliveryDistanceKm),
+    maxDeliveryDistanceKm: coerceNumber(store.maxDeliveryDistanceKm),
   };
 }
 
@@ -184,8 +176,8 @@ export function serializeCheckoutDeliveryQuote(
   return {
     serviceable: quote.serviceable,
     deliveryFeeRuleId: quote.deliveryFeeRuleId,
-    feeAmount: toNumber(quote.feeAmount),
-    distanceKm: toNumber(quote.distanceKm),
+    feeAmount: coerceNumber(quote.feeAmount),
+    distanceKm: coerceNumber(quote.distanceKm),
     distanceMethod: quote.distanceMethod,
     estimatedMinMinutes: quote.estimatedMinMinutes ?? null,
     estimatedMaxMinutes: quote.estimatedMaxMinutes ?? null,

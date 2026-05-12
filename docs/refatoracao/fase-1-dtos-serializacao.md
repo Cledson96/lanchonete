@@ -1,6 +1,6 @@
 # Fase 1 — DTOs e serialização
 
-**Status:** planejada
+**Status:** concluída
 
 ## Objetivo
 Criar a base compartilhada de contratos e serialização para reduzir duplicação entre backend, rotas e frontend antes da modularização dos hotspots.
@@ -22,6 +22,12 @@ Criar a base compartilhada de contratos e serialização para reduzir duplicaç�
 - camada compartilhada de DTOs por domínio
 - normalização `Decimal -> number` centralizada
 - redução de tipos locais repetidos nos componentes-alvo
+
+## Resultado executado
+- contratos compartilhados para checkout, store e cardápio público
+- serializers dedicados para checkout, delivery, store settings e cardápio
+- helpers compartilhados para coerção numérica e precificação de itens
+- primeiros consumidores migrados em rotas, checkout, comanda, home pública e página de sucesso
 
 ## Subetapas
 ### 1.1 Mapear contratos por domínio
