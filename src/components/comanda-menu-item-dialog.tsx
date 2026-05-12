@@ -312,7 +312,7 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                 <div className="inline-flex items-center gap-0.5 rounded-full border border-[var(--line)] bg-white p-0.5">
                   <button aria-label="Diminuir quantidade" className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.max(1, current - 1))} type="button"><MinusIcon /></button>
                   <span className="min-w-7 text-center text-[0.9rem] font-bold text-[var(--foreground)]">{quantity}</span>
-                  <button aria-label="Aumentar quantidade" className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.min(99, current + 1))} type="button"><PlusIcon /></button>
+                  <button aria-label="Aumentar quantidade" className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.min(100, current + 1))} type="button"><PlusIcon /></button>
                 </div>
 
                 <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--green-rich)] px-4 py-2.5 text-[0.88rem] font-bold text-white transition-all duration-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60" disabled={submitDisabled} onClick={() => void handleSubmit()} type="button">

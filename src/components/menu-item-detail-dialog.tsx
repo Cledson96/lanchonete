@@ -488,7 +488,7 @@ export function MenuItemDetailDialog({
                   <button
                     aria-label="Aumentar quantidade"
                     className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
-                    onClick={() => setQuantity((c) => Math.min(c + 1, 99))}
+                    onClick={() => setQuantity((c) => Math.min(c + 1, 100))}
                     type="button"
                   >
                     <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
