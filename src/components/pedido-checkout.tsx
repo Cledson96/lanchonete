@@ -17,6 +17,10 @@ import type {
 } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
+import {
+  buildCheckoutPricingSummary,
+  buildCheckoutSuccessParams,
+} from "@/lib/checkout-ui";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
 import { useCart } from "@/lib/cart-store";
@@ -210,9 +214,11 @@ export function PedidoCheckout({
   );
 
   const subtotal = totalPrice;
-  const deliveryFeeAmount =
-    fulfillmentType === "delivery" ? deliveryQuote?.feeAmount || 0 : 0;
-  const totalAmount = subtotal + deliveryFeeAmount;
+  const { deliveryFeeAmount, totalAmount } = buildCheckoutPricingSummary({
+    subtotalAmount: subtotal,
+    fulfillmentType,
+    deliveryQuote,
+  });
   const cleanZipCode = digitsOnly(zipCode);
   const isZipCodeComplete = cleanZipCode.length === 8;
   const canEditAddressFields = fulfillmentType === "delivery" && isZipCodeComplete;
@@ -682,13 +688,7 @@ export function PedidoCheckout({
         }),
       });
 
-      const params = new URLSearchParams({
-        code: payload.order.code,
-        name: payload.order.customerName || customerName,
-        type: payload.order.type,
-        payment: payload.order.paymentMethod,
-        total: String(payload.order.totalAmount),
-      });
+      const params = buildCheckoutSuccessParams(payload.order, customerName);
 
       clearCart();
       closeCart();

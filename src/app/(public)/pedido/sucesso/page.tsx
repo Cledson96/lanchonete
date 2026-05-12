@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { parseCheckoutSuccessParams } from "@/lib/checkout-ui";
 import { brandContent } from "@/lib/brand-content";
 import { formatMoney } from "@/lib/utils";
 
@@ -29,11 +30,7 @@ export default async function PedidoSuccessPage({
   searchParams,
 }: PedidoSuccessPageProps) {
   const params = await searchParams;
-  const code = params.code;
-  const name = params.name;
-  const type = params.type;
-  const payment = params.payment;
-  const total = Number(params.total || 0);
+  const { code, name, type, payment, totalAmount } = parseCheckoutSuccessParams(params);
 
   return (
     <main className="shell py-10 md:py-14">
@@ -65,7 +62,7 @@ export default async function PedidoSuccessPage({
                 Total
               </p>
               <p className="menu-price mt-3 text-3xl font-bold text-accent">
-                {formatMoney(total)}
+                {formatMoney(totalAmount)}
               </p>
             </div>
           </div>
