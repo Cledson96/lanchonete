@@ -1,6 +1,32 @@
 import type { OrderType, PaymentMethod } from "@/lib/contracts/common";
 import type { StoreStatus } from "@/lib/contracts/store";
 
+export type DeliveryDistanceMethod = "same_address" | "route";
+
+export type DeliveryQuoteRule = {
+  id: string;
+  label: string;
+  city: string;
+  state: string;
+  neighborhood?: string | null;
+  zipCodeStart?: string | null;
+  zipCodeEnd?: string | null;
+  maxDistanceKm?: number | null;
+  feeAmount: number;
+  minimumOrderAmount?: number | null;
+  freeAboveAmount?: number | null;
+};
+
+export type DeliveryQuoteStore = {
+  name: string;
+  street?: string;
+  number?: string;
+  city: string;
+  state: string;
+  zipCode?: string | null;
+  maxDeliveryDistanceKm: number;
+};
+
 export type CheckoutAddress = {
   id: string;
   street: string;
@@ -15,29 +41,14 @@ export type CheckoutAddress = {
 
 export type DeliveryQuote = {
   serviceable: boolean;
+  deliveryFeeRuleId: string;
   feeAmount: number;
   distanceKm: number;
-  distanceMethod?: "same_address" | "route";
+  distanceMethod?: DeliveryDistanceMethod;
   estimatedMinMinutes?: number | null;
   estimatedMaxMinutes?: number | null;
-  rule: {
-    id: string;
-    label: string;
-    city: string;
-    state: string;
-    neighborhood?: string | null;
-    minimumOrderAmount?: number | null;
-    freeAboveAmount?: number | null;
-  };
-  store: {
-    name: string;
-    street?: string;
-    number?: string;
-    city: string;
-    state: string;
-    zipCode?: string | null;
-    maxDeliveryDistanceKm: number;
-  };
+  rule: DeliveryQuoteRule;
+  store: DeliveryQuoteStore;
 };
 
 export type ViaCepResponse = {

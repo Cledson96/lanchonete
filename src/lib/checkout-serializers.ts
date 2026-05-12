@@ -2,6 +2,10 @@ import { Prisma } from "@prisma/client";
 import type {
   CheckoutAddress,
   CheckoutCustomerSnapshot,
+  DeliveryDistanceMethod,
+  DeliveryQuote,
+  DeliveryQuoteRule,
+  DeliveryQuoteStore,
   CheckoutOrderSummary,
   CheckoutVerificationCustomer,
 } from "@/lib/contracts/checkout";
@@ -46,6 +50,38 @@ type CheckoutOrderRecord = {
   totalAmount: Prisma.Decimal | number | string | null;
   subtotalAmount: Prisma.Decimal | number | string | null;
   deliveryFeeAmount: Prisma.Decimal | number | string | null;
+};
+
+type CheckoutDeliveryQuoteRecord = {
+  serviceable: boolean;
+  deliveryFeeRuleId: string;
+  feeAmount: Prisma.Decimal | number | string | null;
+  distanceKm: Prisma.Decimal | number | string | null;
+  distanceMethod?: DeliveryDistanceMethod;
+  estimatedMinMinutes?: number | null;
+  estimatedMaxMinutes?: number | null;
+  rule: {
+    id: string;
+    label: string;
+    city: string;
+    state: string;
+    neighborhood?: string | null;
+    zipCodeStart?: string | null;
+    zipCodeEnd?: string | null;
+    maxDistanceKm?: Prisma.Decimal | number | string | null;
+    feeAmount: Prisma.Decimal | number | string | null;
+    minimumOrderAmount?: Prisma.Decimal | number | string | null;
+    freeAboveAmount?: Prisma.Decimal | number | string | null;
+  };
+  store: {
+    name: string;
+    street?: string;
+    number?: string;
+    city: string;
+    state: string;
+    zipCode?: string | null;
+    maxDeliveryDistanceKm: Prisma.Decimal | number | string | null;
+  };
 };
 
 function toNumber(value: Prisma.Decimal | number | string | null | undefined) {
@@ -106,5 +142,54 @@ export function serializeCheckoutOrderSummary(order: CheckoutOrderRecord): Check
     totalAmount: toNumber(order.totalAmount),
     subtotalAmount: toNumber(order.subtotalAmount),
     deliveryFeeAmount: toNumber(order.deliveryFeeAmount),
+  };
+}
+
+function serializeCheckoutDeliveryQuoteRule(
+  rule: CheckoutDeliveryQuoteRecord["rule"],
+): DeliveryQuoteRule {
+  return {
+    id: rule.id,
+    label: rule.label,
+    city: rule.city,
+    state: rule.state,
+    neighborhood: rule.neighborhood,
+    zipCodeStart: rule.zipCodeStart,
+    zipCodeEnd: rule.zipCodeEnd,
+    maxDistanceKm: rule.maxDistanceKm == null ? null : toNumber(rule.maxDistanceKm),
+    feeAmount: toNumber(rule.feeAmount),
+    minimumOrderAmount:
+      rule.minimumOrderAmount == null ? null : toNumber(rule.minimumOrderAmount),
+    freeAboveAmount: rule.freeAboveAmount == null ? null : toNumber(rule.freeAboveAmount),
+  };
+}
+
+function serializeCheckoutDeliveryQuoteStore(
+  store: CheckoutDeliveryQuoteRecord["store"],
+): DeliveryQuoteStore {
+  return {
+    name: store.name,
+    street: store.street,
+    number: store.number,
+    city: store.city,
+    state: store.state,
+    zipCode: store.zipCode,
+    maxDeliveryDistanceKm: toNumber(store.maxDeliveryDistanceKm),
+  };
+}
+
+export function serializeCheckoutDeliveryQuote(
+  quote: CheckoutDeliveryQuoteRecord,
+): DeliveryQuote {
+  return {
+    serviceable: quote.serviceable,
+    deliveryFeeRuleId: quote.deliveryFeeRuleId,
+    feeAmount: toNumber(quote.feeAmount),
+    distanceKm: toNumber(quote.distanceKm),
+    distanceMethod: quote.distanceMethod,
+    estimatedMinMinutes: quote.estimatedMinMinutes ?? null,
+    estimatedMaxMinutes: quote.estimatedMaxMinutes ?? null,
+    rule: serializeCheckoutDeliveryQuoteRule(quote.rule),
+    store: serializeCheckoutDeliveryQuoteStore(quote.store),
   };
 }

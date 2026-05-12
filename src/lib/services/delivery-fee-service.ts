@@ -6,6 +6,8 @@ import {
   haversineDistanceInKm,
 } from "@/lib/geocoding";
 import { config } from "@/lib/config";
+import { serializeCheckoutDeliveryQuote } from "@/lib/checkout-serializers";
+import type { DeliveryQuote } from "@/lib/contracts/checkout";
 import { decimal, numberFromDecimal } from "@/lib/utils";
 import { getMainStoreProfile } from "@/lib/services/store-settings-service";
 
@@ -131,7 +133,9 @@ async function resolveStoreCoordinates() {
   };
 }
 
-export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
+export async function resolveDeliveryFeeRule(
+  input: DeliveryQuoteInput,
+): Promise<DeliveryQuote> {
   const { store, latitude, longitude } = await resolveStoreCoordinates();
   let distanceMethod: "same_address" | "route" = "same_address";
 
@@ -234,9 +238,9 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
     freeAboveAmount !== null &&
     input.subtotalAmount >= freeAboveAmount
       ? 0
-      : Number(matchedRule.feeAmount);
+      : numberFromDecimal(matchedRule.feeAmount) ?? 0;
 
-  return {
+  return serializeCheckoutDeliveryQuote({
     serviceable: true,
     deliveryFeeRuleId: matchedRule.id,
     feeAmount,
@@ -266,7 +270,7 @@ export async function resolveDeliveryFeeRule(input: DeliveryQuoteInput) {
       zipCode: store.zipCode,
       maxDeliveryDistanceKm,
     },
-  };
+  });
 }
 
 export async function getDeliveryFeeRules() {

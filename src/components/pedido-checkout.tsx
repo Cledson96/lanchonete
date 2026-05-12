@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CheckoutAddress,
   CheckoutCustomerSnapshot,
+  CheckoutStoreStatus,
   ConfirmVerificationResponse,
   CreateOrderResponse,
   CustomerMeResponse,
@@ -15,7 +16,6 @@ import type {
   ViaCepResponse,
 } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
-import type { StoreStatus } from "@/lib/contracts/store";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
@@ -150,7 +150,7 @@ async function readJson<T>(input: RequestInfo, init?: RequestInit) {
 export function PedidoCheckout({
   initialStoreStatus,
 }: {
-  initialStoreStatus?: StoreStatus;
+  initialStoreStatus?: CheckoutStoreStatus;
 }) {
   const {
     state,
@@ -200,7 +200,7 @@ export function PedidoCheckout({
 
   const [submitPending, setSubmitPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [storeStatus, setStoreStatus] = useState<StoreStatus>(
+  const [storeStatus, setStoreStatus] = useState<CheckoutStoreStatus>(
     initialStoreStatus || {
       isOpen: true,
       currentWeekday: getCurrentWeekday(),
@@ -542,7 +542,7 @@ export function PedidoCheckout({
   useEffect(() => {
     let cancelled = false;
 
-    readJson<StoreStatus>("/api/store/status", { cache: "no-store" })
+    readJson<CheckoutStoreStatus>("/api/store/status", { cache: "no-store" })
       .then((payload) => {
         if (!cancelled) {
           setStoreStatus(payload);
