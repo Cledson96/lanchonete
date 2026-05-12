@@ -1,10 +1,6 @@
-import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/admin";
 import { ApiError, handleRouteError, ok } from "@/lib/http";
-import {
-  deleteManagedMenuItemImage,
-  saveMenuItemImage,
-} from "@/lib/menu-images";
+import { removeMenuItemImage, uploadMenuItemImage } from "@/lib/services/menu-admin-service";
 
 export const runtime = "nodejs";
 
@@ -24,35 +20,10 @@ export async function POST(request: Request) {
       throw new ApiError(422, "Envie um arquivo de imagem.");
     }
 
-    const item = await prisma.menuItem.findUnique({
-      where: { id: itemId },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-      },
-    });
-
-    if (!item) {
-      throw new ApiError(404, "Item do cardapio nao encontrado.");
-    }
-
-    const imageUrl = await saveMenuItemImage(rawFile, item.name);
-
-    await prisma.menuItem.update({
-      where: { id: item.id },
-      data: {
-        imageUrl,
-      },
-    });
-
-    await deleteManagedMenuItemImage(item.imageUrl);
+    const item = await uploadMenuItemImage(itemId, rawFile);
 
     return ok({
-      item: {
-        id: item.id,
-        imageUrl,
-      },
+      item,
     });
   } catch (error) {
     return handleRouteError(error);
@@ -69,32 +40,10 @@ export async function DELETE(request: Request) {
       throw new ApiError(422, "Selecione um item do cardapio.");
     }
 
-    const item = await prisma.menuItem.findUnique({
-      where: { id: itemId },
-      select: {
-        id: true,
-        imageUrl: true,
-      },
-    });
-
-    if (!item) {
-      throw new ApiError(404, "Item do cardapio nao encontrado.");
-    }
-
-    await prisma.menuItem.update({
-      where: { id: item.id },
-      data: {
-        imageUrl: null,
-      },
-    });
-
-    await deleteManagedMenuItemImage(item.imageUrl);
+    const item = await removeMenuItemImage(itemId);
 
     return ok({
-      item: {
-        id: item.id,
-        imageUrl: null,
-      },
+      item,
     });
   } catch (error) {
     return handleRouteError(error);

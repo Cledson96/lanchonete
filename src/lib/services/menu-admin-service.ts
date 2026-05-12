@@ -1,11 +1,69 @@
 import { Prisma } from "@prisma/client";
 import { ApiError } from "@/lib/http";
+import { deleteManagedMenuItemImage, saveMenuItemImage } from "@/lib/menu-images";
 import { normalizeMenuWeekdays } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";
+import { invalidatePublicMenuCache } from "@/lib/services/menu-service";
 import { decimal, optionalNullable, slugify } from "@/lib/utils";
 
 function hasOwn<T extends object>(value: T, key: keyof T) {
   return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+async function getMenuItemImageTarget(itemId: string) {
+  const item = await prisma.menuItem.findUnique({
+    where: { id: itemId },
+    select: {
+      id: true,
+      name: true,
+      imageUrl: true,
+    },
+  });
+
+  if (!item) {
+    throw new ApiError(404, "Item do cardapio nao encontrado.");
+  }
+
+  return item;
+}
+
+export async function uploadMenuItemImage(itemId: string, file: File) {
+  const item = await getMenuItemImageTarget(itemId);
+  const imageUrl = await saveMenuItemImage(file, item.name);
+
+  await prisma.menuItem.update({
+    where: { id: item.id },
+    data: {
+      imageUrl,
+    },
+  });
+
+  await deleteManagedMenuItemImage(item.imageUrl);
+  invalidatePublicMenuCache();
+
+  return {
+    id: item.id,
+    imageUrl,
+  };
+}
+
+export async function removeMenuItemImage(itemId: string) {
+  const item = await getMenuItemImageTarget(itemId);
+
+  await prisma.menuItem.update({
+    where: { id: item.id },
+    data: {
+      imageUrl: null,
+    },
+  });
+
+  await deleteManagedMenuItemImage(item.imageUrl);
+  invalidatePublicMenuCache();
+
+  return {
+    id: item.id,
+    imageUrl: null,
+  };
 }
 
 export async function createCategory(input: {

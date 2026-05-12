@@ -1,7 +1,7 @@
 import { requireCustomer } from "@/lib/auth/customer";
 import { config } from "@/lib/config";
 import { serializeCheckoutOrderSummary } from "@/lib/checkout-serializers";
-import { handleRouteError, ok } from "@/lib/http";
+import { ApiError, handleRouteError, ok } from "@/lib/http";
 import { readRequestBody } from "@/lib/request";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { createOrder } from "@/lib/services/order-service";
@@ -14,20 +14,7 @@ export async function POST(request: Request) {
     const input = await readRequestBody(request, createOrderSchema);
 
     if (session.phone !== input.customerPhone) {
-      return new Response(
-        JSON.stringify({
-          error: {
-            message:
-              "O telefone do pedido precisa ser o mesmo telefone validado.",
-          },
-        }),
-        {
-          status: 403,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      throw new ApiError(403, "O telefone do pedido precisa ser o mesmo telefone validado.");
     }
 
     const order = await createOrder({
