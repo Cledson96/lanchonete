@@ -1,5 +1,6 @@
 import { requireCustomer } from "@/lib/auth/customer";
 import { config } from "@/lib/config";
+import { serializeCheckoutOrderSummary } from "@/lib/checkout-serializers";
 import { handleRouteError, ok } from "@/lib/http";
 import { readRequestBody } from "@/lib/request";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
@@ -49,7 +50,15 @@ export async function POST(request: Request) {
       console.error("[orders:web:whatsapp-confirmation]", error);
     }
 
-    return ok({ order }, { status: 201 });
+    return ok(
+      {
+        order: serializeCheckoutOrderSummary({
+          ...order,
+          paymentMethod: order.paymentMethod ?? input.paymentMethod,
+        }),
+      },
+      { status: 201 },
+    );
   } catch (error) {
     return handleRouteError(error);
   }

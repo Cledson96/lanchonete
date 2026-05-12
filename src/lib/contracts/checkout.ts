@@ -1,4 +1,4 @@
-import type { FulfillmentType, OrderType, PaymentMethod } from "@/lib/contracts/common";
+import type { OrderType, PaymentMethod } from "@/lib/contracts/common";
 import type { StoreStatus } from "@/lib/contracts/store";
 
 export type CheckoutAddress = {
@@ -58,11 +58,13 @@ export type RequestVerificationResponse = {
 };
 
 export type ConfirmVerificationResponse = {
-  customer: {
-    id: string;
-    fullName?: string | null;
-    phone: string;
-  };
+  customer: CheckoutVerificationCustomer;
+};
+
+export type CheckoutVerificationCustomer = {
+  id: string;
+  fullName?: string | null;
+  phone: string;
 };
 
 export type CheckoutCustomerSnapshot = {
@@ -78,17 +80,19 @@ export type CustomerMeResponse = {
   customer: CheckoutCustomerSnapshot | null;
 };
 
+export type CheckoutOrderSummary = {
+  code: string;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  type: OrderType;
+  paymentMethod: PaymentMethod;
+  totalAmount: number;
+  subtotalAmount: number;
+  deliveryFeeAmount: number;
+};
+
 export type CreateOrderResponse = {
-  order: {
-    code: string;
-    customerName?: string | null;
-    customerPhone?: string | null;
-    type: FulfillmentType;
-    paymentMethod: PaymentMethod;
-    totalAmount: string | number;
-    subtotalAmount: string | number;
-    deliveryFeeAmount: string | number;
-  };
+  order: CheckoutOrderSummary;
 };
 
 export type CheckoutStoreStatus = StoreStatus;

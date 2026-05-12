@@ -1,4 +1,5 @@
 import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { serializeCheckoutVerificationCustomer } from "@/lib/checkout-serializers";
 import { checkRateLimit, rateLimitByIp } from "@/lib/rate-limit";
 import { readRequestBody } from "@/lib/request";
 import { confirmPhoneVerification } from "@/lib/services/verification-service";
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     const customer = await confirmPhoneVerification(input);
-    return ok({ customer });
+    return ok({ customer: serializeCheckoutVerificationCustomer(customer) });
   } catch (error) {
     return handleRouteError(error);
   }

@@ -1,5 +1,6 @@
 import { requireCustomer } from "@/lib/auth/customer";
 import { handleRouteError, ok } from "@/lib/http";
+import { serializeCheckoutCustomerSnapshot } from "@/lib/checkout-serializers";
 import { getCustomerById } from "@/lib/services/customer-service";
 
 export async function GET() {
@@ -7,32 +8,8 @@ export async function GET() {
     const session = await requireCustomer();
     const customer = await getCustomerById(session.customerProfileId);
 
-    const defaultAddress = customer?.defaultAddress || customer?.addresses[0] || null;
-    const lastOrder = customer?.orders[0] || null;
-
     return ok({
-      customer: customer
-        ? {
-            id: customer.id,
-            fullName: customer.fullName,
-            phone: customer.phone,
-            defaultAddress: defaultAddress
-              ? {
-                  id: defaultAddress.id,
-                  street: defaultAddress.street,
-                  number: defaultAddress.number,
-                  complement: defaultAddress.complement,
-                  neighborhood: defaultAddress.neighborhood,
-                  city: defaultAddress.city,
-                  state: defaultAddress.state,
-                  zipCode: defaultAddress.zipCode,
-                  reference: defaultAddress.reference,
-                }
-              : null,
-            lastPaymentMethod: lastOrder?.paymentMethod || null,
-            lastOrderType: lastOrder?.type || null,
-          }
-        : null,
+      customer: customer ? serializeCheckoutCustomerSnapshot(customer) : null,
     });
   } catch (error) {
     return handleRouteError(error);
