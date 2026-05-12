@@ -1,16 +1,15 @@
-import { type Message, type MessageAck } from "whatsapp-web.js";
 import { Prisma } from "@prisma/client";
 import { config } from "@/lib/config";
 import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { createOrder } from "@/lib/services/order-service";
 import { getPublicMenu } from "@/lib/services/menu-service";
+import type {
+  WhatsAppInboundMessageEvent,
+  WhatsAppMessageStatusEvent,
+} from "@/lib/whatsapp-contract";
 import { getWhatsAppClientManager } from "@/lib/whatsapp-client";
 import { digitsOnly, formatMoney, normalizePhone, normalizeZipCode, optionalTrimmed } from "@/lib/utils";
-
-const globalForWhatsApp = globalThis as typeof globalThis & {
-  whatsappListenersBound?: boolean;
-};
 
 type BotState =
   | "idle"
@@ -53,7 +52,7 @@ type BotContext = {
 
 type SendResult = {
   delivered: boolean;
-  provider: "whatsapp-web" | "development";
+  provider: "baileys" | "development";
   externalMessageId?: string;
 };
 
@@ -107,7 +106,9 @@ const WHATSAPP_REENGAGEMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
 const PUBLIC_SITE_REPLY_KEY = "public_site_reply";
 const WHATSAPP_GROUP_THREAD_SUFFIX = "@g.us";
 
-let listenersBound = false;
+function stripWhatsAppJidSuffix(value: string) {
+  return value.replace(/@(c\.us|s\.whatsapp\.net|lid)$/u, "");
+}
 
 function getDefaultContext(): BotContext {
   return {
@@ -1013,7 +1014,7 @@ async function handleConfirmation(
   }
 }
 
-async function handleBotMessage(message: Message) {
+export async function handleWhatsAppInboundEvent(message: WhatsAppInboundMessageEvent) {
   if (message.fromMe) {
     return;
   }
@@ -1028,14 +1029,8 @@ async function handleBotMessage(message: Message) {
     return;
   }
 
-  const phone = normalizePhone(message.from.replace(/@c\.us$/, ""));
-  const rawMessage = message as Message & {
-    _data?: {
-      notifyName?: string;
-      pushname?: string;
-    };
-  };
-  const name = rawMessage._data?.notifyName || rawMessage._data?.pushname;
+  const phone = normalizePhone(stripWhatsAppJidSuffix(message.from));
+  const name = message.notifyName || message.pushName || undefined;
 
   if (!phone.startsWith(config.whatsappAllowedCountryCode)) {
     return;
@@ -1048,12 +1043,12 @@ async function handleBotMessage(message: Message) {
   );
 
   await recordInboundMessage({
-    conversationId: conversation.id,
-    externalMessageId: message.id.id,
+      conversationId: conversation.id,
+    externalMessageId: message.messageId,
     content: body,
     payload: {
       from: message.from,
-      rawType: message.type,
+      rawType: message.rawType,
       timestamp: message.timestamp,
     },
   });
@@ -1065,10 +1060,10 @@ async function handleBotMessage(message: Message) {
   await prisma.whatsAppConversation.update({
     where: { id: conversation.id },
     data: {
-      lastMessageAt: now,
-      lastInboundAt: now,
-      phone,
-      externalThreadId: message.from,
+        lastMessageAt: now,
+        lastInboundAt: now,
+        phone,
+        externalThreadId: message.from,
     },
   });
 
@@ -1092,47 +1087,29 @@ async function handleBotMessage(message: Message) {
   await sendStandardPublicSiteReply(conversation);
 }
 
-async function updateMessageAck(message: Message, ack: MessageAck) {
+export async function handleWhatsAppMessageStatusEvent(event: WhatsAppMessageStatusEvent) {
+  const delivered = event.status === "delivered" || event.status === "read";
+  const read = event.status === "read";
+
   await prisma.whatsAppMessage.updateMany({
     where: {
-      externalMessageId: message.id.id,
+      externalMessageId: event.messageId,
     },
     data: {
-      status:
-        ack >= 3
-          ? "read"
-          : ack >= 2
-            ? "delivered"
-            : ack >= 1
-              ? "sent"
-              : "pending",
-      deliveredAt: ack >= 2 ? new Date() : undefined,
-      readAt: ack >= 3 ? new Date() : undefined,
+      status: event.status,
+      deliveredAt: delivered ? new Date(event.timestamp) : undefined,
+      readAt: read ? new Date(event.timestamp) : undefined,
     },
   });
 }
 
-function ensureListenersBound() {
-  if (globalForWhatsApp.whatsappListenersBound || listenersBound) {
-    return;
-  }
-
-  const manager = getWhatsAppClientManager();
-  manager.onInboundMessage((message) => void handleBotMessage(message));
-  manager.onMessageAck((message, ack) => void updateMessageAck(message, ack));
-  listenersBound = true;
-  globalForWhatsApp.whatsappListenersBound = true;
-}
-
 export async function getWhatsAppSession() {
-  ensureListenersBound();
   return getWhatsAppClientManager().getSessionInfo();
 }
 
 export async function connectWhatsAppSession() {
-  ensureListenersBound();
   const manager = getWhatsAppClientManager();
-  manager.start();
+  await manager.ensureStarted();
   const deadline = Date.now() + 15_000;
   let session = await manager.getSessionInfo();
 
@@ -1165,8 +1142,6 @@ export async function sendWhatsAppTextMessage(input: {
   to: string;
   body: string;
 }): Promise<SendResult> {
-  ensureListenersBound();
-
   const to = normalizePhone(input.to);
 
   if (!to.startsWith(config.whatsappAllowedCountryCode)) {
@@ -1177,7 +1152,7 @@ export async function sendWhatsAppTextMessage(input: {
     const result = await getWhatsAppClientManager().sendTextMessage(to, input.body);
     return {
       delivered: true,
-      provider: "whatsapp-web",
+      provider: "baileys",
       externalMessageId: result.externalMessageId,
     };
   } catch (error) {

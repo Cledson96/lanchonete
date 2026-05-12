@@ -22,7 +22,7 @@ A v1 cobre cardápio público, pedido pelo site, pedido automatizado pelo WhatsA
 | Banco | PostgreSQL 16 (local) / Neon (remoto) |
 | ORM | Prisma 7 com adapter `@prisma/adapter-pg` |
 | Auth | JWT com `jose` (HS256), cookies httpOnly |
-| WhatsApp | `whatsapp-web.js` (Puppeteer/Chromium) |
+| WhatsApp | `@whiskeysockets/baileys` em worker HTTP proprio |
 | Validação | Zod 4 |
 | QR Code | `qrcode` (geração de QR para comandas e WhatsApp) |
 | Senhas | `bcryptjs` |
@@ -40,7 +40,7 @@ lanchonete/
 │   ├── plano-landing-page-v1.md    # Plano visual da landing
 │   ├── modelo-dados.md            # Resumo do modelo Prisma
 │   ├── database-setup.md           # Setup do banco local/remoto
-│   ├── whatsapp-webjs-setup.md     # Setup do WhatsApp Web.js
+│   ├── whatsapp-webjs-setup.md     # Setup do worker WhatsApp com Baileys
 │   └── cardapio-auditoria.md      # Auditoria dos itens do cardápio
 ├── prisma/
 │   ├── schema.prisma              # Schema completo do banco
@@ -143,7 +143,7 @@ lanchonete/
 │       ├── request.ts             # Helpers de request
 │       ├── utils.ts               # Utilitários gerais
 │       ├── validators.ts          # Schemas Zod
-│       └── whatsapp-client.ts     # Manager do WhatsApp Web.js
+│       └── whatsapp-client.ts     # Cliente HTTP do worker do WhatsApp
 ├── cardapio/                      # Fotos originais do cardápio físico
 ├── .env.example                   # Template de variáveis de ambiente
 ├── .env.local                     # Variáveis locais (gitignored)
@@ -285,7 +285,7 @@ lanchonete/
 
 ## WhatsApp
 
-- **Biblioteca**: `whatsapp-web.js` com Puppeteer (headless Chromium)
+- **Biblioteca**: `@whiskeysockets/baileys` em worker Node dedicado
 - **Sessão**: Persistida em disco local (`.runtime/whatsapp-session/`)
 - **Conexão**: Dashboard → escanear QR → status conectado
 - **Funcionalidades v1**:
@@ -293,7 +293,7 @@ lanchonete/
   - Mensagens automáticas de status do pedido (aceito, em preparo, saiu para entrega)
   - Bot textual de pedido pelo WhatsApp
   - Inbox simples no dashboard
-- **Limitação**: Arquitetura para processo único Node em VPS (não serverless)
+- **Arquitetura**: app Next.js separado do worker do WhatsApp
 
 ---
 
@@ -346,10 +346,13 @@ Ver `.env.example` para referência completa:
 | `ADMIN_PASSWORD` | Senha do admin |
 | `NEXT_PUBLIC_WHATSAPP_URL` | URL pública do WhatsApp |
 | `WHATSAPP_SESSION_PATH` | Caminho da sessão WhatsApp |
-| `WHATSAPP_HEADLESS` | Rodar Chromium headless |
 | `WHATSAPP_CLIENT_NAME` | Nome da sessão WhatsApp |
 | `WHATSAPP_ALLOWED_COUNTRY_CODE` | DDI permitido (default: 55) |
 | `WHATSAPP_BOT_ENABLED` | Ligar/desligar bot |
+| `WHATSAPP_AUTO_START` | Reconectar o worker automaticamente |
+| `WHATSAPP_WORKER_URL` | URL interna do worker |
+| `WHATSAPP_WORKER_TOKEN` | Token Bearer entre app e worker |
+| `WHATSAPP_INTERNAL_WEBHOOK_SECRET` | Segredo do webhook interno |
 | `NEON_API_KEY` | API key da Neon (opcional) |
 
 ---

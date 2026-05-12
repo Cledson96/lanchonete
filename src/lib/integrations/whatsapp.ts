@@ -2,7 +2,7 @@ import { sendWhatsAppTextMessage as sendThroughWhatsAppService } from "@/lib/ser
 
 export type SendWhatsAppMessageResult = {
   delivered: boolean;
-  provider: "whatsapp-web" | "development";
+  provider: "baileys" | "development";
   externalMessageId?: string;
 };
 

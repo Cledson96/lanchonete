@@ -79,7 +79,7 @@ export function useCheckoutVerification(input: UseCheckoutVerificationInput) {
       setVerifiedPhone("");
       setDevCodePreview(payload.devCodePreview || null);
       setVerificationMessage(
-        payload.provider === "whatsapp-web" && payload.delivered
+        payload.provider === "baileys" && payload.delivered
           ? "Codigo enviado pelo WhatsApp conectado da loja."
           : "WhatsApp real indisponivel no momento. Use o codigo de desenvolvimento abaixo para testar localmente.",
       );

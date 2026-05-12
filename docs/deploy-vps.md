@@ -53,7 +53,8 @@ As tags usadas sao:
 
 Use Ubuntu/Debian recente, aponte o DNS do dominio para o IP da VPS e libere as
 portas `80` e `443`. O container do Next.js fica acessivel apenas em
-`127.0.0.1:3001`; o Nginx publico da VPS faz o proxy.
+`127.0.0.1:3001`; o Nginx publico da VPS faz o proxy. O worker do WhatsApp roda
+apenas na rede interna do Docker Compose.
 
 Instale Docker e Compose:
 
@@ -108,6 +109,8 @@ Edite `/opt/lanchonete/.env.production` e troque, no minimo:
 - `APP_HOST_PORT=127.0.0.1:3001`
 - `DATABASE_URL`
 - `APP_AUTH_SECRET`
+- `WHATSAPP_WORKER_TOKEN`
+- `WHATSAPP_INTERNAL_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_SITE_URL`
 - `ADMIN_EMAIL`, `ADMIN_PHONE`, `ADMIN_PASSWORD`
 - `NEXT_PUBLIC_WHATSAPP_URL`
@@ -120,6 +123,7 @@ Use, no minimo:
 - `APP_HOST_PORT=127.0.0.1:3002`
 - `DATABASE_URL` apontando para um banco separado de desenvolvimento.
 - `APP_AUTH_SECRET` diferente do segredo de producao.
+- `WHATSAPP_WORKER_TOKEN` e `WHATSAPP_INTERNAL_WEBHOOK_SECRET` proprios de develop.
 - `NEXT_PUBLIC_SITE_URL` com a URL de develop.
 - `ADMIN_EMAIL`, `ADMIN_PHONE`, `ADMIN_PASSWORD` de desenvolvimento.
 - `NEXT_PUBLIC_WHATSAPP_URL` de desenvolvimento.

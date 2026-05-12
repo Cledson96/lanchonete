@@ -64,7 +64,7 @@ export type RequestVerificationResponse = {
   phone: string;
   expiresAt: string;
   delivered: boolean;
-  provider: "whatsapp-web" | "development";
+  provider: "baileys" | "development";
   devCodePreview?: string;
 };
 

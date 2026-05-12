@@ -6,15 +6,35 @@ services:
       - .env.production
     environment:
       NODE_ENV: production
-      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+      WHATSAPP_WORKER_URL: http://whatsapp-worker:3001
       WHATSAPP_SESSION_PATH: .runtime/whatsapp-session
+      WHATSAPP_WORKER_TOKEN: ${WHATSAPP_WORKER_TOKEN}
+      WHATSAPP_INTERNAL_WEBHOOK_SECRET: ${WHATSAPP_INTERNAL_WEBHOOK_SECRET}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "${APP_HOST_PORT:-127.0.0.1:3001}:3000"
     volumes:
-      - whatsapp-session:/app/.runtime/whatsapp-session
       - menu-uploads:/app/public/uploads/menu
+  whatsapp-worker:
+    image: ${APP_IMAGE:-ghcr.io/cledson96/lanchonete:latest}
+    restart: unless-stopped
+    depends_on:
+      - app
+    command: ["npm", "run", "start:whatsapp-worker"]
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      WHATSAPP_WORKER_PORT: 3001
+      APP_INTERNAL_URL: http://app:3000
+      WHATSAPP_SESSION_PATH: .runtime/whatsapp-session
+      WHATSAPP_WORKER_TOKEN: ${WHATSAPP_WORKER_TOKEN}
+      WHATSAPP_INTERNAL_WEBHOOK_SECRET: ${WHATSAPP_INTERNAL_WEBHOOK_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - whatsapp-session:/app/.runtime/whatsapp-session
 
 volumes:
   whatsapp-session:

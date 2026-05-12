@@ -28,7 +28,7 @@ export function getOpenApiDocument(baseUrl?: string) {
       title: "Lanchonete API",
       version: "1.0.0",
       description:
-        "Backend da lanchonete em Next.js App Router, com pedidos web, comandas, dashboard operacional e integracao direta com WhatsApp Web.",
+        "Backend da lanchonete em Next.js App Router, com pedidos web, comandas, dashboard operacional e integracao direta com worker Baileys para WhatsApp.",
     },
     servers: [
       {
@@ -44,7 +44,7 @@ export function getOpenApiDocument(baseUrl?: string) {
       { name: "Dashboard", description: "Operacao interna e gestao." },
       { name: "Menu", description: "Catalogo e estruturas do cardapio." },
       { name: "Frete", description: "Regras e cotacao de entrega." },
-      { name: "WhatsApp", description: "Sessao, inbox e envio transacional via whatsapp-web.js." },
+      { name: "WhatsApp", description: "Sessao, inbox e envio transacional via worker proprio com Baileys." },
       { name: "Auth", description: "Autenticacao do admin." },
     ],
     components: {
@@ -553,7 +553,7 @@ export function getOpenApiDocument(baseUrl?: string) {
       "/api/customer/verification/request": {
         post: {
           tags: ["Cliente"],
-          summary: "Solicita codigo de verificacao via WhatsApp Web conectado",
+          summary: "Solicita codigo de verificacao via sessao Baileys conectada",
           requestBody: {
             required: true,
             ...jsonContent(schemaRef("VerificationRequestInput")),
@@ -1294,14 +1294,14 @@ export function getOpenApiDocument(baseUrl?: string) {
       "/api/whatsapp/webhook": {
         get: {
           tags: ["WhatsApp"],
-          summary: "Rota legada que informa a troca para WhatsApp Web",
+          summary: "Status do webhook interno do worker Baileys",
           responses: {
-            "200": jsonResponse("Canal legado desativado.", schemaRef("WebhookAck")),
+            "200": jsonResponse("Webhook interno ativo.", schemaRef("WebhookAck")),
           },
         },
         post: {
           tags: ["WhatsApp"],
-          summary: "Rota legada sem recebimento externo",
+          summary: "Recebe eventos internos do worker do WhatsApp",
           responses: {
             "200": jsonResponse("Evento processado.", schemaRef("WebhookAck")),
           },

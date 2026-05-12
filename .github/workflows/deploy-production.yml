@@ -109,7 +109,7 @@ jobs:
             git fetch origin main
             git checkout main
             git pull --ff-only origin main
-            docker compose --env-file .env.production pull app
+            docker compose --env-file .env.production pull
             docker compose --env-file .env.production run --rm app npx prisma migrate deploy
-            docker compose --env-file .env.production up -d
+            docker compose --env-file .env.production up -d --remove-orphans
             docker image prune -f
