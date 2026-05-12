@@ -3,23 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CheckoutCustomerSnapshot,
   CheckoutStoreStatus,
-  ConfirmVerificationResponse,
   CreateOrderResponse,
-  RequestVerificationResponse,
 } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import {
-  canRequestCheckoutVerification,
   canSubmitCheckoutOrder,
   checkoutPaymentOptions,
   formatCheckoutPhoneNumber,
   getCheckoutUnavailableItems,
   getCheckoutErrorMessage,
   isCheckoutDeliveryAddressValid,
+  isCheckoutVerificationExpired,
   type CheckoutApiErrorPayload,
 } from "@/lib/checkout-client";
 import {
@@ -30,6 +28,7 @@ import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
 import { useCheckoutDeliveryFlow } from "@/lib/use-checkout-delivery-flow";
 import { useCheckoutCustomerSession } from "@/lib/use-checkout-customer-session";
+import { useCheckoutVerification } from "@/lib/use-checkout-verification";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
 import { formatMoney, optionalTrimmed } from "@/lib/utils";
@@ -73,14 +72,6 @@ export function PedidoCheckout({
   const [customerPhone, setCustomerPhone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [orderNotes, setOrderNotes] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [verificationRequested, setVerificationRequested] = useState(false);
-  const [verificationPending, setVerificationPending] = useState(false);
-  const [verificationConfirmed, setVerificationConfirmed] = useState(false);
-  const [verifiedPhone, setVerifiedPhone] = useState("");
-  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
-  const [verificationError, setVerificationError] = useState<string | null>(null);
-  const [devCodePreview, setDevCodePreview] = useState<string | null>(null);
 
   const {
     street,
@@ -134,6 +125,33 @@ export function PedidoCheckout({
     deliveryQuote,
   });
 
+  const syncCustomerFromSessionRef = useRef<
+    (options?: { preserveVerified?: boolean }) => Promise<boolean>
+  >(async () => false);
+
+  const verification = useCheckoutVerification({
+    customerPhone,
+    customerName,
+    readJson,
+    setCustomerName,
+    syncCustomerFromSession: (options) => syncCustomerFromSessionRef.current(options),
+  });
+
+  const {
+    verificationCode,
+    setVerificationCode,
+    verificationRequested,
+    verificationPending,
+    verificationConfirmed,
+    verifiedPhone,
+    verificationMessage,
+    verificationError,
+    devCodePreview,
+    canRequestVerificationAction,
+    handleRequestVerification,
+    handleConfirmVerification,
+  } = verification;
+
   const applyCustomerSnapshot = useCallback((
     customer: CheckoutCustomerSnapshot,
     options?: { preserveVerified?: boolean },
@@ -143,24 +161,19 @@ export function PedidoCheckout({
     applyAddress(customer.defaultAddress);
 
     if (options?.preserveVerified) {
-      setVerificationConfirmed(true);
-      setVerifiedPhone(customer.phone);
-      setVerificationMessage("Telefone ja validado para esta sessao.");
+      verification.setVerificationConfirmed(true);
+      verification.setVerifiedPhone(customer.phone);
+      verification.setVerificationMessage("Telefone ja validado para esta sessao.");
     }
-  }, [applyAddress]);
+  }, [applyAddress, verification]);
 
   const { isLoadingCustomer, syncCustomerFromSession } = useCheckoutCustomerSession({
-    customerPhone,
-    verifiedPhone,
     readJson,
     applyCustomerSnapshot,
     setCustomerPhone,
-    setVerificationConfirmed,
-    setVerificationRequested,
-    setVerificationCode,
-    setDevCodePreview,
-    setVerificationMessage,
   });
+
+  syncCustomerFromSessionRef.current = syncCustomerFromSession;
 
   const isDeliveryAddressValid = useMemo(
     () =>
@@ -185,11 +198,6 @@ export function PedidoCheckout({
       deliveryQuoteError,
     ],
   );
-
-  const canRequestVerificationAction = canRequestCheckoutVerification({
-    customerPhone,
-    verificationPending,
-  });
 
   const unavailableItems = useMemo(
     () => getCheckoutUnavailableItems(state.items),
@@ -229,90 +237,6 @@ export function PedidoCheckout({
       cancelled = true;
     };
   }, []);
-
-  async function handleRequestVerification() {
-    setVerificationPending(true);
-    setVerificationError(null);
-    setVerificationMessage(null);
-    setDevCodePreview(null);
-    setVerificationCode("");
-
-    try {
-      const payload = await readJson<RequestVerificationResponse>(
-        "/api/customer/verification/request",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            phone: customerPhone,
-            customerName,
-          }),
-        },
-      );
-
-      setVerificationRequested(true);
-      setVerificationConfirmed(false);
-      setVerifiedPhone("");
-      setDevCodePreview(payload.devCodePreview || null);
-      setVerificationMessage(
-        payload.provider === "whatsapp-web" && payload.delivered
-          ? "Codigo enviado pelo WhatsApp conectado da loja."
-          : "WhatsApp real indisponivel no momento. Use o codigo de desenvolvimento abaixo para testar localmente.",
-      );
-    } catch (error) {
-      setVerificationRequested(false);
-      setVerificationError(
-        error instanceof Error ? error.message : "Nao foi possivel solicitar o codigo.",
-      );
-    } finally {
-      setVerificationPending(false);
-    }
-  }
-
-  async function handleConfirmVerification() {
-    setVerificationPending(true);
-    setVerificationError(null);
-    setVerificationMessage(null);
-
-    try {
-      const payload = await readJson<ConfirmVerificationResponse>(
-        "/api/customer/verification/confirm",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            phone: customerPhone,
-            code: verificationCode,
-            customerName,
-          }),
-        },
-      );
-
-      setVerificationConfirmed(true);
-      setVerifiedPhone(payload.customer.phone);
-      setCustomerName((current) => current || payload.customer.fullName || "");
-      const hasSessionCustomer = await syncCustomerFromSession({ preserveVerified: true });
-      setVerificationMessage(
-        hasSessionCustomer
-          ? "Telefone validado com sucesso. Carregamos seu cadastro salvo."
-          : "Telefone validado com sucesso.",
-      );
-    } catch (error) {
-      setVerificationConfirmed(false);
-      setVerifiedPhone("");
-      const message =
-        error instanceof Error ? error.message : "Nao foi possivel validar o codigo.";
-
-      if (message === "Codigo expirado.") {
-        setVerificationRequested(false);
-        setVerificationCode("");
-        setDevCodePreview(null);
-        setVerificationMessage("Codigo expirado. Solicite um novo codigo para continuar.");
-      } else {
-        setVerificationError(message);
-      }
-    } finally {
-      setVerificationPending(false);
-    }
-  }
 
   async function handleSubmitOrder() {
     if (!canSubmit) return;
@@ -465,7 +389,7 @@ export function PedidoCheckout({
                     ? "Validado"
                     : verificationPending
                       ? "Validando"
-                      : verificationMessage?.includes("expirado")
+                      : isCheckoutVerificationExpired(verificationMessage)
                         ? "Código expirado"
                       : verificationRequested
                         ? "Código solicitado"
@@ -482,7 +406,7 @@ export function PedidoCheckout({
                 >
                   {verificationPending
                     ? "Enviando..."
-                    : verificationMessage?.includes("expirado")
+                    : isCheckoutVerificationExpired(verificationMessage)
                       ? "Solicitar novo código"
                       : "Solicitar código"}
                 </button>

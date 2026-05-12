@@ -207,3 +207,7 @@ export function getCheckoutErrorMessage(payload: CheckoutApiErrorPayload | null)
 
   return payload?.error?.message || "Nao foi possivel concluir a acao.";
 }
+
+export function isCheckoutVerificationExpired(message?: string | null) {
+  return message?.includes("expirado") ?? false;
+}
