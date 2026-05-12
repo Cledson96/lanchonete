@@ -1,0 +1,54 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-08T21:25:00Z",
+  "libraries": {
+    "npm": {
+      "files": [
+        {
+          "filename": "npm-run-local-binaries.md",
+          "topic": "npm run local binaries and PATH",
+          "tech_stack": "Node.js / npm scripts",
+          "fetched": "2026-05-08T21:15:00Z",
+          "source": "Context7 API + official npm docs",
+          "path": ".tmp/external-context/npm/npm-run-local-binaries.md"
+        }
+      ]
+    },
+    "typescript": {
+      "files": [
+        {
+          "filename": "local-tsc-install.md",
+          "topic": "local TypeScript install and tsc execution",
+          "tech_stack": "Node.js / npm scripts",
+          "fetched": "2026-05-08T21:15:00Z",
+          "source": "Context7 API + official TypeScript docs",
+          "path": ".tmp/external-context/typescript/local-tsc-install.md"
+        }
+      ]
+    },
+    "eslint": {
+      "files": [
+        {
+          "filename": "local-eslint-install.md",
+          "topic": "local ESLint install and CLI execution",
+          "tech_stack": "Node.js / npm scripts",
+          "fetched": "2026-05-08T21:15:00Z",
+          "source": "Context7 API + official ESLint docs",
+          "path": ".tmp/external-context/eslint/local-eslint-install.md"
+        }
+      ]
+    },
+    "prisma": {
+      "files": [
+        {
+          "filename": "prismaclient-typescript-diagnostics.md",
+          "topic": "PrismaClient TypeScript diagnostics for missing models, enums, and adapter type mismatches",
+          "tech_stack": "Prisma ORM / TypeScript",
+          "fetched": "2026-05-08T21:25:00Z",
+          "source": "Context7 API + official Prisma docs",
+          "path": ".tmp/external-context/prisma/prismaclient-typescript-diagnostics.md"
+        }
+      ]
+    }
+  }
+}
