@@ -155,6 +155,9 @@ const ingredients: IngredientSeed[] = [
   { name: "Vinagrete", slug: "vinagrete", sortOrder: 62, patterns: ["vinagrete"] },
   { name: "Bisteca", slug: "bisteca", sortOrder: 63, patterns: ["bisteca"] },
   { name: "Filé de frango grelhado", slug: "file-de-frango-grelhado", sortOrder: 64, patterns: ["file de frango grelhado", "filé de frango grelhado"] },
+  { name: "Cebola", slug: "cebola", sortOrder: 65, patterns: ["cebola"] },
+  { name: "Farofa", slug: "farofa", sortOrder: 66, patterns: ["farofa"] },
+  { name: "Frango a passarinho", slug: "frango-a-passarinho", sortOrder: 67, patterns: ["frango a passarinho"] },
 ];
 
 const optionGroups: OptionGroupSeed[] = [
@@ -521,10 +524,67 @@ const categories: CategorySeed[] = [
     ],
   },
   {
+    name: "Hot Dog",
+    slug: "hot-dog",
+    description: "Cachorros-quentes montados conforme o cardapio da casa.",
+    sortOrder: 2,
+    items: [
+      {
+        name: "Dog simples",
+        slug: "dog-simples",
+        description: "Pao, maionese, farofa, batata palha, tomate, cebola, milho e 1 vina.",
+        price: 13,
+        sortOrder: 1,
+      },
+      {
+        name: "Dog duplo",
+        slug: "dog-duplo",
+        description: "Pao, maionese, farofa, batata palha, tomate, cebola, milho e 2 vinas.",
+        price: 17,
+        sortOrder: 2,
+      },
+      {
+        name: "Dog bacon",
+        slug: "dog-bacon",
+        description: "Pao, maionese, farofa, batata palha, tomate, cebola, milho, bacon e 1 vina.",
+        price: 17,
+        sortOrder: 3,
+      },
+      {
+        name: "Dog frango",
+        slug: "dog-frango",
+        description: "Pao, maionese, farofa, batata palha, tomate, cebola, milho, frango e 1 vina.",
+        price: 17,
+        sortOrder: 4,
+      },
+      {
+        name: "Dog calabresa",
+        slug: "dog-calabresa",
+        description: "Pao, maionese, farofa, batata palha, tomate, cebola, milho, calabresa e 1 vina.",
+        price: 17,
+        sortOrder: 5,
+      },
+      {
+        name: "Dog pizza",
+        slug: "dog-pizza",
+        description: "Pao, 1 vina, queijo, presunto, oregano, maionese, farofa, batata palha, cebola, tomate e milho.",
+        price: 17,
+        sortOrder: 6,
+      },
+      {
+        name: "Dog especial",
+        slug: "dog-especial",
+        description: "Pao, maionese, farofa, batata palha, tomate, milho, cebola, bacon, frango, calabresa, 2 vinas, cheddar e catupiry.",
+        price: 30,
+        sortOrder: 7,
+      },
+    ],
+  },
+  {
     name: "Combo Lanches",
     slug: "combo-lanches",
     description: "Combos com fritas de 200g aproximadamente e bebida da casa.",
-    sortOrder: 2,
+    sortOrder: 3,
     items: [
       {
         name: "Combo X-Salada + fritas",
@@ -573,7 +633,7 @@ const categories: CategorySeed[] = [
     name: "Lanches Artesanais",
     slug: "lanches-artesanais",
     description: "Burgers artesanais com receitas da casa e molho especial.",
-    sortOrder: 3,
+    sortOrder: 4,
     items: [
       {
         name: "Classico",
@@ -630,7 +690,7 @@ const categories: CategorySeed[] = [
     name: "Combos Artesanais",
     slug: "combos-artesanais",
     description: "Burger artesanal com batata frita de 200g aproximadamente e refrigerante lata 350ml.",
-    sortOrder: 4,
+    sortOrder: 5,
     items: [
       {
         name: "Combo Artesanal Tradicional",
@@ -671,7 +731,7 @@ const categories: CategorySeed[] = [
     name: "Pastel Salgado",
     slug: "pastel-salgado",
     description: "Pasteis salgados feitos na hora para lanche rapido ou para dividir.",
-    sortOrder: 5,
+    sortOrder: 6,
     items: [
       {
         name: "Carne",
@@ -712,7 +772,7 @@ const categories: CategorySeed[] = [
     name: "Pastel Doce",
     slug: "pastel-doce",
     description: "Sabores doces para fechar o pedido com sobremesa quentinha.",
-    sortOrder: 6,
+    sortOrder: 7,
     items: [
       {
         name: "Chocolate preto com morango",
@@ -761,7 +821,7 @@ const categories: CategorySeed[] = [
     name: "Pastel Especial",
     slug: "pastel-especial",
     description: "Versoes especiais com recheios reforcados.",
-    sortOrder: 7,
+    sortOrder: 8,
     items: [
       {
         name: "Carne com ovo",
@@ -834,7 +894,7 @@ const categories: CategorySeed[] = [
     name: "Tapioca Salgada",
     slug: "tapioca-salgada",
     description: "Tapiocas salgadas com recheios classicos e sabores da casa.",
-    sortOrder: 8,
+    sortOrder: 9,
     items: [
       {
         name: "Natural",
@@ -923,7 +983,7 @@ const categories: CategorySeed[] = [
     name: "Tapioca Doce",
     slug: "tapioca-doce",
     description: "Tapiocas doces para sobremesa ou para matar a vontade de acucar.",
-    sortOrder: 9,
+    sortOrder: 10,
     items: [
       {
         name: "Baianinha",
@@ -1028,7 +1088,7 @@ const categories: CategorySeed[] = [
     name: "Acai",
     slug: "acai",
     description: "Copos de acai com adicionais inclusos para montar do seu jeito.",
-    sortOrder: 11,
+    sortOrder: 12,
     items: [
       {
         name: "Acai 240ml",
@@ -1064,7 +1124,7 @@ const categories: CategorySeed[] = [
     name: "Salgados",
     slug: "salgados",
     description: "Coxinhas, risoles, enroladinhos e assados da casa.",
-    sortOrder: 10,
+    sortOrder: 11,
     items: [
       {
         name: "Coxinha pequena de frango",
@@ -1238,10 +1298,60 @@ const categories: CategorySeed[] = [
     ],
   },
   {
+    name: "Porções",
+    slug: "porcoes",
+    description: "Porcoes para compartilhar com acompanhamentos e carnes da casa.",
+    sortOrder: 13,
+    items: [
+      {
+        name: "Batata frita 500g",
+        slug: "batata-frita-500g",
+        description: "Batata frita 500g aproximadamente.",
+        price: 30,
+        sortOrder: 1,
+      },
+      {
+        name: "Batata frita c/ bacon",
+        slug: "batata-frita-bacon-600g",
+        description: "Batata frita com bacon 600g aproximadamente.",
+        price: 45,
+        sortOrder: 2,
+      },
+      {
+        name: "Batata frita c/ calabresa acebolada",
+        slug: "batata-frita-calabresa-acebolada-600g",
+        description: "Batata frita com calabresa acebolada 600g aproximadamente.",
+        price: 45,
+        sortOrder: 3,
+      },
+      {
+        name: "Frango a passarinho",
+        slug: "frango-a-passarinho-1kg",
+        description: "Frango a passarinho 1kg aproximadamente.",
+        price: 45,
+        sortOrder: 4,
+      },
+      {
+        name: "Alcatra acebolada",
+        slug: "alcatra-acebolada-500g",
+        description: "Alcatra acebolada 500g aproximadamente.",
+        price: 65,
+        sortOrder: 5,
+      },
+      {
+        name: "Alcatra com batata",
+        slug: "alcatra-com-batata-600g",
+        description: "Alcatra com batata 600g aproximadamente.",
+        price: 65,
+        sortOrder: 6,
+      },
+    ],
+  },
+  {
     name: "Bebidas",
     slug: "bebidas",
     description: "Bebidas avulsas para acompanhar o pedido.",
-    sortOrder: 12,
+    sortOrder: 14,
     items: [
       {
         name: "Coca cola 220ml",
@@ -1305,7 +1415,7 @@ const categories: CategorySeed[] = [
     name: "Almoço",
     slug: "almoco",
     description: lunchWeekDescription,
-    sortOrder: 13,
+    sortOrder: 15,
     availableFrom: "11:00",
     availableUntil: "15:00",
     items: [
@@ -1407,6 +1517,13 @@ const explicitIngredientSlugsByItem = new Map<string, string[]>([
   ["combo-artesanal-bacon", ["pao-de-brioche", "maionese-da-casa", "alface", "tomate", "cebola-caramelizada", "hamburguer-artesanal-bovino", "bacon", "queijo-cheddar", "molho-billy-jack"]],
   ["combo-artesanal-calabresa", ["pao-de-brioche", "maionese-da-casa", "alface", "tomate", "cebola-caramelizada", "hamburguer-artesanal-bovino", "calabresa", "queijo-cheddar", "molho-billy-jack"]],
   ["combo-artesanal-duplo", ["pao-de-brioche", "maionese-da-casa", "alface", "tomate", "cebola-caramelizada", "hamburguer-artesanal-bovino", "queijo-cheddar", "molho-billy-jack"]],
+  ["dog-simples", ["pao", "maionese-da-casa", "farofa", "batata-palha", "tomate", "cebola", "milho", "vina"]],
+  ["dog-duplo", ["pao", "maionese-da-casa", "farofa", "batata-palha", "tomate", "cebola", "milho", "vina"]],
+  ["dog-bacon", ["pao", "maionese-da-casa", "farofa", "batata-palha", "tomate", "cebola", "milho", "bacon", "vina"]],
+  ["dog-frango", ["pao", "maionese-da-casa", "farofa", "batata-palha", "tomate", "cebola", "milho", "frango-desfiado", "vina"]],
+  ["dog-calabresa", ["pao", "maionese-da-casa", "farofa", "batata-palha", "tomate", "cebola", "milho", "calabresa", "vina"]],
+  ["dog-pizza", ["pao", "vina", "queijo", "presunto", "oregano", "maionese-da-casa", "farofa", "batata-palha", "cebola", "tomate", "milho"]],
+  ["dog-especial", ["pao", "maionese-da-casa", "farofa", "batata-palha", "tomate", "milho", "cebola", "bacon", "frango-desfiado", "calabresa", "vina", "cheddar", "catupiry"]],
   ["pastel-doce-prestigio", ["massa-de-pastel", "prestigio"]],
   ["pastel-especial-da-casa", ["massa-de-pastel", "frango-desfiado", "carne-moida", "calabresa", "bacon", "queijo", "presunto", "ovo", "oregano", "catupiry", "cheddar"]],
   ["tapioca-natural", ["massa-de-tapioca", "margarina"]],
@@ -1429,6 +1546,12 @@ const explicitIngredientSlugsByItem = new Map<string, string[]>([
   ["assado-carne-moida", []],
   ["assado-queijo-presunto", ["oregano"]],
   ["assado-frango-cheddar", ["frango-desfiado"]],
+  ["batata-frita-500g", ["batata-frita"]],
+  ["batata-frita-bacon-600g", ["batata-frita", "bacon"]],
+  ["batata-frita-calabresa-acebolada-600g", ["batata-frita", "calabresa", "cebola"]],
+  ["frango-a-passarinho-1kg", ["frango-a-passarinho"]],
+  ["alcatra-acebolada-500g", ["alcatra", "cebola"]],
+  ["alcatra-com-batata-600g", ["alcatra", "batata-frita"]],
 ]);
 
 function normalizeSeedText(value: string) {
@@ -1477,6 +1600,18 @@ function inferIngredientSlugs(category: CategorySeed, item: MenuItemSeed) {
   }
 
   return Array.from(slugs);
+}
+
+function getIngredientQuantity(itemSlug: string, ingredientSlug: string) {
+  if (ingredientSlug === "hamburguer-artesanal-bovino" && ["artesanal-duplo", "combo-artesanal-duplo"].includes(itemSlug)) {
+    return 2;
+  }
+
+  if (ingredientSlug === "vina" && ["dog-duplo", "dog-especial"].includes(itemSlug)) {
+    return 2;
+  }
+
+  return 1;
 }
 
 async function seedAdmin() {
@@ -1714,7 +1849,7 @@ async function syncCategoriesAndItems(optionGroupIds: Map<string, string>, ingre
             return {
               menuItemId: savedItem.id,
               ingredientId,
-              quantity: ingredientSlug === "hamburguer-artesanal-bovino" && ["artesanal-duplo", "combo-artesanal-duplo"].includes(item.slug) ? 2 : 1,
+              quantity: getIngredientQuantity(item.slug, ingredientSlug),
               sortOrder: index + 1,
             };
           }),
