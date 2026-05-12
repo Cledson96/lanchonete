@@ -10,7 +10,6 @@ import type {
   CheckoutStoreStatus,
   ConfirmVerificationResponse,
   CreateOrderResponse,
-  CustomerMeResponse,
   DeliveryQuote,
   RequestVerificationResponse,
   ViaCepResponse,
@@ -28,7 +27,6 @@ import {
   hasCheckoutLocationForQuote,
   isCheckoutDeliveryAddressValid,
   type CheckoutApiErrorPayload,
-  normalizeCheckoutPhoneForCompare,
 } from "@/lib/checkout-client";
 import {
   buildCheckoutPricingSummary,
@@ -36,6 +34,7 @@ import {
 } from "@/lib/checkout-ui";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
+import { useCheckoutCustomerSession } from "@/lib/use-checkout-customer-session";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
 import { digitsOnly, formatMoney, optionalTrimmed } from "@/lib/utils";
@@ -86,7 +85,6 @@ export function PedidoCheckout({
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [devCodePreview, setDevCodePreview] = useState<string | null>(null);
-  const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
 
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
@@ -183,50 +181,18 @@ export function PedidoCheckout({
     }
   }, [applyAddress]);
 
-  const syncCustomerFromSession = useCallback(async (options?: { preserveVerified?: boolean }) => {
-    const payload = await readJson<CustomerMeResponse>("/api/customer/me");
-
-    if (!payload.customer) {
-      return false;
-    }
-
-    setCustomerPhone(payload.customer.phone);
-    applyCustomerSnapshot(payload.customer, options);
-    return true;
-  }, [applyCustomerSnapshot]);
-
-  useEffect(() => {
-    let active = true;
-
-    syncCustomerFromSession({ preserveVerified: true })
-      .then((hasSessionCustomer) => {
-        if (!active || hasSessionCustomer) return;
-      })
-      .catch(() => {
-        if (!active) return;
-      })
-      .finally(() => {
-        if (active) {
-          setIsLoadingCustomer(false);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [syncCustomerFromSession]);
-
-  useEffect(() => {
-    const normalizedCurrentPhone = normalizeCheckoutPhoneForCompare(customerPhone);
-
-    if (verifiedPhone && normalizedCurrentPhone !== verifiedPhone) {
-      setVerificationConfirmed(false);
-      setVerificationRequested(false);
-      setVerificationCode("");
-      setDevCodePreview(null);
-      setVerificationMessage("Telefone alterado. Confirme novamente antes de finalizar.");
-    }
-  }, [customerPhone, verifiedPhone]);
+  const { isLoadingCustomer, syncCustomerFromSession } = useCheckoutCustomerSession({
+    customerPhone,
+    verifiedPhone,
+    readJson,
+    applyCustomerSnapshot,
+    setCustomerPhone,
+    setVerificationConfirmed,
+    setVerificationRequested,
+    setVerificationCode,
+    setDevCodePreview,
+    setVerificationMessage,
+  });
 
   useEffect(() => {
     if (fulfillmentType !== "delivery") {
