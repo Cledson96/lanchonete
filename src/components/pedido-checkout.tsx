@@ -124,6 +124,12 @@ export function PedidoCheckout({
     handleConfirmVerification,
   } = verification;
 
+  const {
+    setVerificationConfirmed,
+    setVerifiedPhone,
+    setVerificationMessage,
+  } = verification;
+
   const applyCustomerSnapshot = useCallback((
     customer: CheckoutCustomerSnapshot,
     options?: { preserveVerified?: boolean },
@@ -133,11 +139,16 @@ export function PedidoCheckout({
     applyAddress(customer.defaultAddress);
 
     if (options?.preserveVerified) {
-      verification.setVerificationConfirmed(true);
-      verification.setVerifiedPhone(customer.phone);
-      verification.setVerificationMessage("Telefone ja validado para esta sessao.");
+      setVerificationConfirmed(true);
+      setVerifiedPhone(customer.phone);
+      setVerificationMessage("Telefone ja validado para esta sessao.");
     }
-  }, [applyAddress, verification]);
+  }, [
+    applyAddress,
+    setVerificationConfirmed,
+    setVerificationMessage,
+    setVerifiedPhone,
+  ]);
 
   const { isLoadingCustomer, syncCustomerFromSession } = useCheckoutCustomerSession({
     readJson: readCheckoutJson,

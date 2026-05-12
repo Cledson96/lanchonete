@@ -100,9 +100,9 @@ export function useCheckoutDeliveryFlow(input: UseCheckoutDeliveryFlowInput) {
     setStateCode(address.state || "");
     setZipCode(address.zipCode || "");
     setReference(address.reference || "");
-    lockAddressFieldsFromValues(address);
+    resetAddressLocks();
     lastZipLookupRef.current = digitsOnly(address.zipCode || "");
-  }, [lockAddressFieldsFromValues]);
+  }, [resetAddressLocks]);
 
   useEffect(() => {
     if (fulfillmentType !== "delivery") {
