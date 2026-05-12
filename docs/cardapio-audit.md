@@ -1,6 +1,6 @@
 # Auditoria do Cardapio
 
-Gerado em: 2026-05-05T23:30:18.537Z
+Gerado em: 2026-05-06T00:09:25.064Z
 
 ## Fontes analisadas
 
@@ -21,7 +21,7 @@ Arquivos `Zone.Identifier` foram ignorados.
 
 - Categorias: 12
 - Produtos: 94
-- Produtos com imagem antes da limpeza: 85
+- Produtos com imagem antes da limpeza: 0
 - Grupos de opcionais: 9
 - Opcoes cadastradas: 69
 
@@ -250,6 +250,6 @@ Min: 0; Max: sem limite; Obrigatorio: nao
 
 ## Limpeza de imagens
 
-- Produtos com imagem antes: 85
-- Produtos atualizados para imagem default: 85
+- Produtos com imagem antes: 0
+- Produtos atualizados para imagem default: 0
 - Produtos com imagem depois: 0

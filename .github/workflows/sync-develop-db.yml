@@ -1,0 +1,55 @@
+name: Sync develop database
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: sync-develop-database
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Copy production data to develop
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync database on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          SOURCE_ENV: ${{ secrets.VPS_APP_DIR }}/.env.production
+          TARGET_ENV: ${{ secrets.DEVELOP_VPS_APP_DIR }}/.env.production
+          CONFIRM_COPY_PROD_TO_DEVELOP: "1"
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SOURCE_ENV,TARGET_ENV,CONFIRM_COPY_PROD_TO_DEVELOP
+          script: |
+            set -euo pipefail
+            cd "${{ secrets.DEVELOP_VPS_APP_DIR }}"
+            git fetch origin develop
+            git checkout develop
+            git pull --ff-only origin develop
+            if command -v pg_dump >/dev/null 2>&1 && command -v pg_restore >/dev/null 2>&1 && command -v psql >/dev/null 2>&1; then
+              bash ./scripts/db/copy-prod-to-develop-db.sh
+            elif command -v docker >/dev/null 2>&1; then
+              SOURCE_DIR="$(dirname "$SOURCE_ENV")"
+              TARGET_DIR="$(dirname "$TARGET_ENV")"
+              docker run --rm \
+                --network host \
+                --add-host host.docker.internal:host-gateway \
+                -v "$SOURCE_DIR:$SOURCE_DIR:ro" \
+                -v "$TARGET_DIR:$TARGET_DIR:ro" \
+                -w "$(pwd)" \
+                -e SOURCE_ENV \
+                -e TARGET_ENV \
+                -e CONFIRM_COPY_PROD_TO_DEVELOP \
+                postgres:18-bookworm \
+                bash ./scripts/db/copy-prod-to-develop-db.sh
+            else
+              echo "pg_dump/pg_restore/psql not found and docker is not available" >&2
+              exit 1
+            fi
