@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/http";
 import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
+import { calculateLineItemPricing } from "@/lib/line-item-pricing";
 import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu-item-availability";
 import { buildOrderItemUnits } from "@/lib/order-item-units";
 import { groupRepeatedIds } from "@/lib/option-item-quantity";
@@ -210,12 +211,11 @@ export async function createOrder(input: CreateOrderInput) {
       ingredientName: ingredientRecords.find((r) => r.id === ing.ingredientId)?.name,
     }));
 
-    const optionDelta = selectedOptions.reduce(
-      (sum, option) => sum + Number(option.priceDelta) * option.quantity,
-      0,
-    );
-    const unitPrice = Number(menuItem.price) + optionDelta;
-    const lineSubtotal = unitPrice * item.quantity;
+    const { unitPrice, subtotalAmount: lineSubtotal } = calculateLineItemPricing({
+      basePrice: menuItem.price,
+      selectedOptions,
+      quantity: item.quantity,
+    });
     subtotal += lineSubtotal;
 
     return {

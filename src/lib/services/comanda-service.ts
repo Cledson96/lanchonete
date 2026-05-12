@@ -1,10 +1,11 @@
 import { ApiError } from "@/lib/http";
 import { buildOrderItemUnits } from "@/lib/order-item-units";
 import { attachComandaOperationalSummary } from "@/lib/order-operations";
+import { calculateLineItemPricing } from "@/lib/line-item-pricing";
 import { prisma } from "@/lib/prisma";
 import { syncMissingOrderItemUnits } from "@/lib/services/order-item-unit-service";
 import { groupRepeatedIds } from "@/lib/option-item-quantity";
-import { decimal, optionalNullable, slugify } from "@/lib/utils";
+import { coerceNumber, decimal, optionalNullable, slugify } from "@/lib/utils";
 
 type ComandaItemInput = {
   menuItemId: string;
@@ -292,12 +293,11 @@ export async function addItemsToComanda(
       ...ing,
     }));
 
-    const optionDelta = selectedOptions.reduce(
-      (sum, option) => sum + Number(option.priceDelta) * option.quantity,
-      0,
-    );
-    const unitPrice = Number(menuItem.price) + optionDelta;
-    const subtotalAmount = unitPrice * item.quantity;
+    const { unitPrice, subtotalAmount } = calculateLineItemPricing({
+      basePrice: menuItem.price,
+      selectedOptions,
+      quantity: item.quantity,
+    });
     addedSubtotal += subtotalAmount;
 
     return {
@@ -310,8 +310,8 @@ export async function addItemsToComanda(
     };
   });
 
-  const newSubtotal = Number(comanda.subtotalAmount) + addedSubtotal;
-  const newTotal = newSubtotal - Number(comanda.discountAmount);
+  const newSubtotal = coerceNumber(comanda.subtotalAmount) + addedSubtotal;
+  const newTotal = newSubtotal - coerceNumber(comanda.discountAmount);
 
   return prisma.$transaction(async (tx) => {
     const createdEntries = await Promise.all(
