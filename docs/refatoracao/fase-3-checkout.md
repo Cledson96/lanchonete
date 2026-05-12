@@ -1,6 +1,6 @@
 # Fase 3 — Checkout
 
-**Status:** planejada
+**Status:** concluída
 
 ## Objetivo
 Reduzir a complexidade do checkout extraindo lógica pura, hooks de fluxo e componentes menores sem mudar o comportamento do usuário.
@@ -24,6 +24,16 @@ Reduzir a complexidade do checkout extraindo lógica pura, hooks de fluxo e comp
 - helpers puros fora do arquivo principal
 - hooks de fluxo isolados
 - sem regressão de contrato nas chamadas HTTP
+
+## Resultado executado
+- helpers puros e estado derivado extraídos para `src/lib/checkout-client.ts`
+- hidratação de sessão, entrega, verificação e submissão isoladas em hooks dedicados (`use-checkout-customer-session`, `use-checkout-delivery-flow`, `use-checkout-verification`, `use-checkout-submit`)
+- cliente HTTP e refresh de status da loja extraídos para `src/lib/checkout-api.ts` e `src/lib/use-checkout-store-status.ts`
+- UI do checkout dividida em blocos visuais focados dentro de `src/components/checkout/`
+- contrato HTTP do submit preservado com validação por `npm run typecheck` e `npm run lint`
+
+## Observação de cobertura
+- não há suíte automatizada de testes configurada no projeto neste momento; a fase foi encerrada com validação estática e recortes incrementais validados a cada passo
 
 ## Validação sugerida
 - `npm run typecheck`

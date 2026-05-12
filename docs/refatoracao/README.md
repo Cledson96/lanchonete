@@ -28,7 +28,7 @@ Este diretório contém o plano operacional em partes menores para executar a re
 - [x] Fase 0 concluída
 - [x] Fase 1 concluída
 - [x] Fase 2 concluída
-- [ ] Fase 3 pendente
+- [x] Fase 3 concluída
 - [ ] Fase 4 pendente
 - [ ] Fase 5 pendente
 - [ ] Fase 6 pendente
