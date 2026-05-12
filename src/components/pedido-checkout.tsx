@@ -3,28 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
-  CheckoutAddress,
   CheckoutCustomerSnapshot,
   CheckoutStoreStatus,
   ConfirmVerificationResponse,
   CreateOrderResponse,
-  DeliveryQuote,
   RequestVerificationResponse,
-  ViaCepResponse,
 } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import {
-  buildCheckoutZipState,
   canRequestCheckoutVerification,
   canSubmitCheckoutOrder,
   checkoutPaymentOptions,
   formatCheckoutPhoneNumber,
-  formatCheckoutZipCode,
   getCheckoutUnavailableItems,
   getCheckoutErrorMessage,
-  hasCheckoutLocationForQuote,
   isCheckoutDeliveryAddressValid,
   type CheckoutApiErrorPayload,
 } from "@/lib/checkout-client";
@@ -34,10 +28,11 @@ import {
 } from "@/lib/checkout-ui";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
+import { useCheckoutDeliveryFlow } from "@/lib/use-checkout-delivery-flow";
 import { useCheckoutCustomerSession } from "@/lib/use-checkout-customer-session";
 import { useCart } from "@/lib/cart-store";
 import { brandContent } from "@/lib/brand-content";
-import { digitsOnly, formatMoney, optionalTrimmed } from "@/lib/utils";
+import { formatMoney, optionalTrimmed } from "@/lib/utils";
 
 async function readJson<T>(input: RequestInfo, init?: RequestInit) {
   const response = await fetch(input, {
@@ -71,6 +66,7 @@ export function PedidoCheckout({
     totalPrice,
   } = useCart();
   const router = useRouter();
+  const subtotal = totalPrice;
 
   const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>("delivery");
   const [customerName, setCustomerName] = useState("");
@@ -86,26 +82,40 @@ export function PedidoCheckout({
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [devCodePreview, setDevCodePreview] = useState<string | null>(null);
 
-  const [street, setStreet] = useState("");
-  const [number, setNumber] = useState("");
-  const [complement, setComplement] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
-  const [city, setCity] = useState("");
-  const [stateCode, setStateCode] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [reference, setReference] = useState("");
-  const [zipLookupLoading, setZipLookupLoading] = useState(false);
-  const [zipLookupMessage, setZipLookupMessage] = useState<string | null>(null);
-  const [streetLocked, setStreetLocked] = useState(false);
-  const [complementLocked, setComplementLocked] = useState(false);
-  const [neighborhoodLocked, setNeighborhoodLocked] = useState(false);
-  const [cityLocked, setCityLocked] = useState(false);
-  const [stateLocked, setStateLocked] = useState(false);
-  const lastZipLookupRef = useRef("");
-
-  const [deliveryQuote, setDeliveryQuote] = useState<DeliveryQuote | null>(null);
-  const [deliveryQuoteLoading, setDeliveryQuoteLoading] = useState(false);
-  const [deliveryQuoteError, setDeliveryQuoteError] = useState<string | null>(null);
+  const {
+    street,
+    setStreet,
+    number,
+    setNumber,
+    complement,
+    setComplement,
+    neighborhood,
+    setNeighborhood,
+    city,
+    setCity,
+    stateCode,
+    setStateCode,
+    zipCode,
+    setZipCode,
+    reference,
+    setReference,
+    zipLookupLoading,
+    zipLookupMessage,
+    streetLocked,
+    complementLocked,
+    neighborhoodLocked,
+    cityLocked,
+    stateLocked,
+    deliveryQuote,
+    deliveryQuoteLoading,
+    deliveryQuoteError,
+    canEditAddressFields,
+    applyAddress,
+  } = useCheckoutDeliveryFlow({
+    fulfillmentType,
+    subtotalAmount: subtotal,
+    readJson,
+  });
 
   const [submitPending, setSubmitPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -118,53 +128,11 @@ export function PedidoCheckout({
     },
   );
 
-  const subtotal = totalPrice;
   const { deliveryFeeAmount, totalAmount } = buildCheckoutPricingSummary({
     subtotalAmount: subtotal,
     fulfillmentType,
     deliveryQuote,
   });
-  const { cleanZipCode, canEditAddressFields } = buildCheckoutZipState({
-    zipCode,
-    fulfillmentType,
-  });
-
-  const resetAddressLocks = useCallback(() => {
-    setStreetLocked(false);
-    setComplementLocked(false);
-    setNeighborhoodLocked(false);
-    setCityLocked(false);
-    setStateLocked(false);
-  }, []);
-
-  const lockAddressFieldsFromValues = useCallback((values: {
-    street?: string | null;
-    complement?: string | null;
-    neighborhood?: string | null;
-    city?: string | null;
-    state?: string | null;
-  }) => {
-    setStreetLocked(Boolean(values.street?.trim()));
-    setComplementLocked(Boolean(values.complement?.trim()));
-    setNeighborhoodLocked(Boolean(values.neighborhood?.trim()));
-    setCityLocked(Boolean(values.city?.trim()));
-    setStateLocked(Boolean(values.state?.trim()));
-  }, []);
-
-  const applyAddress = useCallback((address?: CheckoutAddress | null) => {
-    if (!address) return;
-
-    setStreet(address.street || "");
-    setNumber(address.number || "");
-    setComplement(address.complement || "");
-    setNeighborhood(address.neighborhood || "");
-    setCity(address.city || "");
-    setStateCode(address.state || "");
-    setZipCode(address.zipCode || "");
-    setReference(address.reference || "");
-    lockAddressFieldsFromValues(address);
-    lastZipLookupRef.current = digitsOnly(address.zipCode || "");
-  }, [lockAddressFieldsFromValues]);
 
   const applyCustomerSnapshot = useCallback((
     customer: CheckoutCustomerSnapshot,
@@ -193,183 +161,6 @@ export function PedidoCheckout({
     setDevCodePreview,
     setVerificationMessage,
   });
-
-  useEffect(() => {
-    if (fulfillmentType !== "delivery") {
-      setZipLookupLoading(false);
-      setZipLookupMessage(null);
-      return;
-    }
-
-    if (!cleanZipCode) {
-      setZipLookupLoading(false);
-      setZipLookupMessage(null);
-      lastZipLookupRef.current = "";
-      setStreet("");
-      setComplement("");
-      setNeighborhood("");
-      setCity("");
-      setStateCode("");
-      setNumber("");
-      setReference("");
-      setDeliveryQuote(null);
-      setDeliveryQuoteError(null);
-      resetAddressLocks();
-      return;
-    }
-
-    if (cleanZipCode.length < 8) {
-      setZipLookupLoading(false);
-      setZipLookupMessage("Digite um CEP completo para buscar o endereco.");
-      setStreet("");
-      setComplement("");
-      setNeighborhood("");
-      setCity("");
-      setStateCode("");
-      setNumber("");
-      setReference("");
-      setDeliveryQuote(null);
-      setDeliveryQuoteError(null);
-      resetAddressLocks();
-      return;
-    }
-
-    const zipChanged = lastZipLookupRef.current !== cleanZipCode;
-
-    if (zipChanged) {
-      setStreet("");
-      setComplement("");
-      setNeighborhood("");
-      setCity("");
-      setStateCode("");
-      setDeliveryQuote(null);
-      setDeliveryQuoteError(null);
-      resetAddressLocks();
-      setZipLookupMessage("Buscando endereco pelo CEP...");
-    }
-
-    let active = true;
-
-    const timeout = window.setTimeout(async () => {
-      setZipLookupLoading(true);
-      setZipLookupMessage(null);
-
-      try {
-        const payload = await readJson<ViaCepResponse>(
-          `/api/zip-code/lookup?zipCode=${cleanZipCode}`,
-          {
-            method: "GET",
-          },
-        );
-
-        const nextStreet = payload.street.trim();
-        const nextComplement = payload.complement?.trim() || "";
-        const nextNeighborhood = payload.neighborhood.trim();
-        const nextCity = payload.city.trim();
-        const nextState = payload.state.trim();
-
-        if (!active) return;
-
-        setStreet(nextStreet);
-        setComplement(nextComplement);
-        setNeighborhood(nextNeighborhood);
-        setCity(nextCity);
-        setStateCode(nextState);
-        lockAddressFieldsFromValues({
-          street: nextStreet,
-          complement: nextComplement,
-          neighborhood: nextNeighborhood,
-          city: nextCity,
-          state: nextState,
-        });
-        lastZipLookupRef.current = cleanZipCode;
-        setZipLookupMessage("Endereco carregado pelo CEP. Edite apenas o que vier em branco.");
-      } catch (error) {
-        if (!active) return;
-        resetAddressLocks();
-        setZipLookupMessage(
-          error instanceof Error
-            ? error.message
-            : "Nao foi possivel preencher o endereco pelo CEP.",
-        );
-      } finally {
-        if (active) {
-          setZipLookupLoading(false);
-        }
-      }
-    }, 350);
-
-    return () => {
-      active = false;
-      window.clearTimeout(timeout);
-    };
-  }, [cleanZipCode, fulfillmentType, lockAddressFieldsFromValues, resetAddressLocks]);
-
-  useEffect(() => {
-    if (fulfillmentType !== "delivery") {
-      setDeliveryQuote(null);
-      setDeliveryQuoteError(null);
-      setDeliveryQuoteLoading(false);
-      return;
-    }
-
-    const hasLocationForQuote = hasCheckoutLocationForQuote({
-      street,
-      number,
-      city,
-      stateCode,
-      neighborhood,
-    });
-
-    if (!hasLocationForQuote) {
-      setDeliveryQuote(null);
-      setDeliveryQuoteError(null);
-      setDeliveryQuoteLoading(false);
-      return;
-    }
-
-    const timeout = window.setTimeout(async () => {
-      setDeliveryQuoteLoading(true);
-      setDeliveryQuoteError(null);
-
-      try {
-        const payload = await readJson<DeliveryQuote>("/api/delivery-fee/quote", {
-          method: "POST",
-          body: JSON.stringify({
-            street,
-            number,
-            zipCode,
-            neighborhood,
-            city,
-            state: stateCode.toUpperCase(),
-            subtotalAmount: subtotal,
-          }),
-        });
-
-        setDeliveryQuote(payload);
-      } catch (error) {
-        setDeliveryQuote(null);
-        setDeliveryQuoteError(
-          error instanceof Error ? error.message : "Nao foi possivel calcular o frete.",
-        );
-      } finally {
-        setDeliveryQuoteLoading(false);
-      }
-    }, 450);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [
-    fulfillmentType,
-    street,
-    number,
-    city,
-    stateCode,
-    neighborhood,
-    zipCode,
-    subtotal,
-  ]);
 
   const isDeliveryAddressValid = useMemo(
     () =>
@@ -942,7 +733,7 @@ export function PedidoCheckout({
                   <input
                     className="w-full rounded-[1rem] border border-[var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--brand-orange)] focus:ring-4 focus:ring-[var(--brand-orange)]/15 shadow-sm"
                     inputMode="numeric"
-                    onChange={(event) => setZipCode(formatCheckoutZipCode(event.target.value))}
+                    onChange={(event) => setZipCode(event.target.value)}
                     placeholder="00000-000"
                     value={zipCode}
                   />
