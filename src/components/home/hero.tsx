@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ChevronDownIcon } from "@/components/home/home-icons";
+import { ChevronDownIcon } from "@/components/home/icons";
 import type { StoreStatus } from "@/lib/contracts/store";
 
 type HomeHeroProps = {

@@ -1,4 +1,4 @@
-import { PedidoCheckout } from "@/components/pedido-checkout";
+import { PedidoCheckout } from "@/components/checkout/pedido-checkout";
 import { getPublicStoreStatus } from "@/lib/services/store-settings-service";
 
 export const dynamic = "force-dynamic";

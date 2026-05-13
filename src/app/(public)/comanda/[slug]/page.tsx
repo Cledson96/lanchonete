@@ -1,4 +1,4 @@
-import { PublicComandaExperience } from "@/components/public-comanda-experience";
+import { PublicComandaExperience } from "@/components/comanda/public-experience";
 
 type ComandaPageProps = Readonly<{
   params: Promise<{ slug: string }>;

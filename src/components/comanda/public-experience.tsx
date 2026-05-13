@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ComandaEntryList } from "@/components/comanda-entry-list";
-import { ComandaMenuLauncher } from "@/components/comanda-menu-launcher";
+import { ComandaEntryList } from "@/components/comanda/entry-list";
+import { ComandaMenuLauncher } from "@/components/comanda/menu-launcher";
 import type { PublicMenuCategory, PublicMenuResponse } from "@/lib/contracts/menu";
 import {
   canEditComanda,

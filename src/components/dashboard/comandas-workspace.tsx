@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
-import { ComandaEntryList } from "@/components/comanda-entry-list";
-import { ComandaMenuLauncher } from "@/components/comanda-menu-launcher";
+import { ComandaEntryList } from "@/components/comanda/entry-list";
+import { ComandaMenuLauncher } from "@/components/comanda/menu-launcher";
 import type { PublicMenuCategory, PublicMenuResponse } from "@/lib/contracts/menu";
 import {
   canEditComanda,

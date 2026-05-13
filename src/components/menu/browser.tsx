@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CategoryNav } from "@/components/category-nav";
-import { MenuItemCard } from "@/components/menu-item-card";
+import { CategoryNav } from "@/components/menu/category-nav";
+import { MenuItemCard } from "@/components/menu/item-card";
 import type { PublicMenuCategory } from "@/lib/contracts/menu";
 
 type Props = {

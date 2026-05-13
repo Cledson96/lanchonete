@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ClockIcon, MapPinIcon, PhoneIcon } from "@/components/home/home-icons";
+import { ClockIcon, MapPinIcon, PhoneIcon } from "@/components/home/icons";
 import { brandContent } from "@/lib/brand-content";
 import type { StoreStatus } from "@/lib/contracts/store";
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DashboardWhatsAppConversation } from "@/components/dashboard-whatsapp-conversation";
+import { DashboardWhatsAppConversation } from "@/components/dashboard/whatsapp-conversation";
 import { getWhatsAppConversationById } from "@/lib/services/whatsapp-service";
 
 export const runtime = "nodejs";

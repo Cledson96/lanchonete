@@ -1,6 +1,6 @@
 import { getAdminOptionGroups } from "@/lib/services/menu-service";
 import { numberFromDecimal } from "@/lib/db/decimal";
-import { DashboardIngredientManager } from "@/components/dashboard-ingredient-manager";
+import { DashboardIngredientManager } from "@/components/dashboard/ingredient-manager";
 
 export default async function DashboardIngredientesPage() {
   const optionGroups = await getAdminOptionGroups();

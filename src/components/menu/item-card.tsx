@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useState } from "react";
-import { MenuItemDetailDialog } from "@/components/menu-item-detail-dialog";
+import { MenuItemDetailDialog } from "@/components/menu/item-detail-dialog";
 import { formatMenuWeekdays } from "@/lib/menu-item-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { useCart } from "@/lib/cart-store";

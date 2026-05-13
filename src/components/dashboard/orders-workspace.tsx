@@ -18,7 +18,7 @@ import { formatMoney } from "@/lib/utils";
 import {
   DashboardOrderDetailSheet,
   type DashboardOrderDetail,
-} from "@/components/dashboard-order-detail-sheet";
+} from "@/components/dashboard/order-detail-sheet";
 
 type DashboardOrderView = "operation" | "kitchen" | "dispatch" | "archive";
 type OrderStatus = DashboardOrderDetail["status"];

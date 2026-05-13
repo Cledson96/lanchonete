@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/auth/session";
-import { BrandLogo } from "@/components/brand-logo";
-import { DashboardNav } from "@/components/dashboard-nav";
+import { BrandLogo } from "@/components/brand/logo";
+import { DashboardNav } from "@/components/dashboard/nav";
 
 export const dynamic = "force-dynamic";
 

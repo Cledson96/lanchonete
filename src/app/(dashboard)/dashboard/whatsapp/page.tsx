@@ -1,4 +1,4 @@
-import { DashboardWhatsAppPanel } from "@/components/dashboard-whatsapp-panel";
+import { DashboardWhatsAppPanel } from "@/components/dashboard/whatsapp-panel";
 import { getAdminSession } from "@/lib/auth/session";
 import { getWhatsAppSession, listWhatsAppConversations } from "@/lib/services/whatsapp-service";
 

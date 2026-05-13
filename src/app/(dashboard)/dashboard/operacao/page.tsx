@@ -1,4 +1,4 @@
-import { DashboardOrdersWorkspace } from "@/components/dashboard-orders-workspace";
+import { DashboardOrdersWorkspace } from "@/components/dashboard/orders-workspace";
 
 export default function DashboardOperationPage() {
   return (

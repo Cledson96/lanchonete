@@ -1,5 +1,5 @@
-import { BrandLogo } from "@/components/brand-logo";
-import { ClockIcon, MapPinIcon, PhoneIcon } from "@/components/home/home-icons";
+import { BrandLogo } from "@/components/brand/logo";
+import { ClockIcon, MapPinIcon, PhoneIcon } from "@/components/home/icons";
 import { brandContent } from "@/lib/brand-content";
 import type { StoreStatus } from "@/lib/contracts/store";
 

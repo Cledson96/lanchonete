@@ -1,8 +1,8 @@
-import { CartDrawer } from "@/components/cart-drawer";
-import { HomeFooter } from "@/components/home/home-footer";
-import { HomeHero } from "@/components/home/home-hero";
-import { HomeInfoBar } from "@/components/home/home-info-bar";
-import { MenuBrowser } from "@/components/menu-browser";
+import { CartDrawer } from "@/components/cart/drawer";
+import { HomeFooter } from "@/components/home/footer";
+import { HomeHero } from "@/components/home/hero";
+import { HomeInfoBar } from "@/components/home/info-bar";
+import { MenuBrowser } from "@/components/menu/browser";
 import { getPublicMenu } from "@/lib/services/menu-service";
 import { getPublicStoreStatus } from "@/lib/services/store-settings-service";
 

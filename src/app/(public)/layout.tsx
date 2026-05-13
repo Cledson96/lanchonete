@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { BrandLogo } from "@/components/brand-logo";
-import { CartButton } from "@/components/cart-button";
+import { BrandLogo } from "@/components/brand/logo";
+import { CartButton } from "@/components/cart/button";
 import { CartProvider } from "@/lib/cart-store";
 
 export default function PublicLayout({

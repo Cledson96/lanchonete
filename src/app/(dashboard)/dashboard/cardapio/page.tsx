@@ -1,5 +1,5 @@
 import { getAdminCategories, getAdminMenuItems, getAdminOptionGroups, getAdminIngredients } from "@/lib/services/menu-service";
-import { DashboardCardapioManager } from "@/components/dashboard-cardapio-manager";
+import { DashboardCardapioManager } from "@/components/dashboard/cardapio-manager";
 import { numberFromDecimal } from "@/lib/db/decimal";
 
 export default async function DashboardCardapioPage() {

@@ -21,12 +21,12 @@ import { useCheckoutCustomerSession } from "@/lib/checkout/hooks/use-customer-se
 import { useCheckoutStoreStatus } from "@/lib/checkout/hooks/use-store-status";
 import { useCheckoutSubmit } from "@/lib/checkout/hooks/use-submit";
 import { useCheckoutVerification } from "@/lib/checkout/hooks/use-verification";
-import { CheckoutCustomerDetailsSection } from "@/components/checkout/checkout-customer-details-section";
-import { CheckoutFulfillmentSection } from "@/components/checkout/checkout-fulfillment-section";
-import { CheckoutItemsSection } from "@/components/checkout/checkout-items-section";
-import { CheckoutPaymentSection } from "@/components/checkout/checkout-payment-section";
-import { CheckoutPhoneSection } from "@/components/checkout/checkout-phone-section";
-import { CheckoutSummaryAside } from "@/components/checkout/checkout-summary-aside";
+import { CheckoutCustomerDetailsSection } from "@/components/checkout/customer-details-section";
+import { CheckoutFulfillmentSection } from "@/components/checkout/fulfillment-section";
+import { CheckoutItemsSection } from "@/components/checkout/items-section";
+import { CheckoutPaymentSection } from "@/components/checkout/payment-section";
+import { CheckoutPhoneSection } from "@/components/checkout/phone-section";
+import { CheckoutSummaryAside } from "@/components/checkout/summary-aside";
 import { useCart } from "@/lib/cart-store";
 
 export function PedidoCheckout({
