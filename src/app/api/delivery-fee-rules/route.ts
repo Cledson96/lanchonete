@@ -6,7 +6,7 @@ import {
   updateDeliveryFeeRule,
 } from "@/lib/services/menu-admin-service";
 import { getDeliveryFeeRules } from "@/lib/services/delivery-fee-service";
-import { serializeStoreDeliveryRule } from "@/lib/store-serializers";
+import { serializeStoreDeliveryRule } from "@/lib/store/serializers.server";
 import {
   createDeliveryFeeRuleSchema,
   updateDeliveryFeeRuleSchema,

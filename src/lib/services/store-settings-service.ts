@@ -10,7 +10,7 @@ import {
   buildStoreHoursLabel,
   serializeStoreSettings,
   serializeStoreStatus,
-} from "@/lib/store-serializers";
+} from "@/lib/store/serializers.server";
 import { decimal } from "@/lib/db/decimal";
 const STORE_SLUG = "loja-principal";
 

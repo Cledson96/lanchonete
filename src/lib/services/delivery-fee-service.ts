@@ -4,14 +4,14 @@ import {
   drivingDistanceInKm,
   geocodeBrazilianAddress,
   haversineDistanceInKm,
-} from "@/lib/geocoding";
+} from "@/lib/delivery/geocoding.server";
 import { config } from "@/lib/config";
 import { serializeCheckoutDeliveryQuote } from "@/lib/checkout/serializers";
 import type { DeliveryQuote } from "@/lib/contracts/checkout";
 import type { DeliveryRule } from "@/lib/contracts/store";
 import { decimal, numberFromDecimal } from "@/lib/db/decimal";
 import { getMainStoreProfile } from "@/lib/services/store-settings-service";
-import { serializeStoreDeliveryRule } from "@/lib/store-serializers";
+import { serializeStoreDeliveryRule } from "@/lib/store/serializers.server";
 
 type DeliveryQuoteInput = {
   street: string;
