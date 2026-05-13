@@ -3,6 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconButton } from "@/components/ui/icon-button";
+import { Typography } from "@/components/ui/typography";
 import type { WhatsAppInboxConversationItem, WhatsAppInboxPriority } from "@/lib/services/whatsapp-service";
 
 /* ═══════════════════════════════════════════════
@@ -297,38 +303,29 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
       {/* ─── Header ─── */}
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="eyebrow text-[var(--muted)]">Canal da loja</p>
-          <h1 className="mt-1 flex items-center gap-2 text-2xl font-semibold tracking-tight">
+          <Typography tone="muted" variant="eyebrow">Canal da loja</Typography>
+          <Typography as="h1" className="mt-1 flex items-center gap-2 text-2xl" variant="title-lg">
             <span className="text-emerald-600">
               <WhatsAppIcon />
             </span>
             WhatsApp
-          </h1>
-          <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
+          </Typography>
+          <Typography className="mt-0.5 leading-5" tone="muted" variant="caption">
             Conecte o número da loja, veja mensagens e atenda clientes pelo painel.
-          </p>
+          </Typography>
         </div>
-        <button
-          aria-label="Atualizar"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--muted)] transition hover:bg-[var(--background)]"
+        <IconButton
+          className="h-10 w-10 bg-white"
+          label="Atualizar"
           onClick={() => void refresh()}
-          type="button"
         >
           <RefreshIcon />
-        </button>
+        </IconButton>
       </section>
 
       {/* ─── Feedback ─── */}
-      {feedback ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-700">
-          {feedback}
-        </div>
-      ) : null}
-      {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-medium text-red-700">
-          {error}
-        </div>
-      ) : null}
+      {feedback ? <Alert className="rounded-xl px-4 py-2" tone="success">{feedback}</Alert> : null}
+      {error ? <Alert className="rounded-xl px-4 py-2" tone="error">{error}</Alert> : null}
 
       {/* ─── Session + QR ─── */}
       <section className="grid gap-4 lg:grid-cols-[1fr_auto]">
@@ -336,17 +333,15 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
         <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-                Status da sessão
-              </p>
+              <Typography tone="muted" variant="eyebrow">Status da sessão</Typography>
               <div className="mt-1 flex items-center gap-2">
                 <span className={`flex h-2 w-2 rounded-full ${tone.dot} ${isConnected || sessionStarting ? "animate-pulse" : ""}`} />
-                <span className="text-base font-bold capitalize">{session.status}</span>
+                <Typography as="span" variant="title-sm" className="capitalize">{session.status}</Typography>
               </div>
             </div>
-            <span className={`rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold ${tone.border} ${tone.bg} ${tone.text}`}>
+            <Badge className={`border ${tone.border} ${tone.bg} ${tone.text}`}>
               {isConnected ? "Online" : "Offline"}
-            </span>
+            </Badge>
           </div>
 
           <div className="mt-3 grid gap-2 border-t border-[var(--line)] pt-3 sm:grid-cols-2">
@@ -372,52 +367,55 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
           </div>
 
           {sessionStartTimedOut ? (
-            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[0.7rem] font-medium leading-5 text-amber-800">
+            <Alert className="mt-3 px-3 py-2 text-[0.7rem] leading-5" tone="warning">
               O WhatsApp está inicializando há mais de 60s sem QR. Isso costuma indicar sessão local travada; use resetar para limpar e gerar um QR novo.
-            </div>
+            </Alert>
           ) : null}
 
           <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
-            <button
-              className="flex-1 rounded-full bg-[var(--brand-orange)] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-initial"
+            <Button
+              className="flex-1 px-3 py-2 text-xs sm:flex-initial"
               disabled={pendingAction !== null}
               onClick={() => void (shouldResetBeforeConnect ? resetAndConnect() : runAction("connect"))}
-              type="button"
+              size="xs"
             >
               {pendingAction === "connect" || pendingAction === "reset-connect" ? "Conectando…" : isConnected ? "Reconectar" : "Conectar / Gerar QR"}
-            </button>
+            </Button>
             {sessionStartTimedOut ? (
-              <button
-                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              <Button
+                className="border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 hover:bg-amber-100"
                 disabled={pendingAction !== null}
                 onClick={() => void resetAndConnect()}
-                type="button"
+                size="xs"
+                variant="unstyled"
               >
                 {pendingAction === "reset-connect" ? "Resetando..." : "Resetar sessão e gerar novo QR"}
-              </button>
+              </Button>
             ) : null}
-            <button
-              className="rounded-full border border-[var(--line)] bg-white px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)] disabled:cursor-not-allowed disabled:opacity-60"
+            <Button
+              className="px-3 py-2 text-xs"
               disabled={pendingAction !== null}
               onClick={() => void runAction("disconnect")}
-              type="button"
+              size="xs"
+              variant="secondary"
             >
               {pendingAction === "disconnect" ? "Desconectando…" : "Desconectar"}
-            </button>
-            <button
-              className="rounded-full border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            </Button>
+            <Button
+              className="border-red-200 bg-white px-3 py-2 text-xs text-red-600 hover:bg-red-50"
               disabled={pendingAction !== null}
               onClick={() => void runAction("reset")}
-              type="button"
+              size="xs"
+              variant="unstyled"
             >
               {pendingAction === "reset" ? "Resetando…" : "Resetar"}
-            </button>
+            </Button>
           </div>
         </article>
 
         {/* QR */}
         <article className="flex w-full flex-col items-center justify-center rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm lg:w-64">
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">QR da sessão</p>
+          <Typography tone="muted" variant="eyebrow">QR da sessão</Typography>
           <div className="mt-3 flex h-48 w-48 items-center justify-center rounded-xl border border-dashed border-[var(--line)] bg-white p-2">
             {session.qrDataUrl ? (
               <Image
@@ -429,18 +427,18 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
                 width={192}
               />
             ) : (
-              <p className="px-3 text-center text-[0.7rem] leading-4 text-[var(--muted)]">
+              <Typography className="px-3 text-center leading-4" tone="muted" variant="caption-sm">
                 {isConnected
                   ? "Sessão conectada. Use 'Resetar' para trocar de conta."
                   : sessionStarting
                     ? "Gerando QR..."
                     : "Clique em conectar para gerar o QR."}
-              </p>
+              </Typography>
             )}
           </div>
-          <p className="mt-2 text-center text-[0.65rem] text-[var(--muted)]">
+          <Typography className="mt-2 text-center" tone="muted" variant="caption-sm">
             Escaneie com o WhatsApp Business da loja.
-          </p>
+          </Typography>
         </article>
       </section>
 
@@ -450,19 +448,20 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
         <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold tracking-tight">Conversas</p>
-              <p className="mt-0.5 text-[0.65rem] text-[var(--muted)]">
+              <Typography variant="title-sm">Conversas</Typography>
+              <Typography className="mt-0.5" tone="muted" variant="caption-sm">
                 {conversations.length} no total · {conversations.filter((conversation) => conversation.needsReply).length} precisando resposta
-              </p>
+              </Typography>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <button
-                className={`rounded-full border px-3 py-1.5 text-[0.65rem] font-semibold transition ${needsReplyOnly ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]" : "border-[var(--line)] bg-white text-[var(--muted)] hover:bg-[var(--background)]"}`}
+              <Button
+                className={needsReplyOnly ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]" : "text-[var(--muted)]"}
                 onClick={() => setNeedsReplyOnly((current) => !current)}
-                type="button"
+                size="xs"
+                variant="secondary"
               >
                 Precisa responder
-              </button>
+              </Button>
               <input
                 className="w-40 rounded-lg border border-[var(--line)] bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[var(--brand-orange)] sm:w-56"
                 onChange={(e) => setConvSearch(e.target.value)}
@@ -474,11 +473,11 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
 
           <div className="mt-3 space-y-2">
             {filteredConversations.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-8 text-center text-xs text-[var(--muted)]">
+              <EmptyState className="bg-[var(--background)] px-4 py-8 text-xs">
                 {conversations.length === 0
                   ? "Ainda não chegaram conversas pelo WhatsApp."
                   : "Nenhuma conversa bate com a busca."}
-              </div>
+              </EmptyState>
             ) : (
               filteredConversations.map((conversation) => {
                 const lastMessage = conversation.messages[0];
@@ -505,45 +504,45 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="truncate text-sm font-bold">{conversation.customerProfile.fullName}</p>
-                          <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--muted)]">
+                          <Badge className="px-1.5 py-0.5 text-[0.6rem]" tone="neutral">
                             {humanizeConvState(conversation.state)}
-                          </span>
-                          <span className={`rounded-full border px-1.5 py-0.5 text-[0.6rem] font-semibold ${priorityTone(conversation.priority)}`}>
+                          </Badge>
+                          <Badge className={`border px-1.5 py-0.5 text-[0.6rem] ${priorityTone(conversation.priority)}`}>
                             {humanizePriority(conversation.priority)}
-                          </span>
+                          </Badge>
                           {humanHandoff ? (
-                            <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-violet-700">
+                            <Badge className="px-1.5 py-0.5 text-[0.6rem]" tone="violet">
                               Em atendente
-                            </span>
+                            </Badge>
                           ) : null}
                           {inboundLastMessage ? (
-                            <span className="rounded-full bg-[var(--brand-orange)]/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--brand-orange-dark)]">
+                            <Badge className="px-1.5 py-0.5 text-[0.6rem]" tone="orange">
                               Cliente falou
-                            </span>
+                            </Badge>
                           ) : null}
                           {conversation.order ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--brand-green-dark)]">
+                            <Badge className="gap-1 px-1.5 py-0.5 text-[0.6rem]" tone="success">
                               <LinkIcon />
                               {conversation.order.code}
-                            </span>
+                            </Badge>
                           ) : null}
                         </div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[0.65rem] text-[var(--muted)]">
                           <p className="font-mono">{conversation.phone}</p>
                           {conversation.owner ? (
-                            <span className="rounded-full bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700">
-                              {ownedByCurrentAdmin ? "Com você" : `Resp.: ${conversation.owner.email}`}
-                            </span>
-                          ) : (
-                            <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 font-semibold text-[var(--muted)]">
-                              Sem responsável
-                            </span>
-                          )}
-                          {waitingTime ? (
-                            <span className="rounded-full bg-red-50 px-1.5 py-0.5 font-semibold text-red-700">
-                              {waitingTime}
-                            </span>
-                          ) : null}
+                              <Badge className="px-1.5 py-0.5" tone="info">
+                                {ownedByCurrentAdmin ? "Com você" : `Resp.: ${conversation.owner.email}`}
+                              </Badge>
+                            ) : (
+                              <Badge className="px-1.5 py-0.5" tone="neutral">
+                                Sem responsável
+                              </Badge>
+                            )}
+                            {waitingTime ? (
+                              <Badge className="px-1.5 py-0.5" tone="danger">
+                                {waitingTime}
+                              </Badge>
+                            ) : null}
                         </div>
                         {lastMessage ? (
                           <p className="mt-1 line-clamp-1 text-xs text-[var(--foreground)]">
@@ -585,19 +584,20 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
 
                       <div className="ml-auto flex flex-wrap gap-2">
                         {ownedByCurrentAdmin ? (
-                          <button
-                            className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-[0.65rem] font-semibold text-[var(--muted)] transition hover:bg-white disabled:opacity-60"
+                          <Button
+                            className="px-3 py-1.5 text-[0.65rem] text-[var(--muted)]"
                             disabled={isUpdatingConversation}
                             onClick={() =>
                               void updateConversationInbox(conversation.id, { ownerId: null }, "Conversa liberada para a fila.")
                             }
-                            type="button"
+                            size="xs"
+                            variant="secondary"
                           >
                             Liberar
-                          </button>
+                          </Button>
                         ) : currentAdmin ? (
-                          <button
-                            className="rounded-full bg-[var(--brand-orange)] px-3 py-1.5 text-[0.65rem] font-semibold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:opacity-60"
+                          <Button
+                            className="px-3 py-1.5 text-[0.65rem]"
                             disabled={isUpdatingConversation}
                             onClick={() =>
                               void updateConversationInbox(
@@ -606,10 +606,10 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
                                 ownedByCurrentAdmin ? "Conversa mantida com você." : "Conversa assumida por você.",
                               )
                             }
-                            type="button"
+                            size="xs"
                           >
                             {conversation.owner ? "Assumir" : "Pegar atendimento"}
-                          </button>
+                          </Button>
                         ) : null}
                       </div>
                     </div>
@@ -622,14 +622,14 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
 
         {/* Eventos */}
         <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
-          <p className="text-sm font-bold tracking-tight">Linha do tempo</p>
-          <p className="mt-0.5 text-[0.65rem] text-[var(--muted)]">Últimos eventos da sessão</p>
+          <Typography variant="title-sm">Linha do tempo</Typography>
+          <Typography className="mt-0.5" tone="muted" variant="caption-sm">Últimos eventos da sessão</Typography>
 
           <div className="mt-3 space-y-2">
             {session.events.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-3 py-6 text-center text-[0.65rem] text-[var(--muted)]">
+              <EmptyState className="bg-[var(--background)] px-3 py-6 text-[0.65rem]">
                 Nenhum evento ainda.
-              </div>
+              </EmptyState>
             ) : (
               session.events.slice(0, 12).map((event, index) => (
                 <div

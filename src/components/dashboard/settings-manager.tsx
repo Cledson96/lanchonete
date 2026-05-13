@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState, type ChangeEvent } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Typography } from "@/components/ui/typography";
 import type { DeliveryRule, StoreSettings } from "@/lib/contracts/store";
 import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
 import { formatMoney } from "@/lib/utils";
@@ -208,13 +212,13 @@ export function DashboardSettingsManager({
       <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-6 py-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="eyebrow mb-2">Configurações</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--foreground)]">
+            <Typography className="mb-2" variant="eyebrow">Configurações</Typography>
+            <Typography as="h1" className="text-3xl" variant="title-lg">
               Loja, horários e frete
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+            </Typography>
+            <Typography className="mt-2 max-w-2xl leading-6" tone="muted" variant="body-sm">
               Ajuste os dados usados no checkout, no cálculo de entrega e no bloqueio de pedidos fora do expediente.
-            </p>
+            </Typography>
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-[var(--line)] bg-[var(--background)] px-4 py-3">
             <span className={`h-2.5 w-2.5 rounded-full ${status.isOpen ? "bg-emerald-500" : "bg-red-500"}`} />
@@ -229,15 +233,9 @@ export function DashboardSettingsManager({
       </section>
 
       {toast ? (
-        <div
-          className={`rounded-xl border px-4 py-3 text-sm ${
-            toast.tone === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
+        <Alert className="px-4 py-3 text-sm" tone={toast.tone === "success" ? "success" : "error"}>
           {toast.message}
-        </div>
+        </Alert>
       ) : null}
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
@@ -310,9 +308,9 @@ export function DashboardSettingsManager({
               );
             })}
           </div>
-          <button className="mt-5 rounded-full bg-[var(--brand-orange)] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:opacity-50" disabled={savingStore} onClick={() => void handleSaveStoreSettings()} type="button">
+          <Button className="mt-5" disabled={savingStore} onClick={() => void handleSaveStoreSettings()}>
             {savingStore ? "Salvando..." : "Salvar loja e horários"}
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -324,9 +322,9 @@ export function DashboardSettingsManager({
               {activeRules} faixas ativas. Remover desativa a regra e preserva histórico.
             </p>
           </div>
-          <button className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-bold transition hover:bg-[var(--background)] disabled:opacity-50" disabled={savingFreight} onClick={() => void handleSaveDeliveryRules()} type="button">
+          <Button disabled={savingFreight} onClick={() => void handleSaveDeliveryRules()} variant="secondary">
             {savingFreight ? "Salvando..." : "Salvar frete"}
-          </button>
+          </Button>
         </div>
 
         <div className="overflow-x-auto">
@@ -365,9 +363,9 @@ export function DashboardSettingsManager({
                     </label>
                   </td>
                   <td className="rounded-r-xl px-2 py-2 text-right">
-                    <button className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50" onClick={() => updateRule(rule.id, { isActive: false })} type="button">
+                    <Button className="rounded-lg px-3 py-2 text-xs font-bold" onClick={() => updateRule(rule.id, { isActive: false })} size="xs" variant="unstyled">
                       Remover
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -375,8 +373,8 @@ export function DashboardSettingsManager({
           </table>
         </div>
 
-        <div className="mt-5 rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] p-4">
-          <h3 className="text-sm font-bold">Nova faixa</h3>
+        <EmptyState className="mt-5 bg-[var(--background)] p-4 text-left text-inherit">
+          <Typography as="h3" variant="title-sm">Nova faixa</Typography>
           <div className="mt-3 grid gap-3 md:grid-cols-6">
             <input className="rounded-lg border border-[var(--line)] px-3 py-2 md:col-span-2" placeholder="Nome" value={newRule.label} onChange={(e) => setNewRule((current) => ({ ...current, label: e.target.value }))} />
             <input className="rounded-lg border border-[var(--line)] px-3 py-2" min={0.1} step={0.1} type="number" value={newRule.maxDistanceKm} onChange={(event) => setNewRule((current) => ({ ...current, maxDistanceKm: readInputNumber(event) }))} />
@@ -384,10 +382,10 @@ export function DashboardSettingsManager({
             <input className="rounded-lg border border-[var(--line)] px-3 py-2" placeholder="Cidade" value={newRule.city} onChange={(e) => setNewRule((current) => ({ ...current, city: e.target.value }))} />
             <input className="rounded-lg border border-[var(--line)] px-3 py-2 uppercase" maxLength={2} placeholder="UF" value={newRule.state} onChange={(e) => setNewRule((current) => ({ ...current, state: e.target.value.toUpperCase() }))} />
           </div>
-          <button className="mt-3 rounded-full bg-[var(--brand-green)] px-4 py-2 text-sm font-bold text-white transition hover:bg-[var(--brand-green-dark)] disabled:opacity-50" disabled={savingFreight} onClick={() => void handleCreateRule()} type="button">
+          <Button className="mt-3" disabled={savingFreight} onClick={() => void handleCreateRule()} variant="success">
             Criar faixa de {formatMoney(newRule.feeAmount)}
-          </button>
-        </div>
+          </Button>
+        </EmptyState>
       </section>
     </main>
   );

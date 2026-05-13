@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 type CategoryNavProps = {
   categories: { id: string; name: string; slug: string }[];
   activeCategoryId: string;
@@ -65,18 +67,18 @@ export function CategoryNav({
           {categories.map((category) => {
             const isActive = category.id === activeCategoryId;
             return (
-              <button
+              <Button
                 key={category.id}
                 aria-current={isActive ? "true" : undefined}
-                className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.76rem] font-bold transition-all duration-200 ${
+                className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[0.76rem] ${
                   isActive ? activeClasses : inactiveClasses
                 }`}
                 onClick={() => onSelect(category.id)}
-                type="button"
+                variant="unstyled"
               >
                 <CategoryIcon name={category.name} />
                 <span>{category.name}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -87,18 +89,18 @@ export function CategoryNav({
             {categories.map((category) => {
               const isActive = category.id === activeCategoryId;
               return (
-                <button
+                <Button
                   key={category.id}
                   aria-current={isActive ? "true" : undefined}
-                  className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.76rem] font-bold transition-all duration-200 ${
+                  className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[0.76rem] ${
                     isActive ? activeClasses : inactiveClasses
                   }`}
                   onClick={() => onSelect(category.id)}
-                  type="button"
+                  variant="unstyled"
                 >
                   <CategoryIcon name={category.name} />
                   <span>{category.name}</span>
-                </button>
+                </Button>
               );
             })}
           </div>

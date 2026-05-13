@@ -2,6 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Typography } from "@/components/ui/typography";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { formatMoney } from "@/lib/utils";
 
@@ -45,11 +49,11 @@ type MenuItemDetailDialogProps = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+    <Typography className="flex items-center gap-2 text-[var(--ink-soft)]" variant="caption-sm">
       <span className="h-px flex-1 bg-[var(--line)]" />
       {children}
       <span className="h-px flex-1 bg-[var(--line)]" />
-    </p>
+    </Typography>
   );
 }
 
@@ -171,16 +175,15 @@ export function MenuItemDetailDialog({
           <div className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-[var(--line)] sm:hidden" />
 
           {/* Botão fechar */}
-          <button
-            aria-label="Fechar detalhes"
-            className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 text-[var(--foreground)] shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+          <IconButton
+            className="absolute right-3 top-3 z-10 bg-white/90 text-[var(--foreground)] shadow-sm backdrop-blur-sm hover:bg-white"
+            label="Fechar detalhes"
             onClick={onClose}
-            type="button"
           >
             <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </button>
+          </IconButton>
 
           {/* Imagem — desktop: coluna lateral */}
           <div className="relative hidden w-[42%] shrink-0 sm:block">
@@ -213,27 +216,27 @@ export function MenuItemDetailDialog({
             <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
               <div className="flex items-start justify-between gap-3 sm:pr-10">
                 <div className="min-w-0 flex-1">
-                  <span className="inline-flex rounded-full bg-[var(--accent-light)] px-2.5 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[var(--brand-orange-dark)]">
+                  <Badge className="bg-[var(--accent-light)] text-[var(--brand-orange-dark)]" tone="orange">
                     {categoryName}
-                  </span>
-                  <h2 className="mt-1.5 text-[1.15rem] font-black leading-tight text-[var(--foreground)] sm:text-xl">
+                  </Badge>
+                  <Typography className="mt-1.5 font-black leading-tight sm:text-xl" variant="title-md">
                     {name}
-                  </h2>
+                  </Typography>
                 </div>
                 <div className="shrink-0 text-right">
                   {compareAtPriceLabel ? (
-                    <p className="text-[0.68rem] text-[var(--muted)] line-through leading-none">{compareAtPriceLabel}</p>
+                    <Typography className="line-through leading-none" tone="muted" variant="caption-sm">{compareAtPriceLabel}</Typography>
                   ) : null}
-                  <p className="text-[1.35rem] font-extrabold leading-none text-[var(--accent)] sm:text-2xl">
+                  <Typography className="font-extrabold leading-none text-[var(--accent)] sm:text-2xl" variant="title-lg">
                     {priceLabel}
-                  </p>
+                  </Typography>
                 </div>
               </div>
 
               {description?.trim() ? (
-                <p className="mt-2 text-[0.82rem] leading-relaxed text-[var(--muted)]">
+                <Typography className="mt-2 leading-relaxed" tone="muted" variant="body-sm">
                   {description}
-                </p>
+                </Typography>
               ) : null}
             </div>
 
@@ -244,7 +247,7 @@ export function MenuItemDetailDialog({
               {ingredients.length > 0 && (
                 <div className="mb-4 space-y-2">
                   <SectionLabel>Monte seu lanche</SectionLabel>
-                  <p className="text-[0.72rem] text-[var(--muted)]">Toque em − para remover ingredientes.</p>
+                  <Typography tone="muted" variant="caption">Toque em − para remover ingredientes.</Typography>
                   <div className="space-y-1.5">
                     {ingredients.map((ing) => {
                       const qty = Math.max(0, Math.min(ingredientQtys[ing.id] ?? ing.quantity, ing.quantity));
@@ -262,9 +265,9 @@ export function MenuItemDetailDialog({
                             {ing.name}
                           </span>
                           <div className="inline-flex items-center gap-2">
-                            <button
+                            <Button
                               aria-label={`Remover ${ing.name}`}
-                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--line)]/60 text-[var(--foreground)] transition hover:bg-red-100 hover:text-red-600"
+                              className="bg-[var(--line)]/60 text-[var(--foreground)] hover:bg-red-100 hover:text-red-600"
                               onClick={() =>
                                 setIngredientQtys((prev) => ({
                                   ...prev,
@@ -272,15 +275,17 @@ export function MenuItemDetailDialog({
                                 }))
                               }
                               type="button"
+                              size="sm"
+                              variant="unstyled"
                             >
                               <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                 <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
-                            </button>
-                            <span className="min-w-[1.4rem] text-center text-[0.82rem] font-bold text-[var(--foreground)]">
+                            </Button>
+                            <Typography as="span" className="min-w-[1.4rem] text-center font-bold text-[var(--foreground)]" variant="body-sm">
                               {qty}
-                            </span>
-                            <button
+                            </Typography>
+                            <Button
                               aria-label={`Adicionar ${ing.name}`}
                               className={`flex h-7 w-7 items-center justify-center rounded-full transition ${
                                 canIncrease
@@ -295,12 +300,13 @@ export function MenuItemDetailDialog({
                                 }));
                               }}
                               disabled={!canIncrease}
-                              type="button"
+                              size="sm"
+                              variant="unstyled"
                             >
                               <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                 <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       );
@@ -325,20 +331,20 @@ export function MenuItemDetailDialog({
                               {group.name}
                             </p>
                             {group.isRequired && (
-                              <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wide text-red-600">
+                              <Badge className="bg-red-100 px-1.5 py-0.5 text-[0.55rem] text-red-600" tone="danger">
                                 obrigatório
-                              </span>
+                              </Badge>
                             )}
                           </div>
                           {group.maxSelections && group.maxSelections > 1 && (
-                            <span className="text-[0.68rem] text-[var(--muted)]">
+                            <Typography as="span" tone="muted" variant="caption-sm">
                               máx. {group.maxSelections}
-                            </span>
+                            </Typography>
                           )}
                         </div>
 
                         {group.description ? (
-                          <p className="px-3 pt-2 text-[0.72rem] text-[var(--muted)]">{group.description}</p>
+                          <Typography className="px-3 pt-2" tone="muted" variant="caption">{group.description}</Typography>
                         ) : null}
 
                         <div className="divide-y divide-[var(--line)]">
@@ -357,14 +363,12 @@ export function MenuItemDetailDialog({
                                   <p className={`text-[0.85rem] ${isSelected ? "font-semibold text-[var(--foreground)]" : "text-[var(--foreground)]"}`}>
                                     {option.name}
                                   </p>
-                                  {option.description ? (
-                                    <p className="text-[0.72rem] text-[var(--muted)]">{option.description}</p>
-                                  ) : null}
+                                  {option.description ? <Typography tone="muted" variant="caption">{option.description}</Typography> : null}
                                 </div>
 
-                                <span className={`shrink-0 text-[0.78rem] font-semibold ${option.priceDelta > 0 ? "text-[var(--brand-green-dark)]" : "text-[var(--muted)]"}`}>
+                                <Typography as="span" className={`shrink-0 font-semibold ${option.priceDelta > 0 ? "text-[var(--brand-green-dark)]" : "text-[var(--muted)]"}`} variant="body-sm">
                                   {option.priceDelta > 0 ? `+${formatMoney(option.priceDelta)}` : "incluso"}
-                                </span>
+                                </Typography>
 
                                 {/* Radio (seleção única) ou Stepper (múltipla) */}
                                 {isRadio ? (
@@ -384,29 +388,31 @@ export function MenuItemDetailDialog({
                                   </button>
                                 ) : (
                                   <div className="inline-flex items-center gap-1.5">
-                                    <button
+                                    <Button
                                       aria-label={`Diminuir ${option.name}`}
                                       className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--line)]/60 text-[var(--foreground)] transition hover:bg-red-100 hover:text-red-600"
                                       onClick={() => decrementOption(group.id, option.id)}
-                                      type="button"
+                                      size="sm"
+                                      variant="unstyled"
                                     >
                                       <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                         <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                                       </svg>
-                                    </button>
-                                    <span className="min-w-[1.4rem] text-center text-[0.82rem] font-bold text-[var(--foreground)]">
+                                    </Button>
+                                    <Typography as="span" className="min-w-[1.4rem] text-center font-bold text-[var(--foreground)]" variant="body-sm">
                                       {optionQty}
-                                    </span>
-                                    <button
+                                    </Typography>
+                                    <Button
                                       aria-label={`Adicionar ${option.name}`}
                                       className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--brand-green)]/20 text-[var(--green-rich)] transition hover:bg-[var(--brand-green)]/30"
                                       onClick={() => incrementOption(group.id, option.id, group.maxSelections)}
-                                      type="button"
+                                      size="sm"
+                                      variant="unstyled"
                                     >
                                       <svg aria-hidden="true" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                         <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
                                       </svg>
-                                    </button>
+                                    </Button>
                                   </div>
                                 )}
                               </div>
@@ -422,24 +428,22 @@ export function MenuItemDetailDialog({
               {/* Observação */}
               <div className="mb-4">
                 {!showNotes ? (
-                  <button
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-[var(--line)] px-3 py-1.5 text-[0.78rem] font-semibold text-[var(--ink-soft)] transition-colors hover:border-[var(--brand-orange)] hover:text-[var(--brand-orange-dark)]"
+                  <Button
+                    className="border border-dashed border-[var(--line)] text-[var(--ink-soft)] hover:border-[var(--brand-orange)] hover:text-[var(--brand-orange-dark)]"
                     onClick={() => setShowNotes(true)}
-                    type="button"
+                    size="xs"
+                    variant="unstyled"
                   >
                     <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Adicionar observação
-                  </button>
+                  </Button>
                 ) : (
                   <div>
-                    <label
-                      className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[var(--ink-soft)]"
-                      htmlFor={`notes-${name}`}
-                    >
+                    <Typography as="label" className="text-[var(--ink-soft)]" htmlFor={`notes-${name}`} variant="caption-sm">
                       Observação
-                    </label>
+                    </Typography>
                     <textarea
                       autoFocus
                       className="mt-1.5 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2.5 text-[0.85rem] text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/50 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/15"
@@ -458,10 +462,10 @@ export function MenuItemDetailDialog({
               {(ingredientDelta > 0 || optionDelta > 0) && (
                 <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1 rounded-xl bg-[var(--brand-green)]/8 px-3 py-2 text-[0.75rem] text-[var(--muted)]">
                   {ingredientDelta > 0 && (
-                    <span>Extras: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(ingredientDelta)}</strong></span>
+                    <Typography as="span" tone="muted" variant="caption">Extras: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(ingredientDelta)}</strong></Typography>
                   )}
                   {optionDelta > 0 && (
-                    <span>Adicionais: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(optionDelta)}</strong></span>
+                    <Typography as="span" tone="muted" variant="caption">Adicionais: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(optionDelta)}</strong></Typography>
                   )}
                 </div>
               )}
@@ -472,40 +476,40 @@ export function MenuItemDetailDialog({
               <div className="flex items-center gap-3">
                 {/* Stepper de quantidade */}
                 <div className="inline-flex items-center gap-0.5 rounded-full border border-[var(--line)] bg-white p-0.5">
-                  <button
+                  <Button
                     aria-label="Diminuir quantidade"
-                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
+                    className="h-9 w-9 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
                     onClick={() => setQuantity((c) => Math.max(c - 1, 1))}
-                    type="button"
+                    variant="unstyled"
                   >
                     <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </button>
-                  <span className="min-w-7 text-center text-[0.9rem] font-bold text-[var(--foreground)]">
+                  </Button>
+                  <Typography as="span" className="min-w-7 text-center font-bold text-[var(--foreground)]" variant="body-md">
                     {quantity}
-                  </span>
-                  <button
+                  </Typography>
+                  <Button
                     aria-label="Aumentar quantidade"
-                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
+                    className="h-9 w-9 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
                     onClick={() => setQuantity((c) => Math.min(c + 1, 100))}
-                    type="button"
+                    variant="unstyled"
                   >
                     <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Botão adicionar */}
-                <button
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[0.88rem] font-bold text-white transition-all duration-200 active:scale-[0.97] ${
+                <Button
+                  className={`flex-1 gap-2 text-[0.88rem] font-bold text-white active:scale-[0.97] ${
                     added
                       ? "bg-[var(--green-soft)]"
                       : "bg-[var(--green-rich)] hover:bg-[var(--green-deep)]"
                   }`}
                   onClick={() => onAdd(notesRef.current?.value, quantity, selectedOptions, ingredientQtys)}
-                  type="button"
+                  variant="unstyled"
                 >
                   {added ? (
                     <>
@@ -522,7 +526,7 @@ export function MenuItemDetailDialog({
                       Adicionar · {totalLabel}
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

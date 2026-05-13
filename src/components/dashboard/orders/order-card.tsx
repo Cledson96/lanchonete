@@ -1,5 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { Badge } from "@/components/ui/badge";
+import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
 import { channelMeta } from "./config";
 import {
@@ -55,40 +57,40 @@ export function OrderCard({
       <div className="pl-4 pr-3 py-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <span className="inline-flex items-center gap-1 rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[var(--muted)]">
+            <Badge className="items-center gap-1 px-1.5 py-0.5 uppercase tracking-wider" shape="square">
               {order.code.slice(0, 8)}
-            </span>
-            <p className="mt-1.5 truncate text-sm font-semibold leading-tight">
+            </Badge>
+            <Typography className="mt-1.5 truncate leading-tight" variant="body-sm">
               {order.customerName || order.customerPhone || "Cliente"}
-            </p>
+            </Typography>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-[0.7rem] font-semibold text-[var(--foreground)]">{formatElapsed(order.createdAt)}</p>
+            <Typography tone="default" variant="caption">{formatElapsed(order.createdAt)}</Typography>
           </div>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-1">
-          <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.65rem] font-semibold ${channel.badge}`}>
+          <Badge className={`items-center gap-1 px-1.5 py-0.5 ${channel.badge}`} shape="square">
             {channel.icon}
             {channel.label}
-          </span>
-          <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-semibold capitalize text-[var(--muted)]">
+          </Badge>
+          <Badge className="px-1.5 py-0.5 capitalize" shape="square">
             {humanize(order.type)}
-          </span>
+          </Badge>
           {hasNotes ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-amber-700">
+            <Badge className="items-center gap-1 px-1.5 py-0.5" shape="square" tone="warning">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               obs
-            </span>
+            </Badge>
           ) : null}
           {order.comanda ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-violet-700">
+            <Badge className="items-center gap-1 px-1.5 py-0.5" shape="square" tone="violet">
               Comanda {comandaLabel}
-            </span>
+            </Badge>
           ) : null}
-          <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--muted)]">
+          <Badge className="px-1.5 py-0.5" shape="square">
             {progressLabel}
-          </span>
+          </Badge>
         </div>
 
         <div className="mt-2 space-y-2">
@@ -104,15 +106,15 @@ export function OrderCard({
                       {item.quantity}x
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold leading-4 text-[var(--foreground)]">{item.menuItem.name}</p>
+                      <Typography className="leading-4" variant="caption">{item.menuItem.name}</Typography>
                       {optionPreview ? (
-                        <p className="mt-1 line-clamp-2 text-[0.7rem] leading-4 text-[var(--brand-green-dark)]">+ {optionPreview}</p>
+                        <Typography className="mt-1 line-clamp-2 leading-4" tone="green" variant="caption">+ {optionPreview}</Typography>
                       ) : null}
                       {ingredientPreview ? (
-                        <p className="mt-1 line-clamp-2 text-[0.7rem] leading-4 text-[var(--muted)]">{ingredientPreview}</p>
+                        <Typography className="mt-1 line-clamp-2 leading-4" tone="muted" variant="caption">{ingredientPreview}</Typography>
                       ) : null}
                       {item.notes ? (
-                        <p className="mt-1 line-clamp-2 text-[0.7rem] leading-4 text-amber-700">Obs: {item.notes}</p>
+                        <Typography className="mt-1 line-clamp-2 leading-4" tone="amber" variant="caption">Obs: {item.notes}</Typography>
                       ) : null}
                     </div>
                   </div>
@@ -120,23 +122,23 @@ export function OrderCard({
               );
             })
           ) : (
-            <p className="text-xs leading-relaxed text-[var(--muted)]">Sem itens</p>
+            <Typography tone="muted" variant="caption">Sem itens</Typography>
           )}
 
           {hiddenItemsCount > 0 ? (
-            <p className="text-[0.7rem] font-medium text-[var(--muted)]">+{hiddenItemsCount} item(ns) neste pedido</p>
+            <Typography tone="muted" variant="caption">+{hiddenItemsCount} item(ns) neste pedido</Typography>
           ) : null}
         </div>
 
         <div className="mt-2 flex items-center justify-between border-t border-[var(--line)] pt-2">
-          <div className="text-[0.7rem] text-[var(--muted)]">
-            <p>{itemCount} {itemCount === 1 ? "item" : "itens"}</p>
-            {order.comanda ? <p>{order.comanda.entries.length} lançamento(s)</p> : null}
-            <p>{order.operationalSummary.readyOrDeliveredUnits}/{order.operationalSummary.activeUnits} prontos</p>
+          <div>
+            <Typography tone="muted" variant="caption">{itemCount} {itemCount === 1 ? "item" : "itens"}</Typography>
+            {order.comanda ? <Typography tone="muted" variant="caption">{order.comanda.entries.length} lançamento(s)</Typography> : null}
+            <Typography tone="muted" variant="caption">{order.operationalSummary.readyOrDeliveredUnits}/{order.operationalSummary.activeUnits} prontos</Typography>
           </div>
-          <span className="text-sm font-bold text-[var(--foreground)]">
+          <Typography as="span" variant="body-sm">
             {formatMoney(toNumber(order.totalAmount))}
-          </span>
+          </Typography>
         </div>
       </div>
     </div>

@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
 import { DeleteDialog } from "./ingredients/delete-dialog";
 import { GroupCard } from "./ingredients/group-card";
@@ -201,33 +205,23 @@ export function DashboardIngredientManager({
     <main className="space-y-4 text-[var(--foreground)]">
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="eyebrow text-[var(--muted)]">Catálogo</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Ingredientes &amp; Adicionais</h1>
-          <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
+          <Typography className="eyebrow" tone="muted" variant="eyebrow">
+            Catálogo
+          </Typography>
+          <Typography as="h1" className="mt-1 text-2xl font-semibold" variant="title-lg">
+            Ingredientes &amp; Adicionais
+          </Typography>
+          <Typography className="mt-0.5 leading-5" tone="muted" variant="caption-sm">
             {totalGroups} grupos ({activeGroups} ativos) · {totalItems} opções · média {formatMoney(avgDelta)}
-          </p>
+          </Typography>
         </div>
-        <button
-          className="flex items-center gap-1.5 self-start rounded-full bg-[var(--brand-orange)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
-          onClick={() => openEditor()}
-          type="button"
-        >
+        <Button className="self-start" onClick={() => openEditor()} size="sm">
           <PlusIcon />
           Novo grupo
-        </button>
+        </Button>
       </section>
 
-      {toast ? (
-        <div
-          className={`rounded-xl border px-4 py-2 text-xs font-medium ${
-            toast.tone === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
-          {toast.message}
-        </div>
-      ) : null}
+      {toast ? <Alert className="rounded-xl px-4" tone={toast.tone === "success" ? "success" : "error"}>{toast.message}</Alert> : null}
 
       <div className="flex flex-col gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 shadow-sm sm:flex-row sm:items-center">
         <div className="relative flex-1">
@@ -260,11 +254,11 @@ export function DashboardIngredientManager({
       </div>
 
       {filteredGroups.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-4 py-12 text-center text-sm text-[var(--muted)]">
+        <EmptyState className="rounded-2xl bg-[var(--surface)] py-12">
           {totalGroups === 0
             ? "Nenhum grupo cadastrado. Clique em 'Novo grupo' para começar."
             : "Nenhum grupo bate com os filtros. Ajuste a busca ou status."}
-        </div>
+        </EmptyState>
       ) : (
         <section className="grid gap-3 lg:grid-cols-2">
           {filteredGroups.map((group) => (

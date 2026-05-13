@@ -1,3 +1,5 @@
+import { Typography } from "@/components/ui/typography";
+
 export function FilterPill({
   label,
   value,
@@ -11,7 +13,7 @@ export function FilterPill({
 }) {
   return (
     <div className="flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5">
-      <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{label}</span>
+      <Typography tone="muted" variant="caption-sm">{label}</Typography>
       <select
         className="bg-transparent text-sm font-medium text-[var(--foreground)] outline-none"
         onChange={(e) => onChange(e.target.value)}

@@ -2,6 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Typography } from "@/components/ui/typography";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import type { PublicMenuCategory } from "@/lib/contracts/menu";
 import { formatMoney } from "@/lib/utils";
@@ -25,11 +30,11 @@ type Props = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+    <Typography className="flex items-center gap-2 text-[var(--ink-soft)]" variant="caption-sm">
       <span className="h-px flex-1 bg-[var(--line)]" />
       {children}
       <span className="h-px flex-1 bg-[var(--line)]" />
-    </p>
+    </Typography>
   );
 }
 
@@ -184,9 +189,9 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
         <div className="relative flex w-full max-w-[52rem] flex-col overflow-hidden rounded-t-[1.5rem] border border-[var(--line)] bg-[var(--background)] shadow-[0_-8px_40px_rgba(23,15,8,0.22)] sm:max-h-[90vh] sm:flex-row sm:rounded-[var(--radius-xl)] sm:shadow-[0_30px_80px_rgba(23,15,8,0.28)]">
           <div className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-[var(--line)] sm:hidden" />
 
-          <button aria-label="Fechar detalhes" className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 text-[var(--foreground)] shadow-sm backdrop-blur-sm transition-colors hover:bg-white" onClick={onClose} type="button">
+          <IconButton className="absolute right-3 top-3 z-10 bg-white/90 text-[var(--foreground)] shadow-sm backdrop-blur-sm hover:bg-white" label="Fechar detalhes" onClick={onClose}>
             <CloseIcon />
-          </button>
+          </IconButton>
 
           <div className="relative hidden w-[42%] shrink-0 sm:block">
             <Image alt={currentItem.name} className="object-cover" fill sizes="340px" src={resolveMenuItemImage(currentItem.imageUrl)} />
@@ -202,22 +207,22 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
             <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
               <div className="flex items-start justify-between gap-3 sm:pr-10">
                 <div className="min-w-0 flex-1">
-                  <span className="inline-flex rounded-full bg-[var(--accent-light)] px-2.5 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[var(--brand-orange-dark)]">{categoryName}</span>
-                  <h2 className="mt-1.5 text-[1.15rem] font-black leading-tight text-[var(--foreground)] sm:text-xl">{currentItem.name}</h2>
+                  <Badge className="bg-[var(--accent-light)] text-[var(--brand-orange-dark)]" tone="orange">{categoryName}</Badge>
+                  <Typography className="mt-1.5 font-black leading-tight sm:text-xl" variant="title-md">{currentItem.name}</Typography>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[1.35rem] font-extrabold leading-none text-[var(--accent)] sm:text-2xl">{formatMoney(totalPrice)}</p>
+                  <Typography className="font-extrabold leading-none text-[var(--accent)] sm:text-2xl" variant="title-lg">{formatMoney(totalPrice)}</Typography>
                 </div>
               </div>
 
-              {currentItem.description?.trim() ? <p className="mt-2 text-[0.82rem] leading-relaxed text-[var(--muted)]">{currentItem.description}</p> : null}
+              {currentItem.description?.trim() ? <Typography className="mt-2 leading-relaxed" tone="muted" variant="body-sm">{currentItem.description}</Typography> : null}
             </div>
 
             <div className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-5">
               {currentItem.ingredients.length > 0 ? (
                 <div className="mb-4 space-y-2">
                   <SectionLabel>Monte seu lanche</SectionLabel>
-                  <p className="text-[0.72rem] text-[var(--muted)]">Toque em − para remover ingredientes.</p>
+                  <Typography tone="muted" variant="caption">Toque em − para remover ingredientes.</Typography>
                   <div className="space-y-1.5">
                     {currentItem.ingredients.map((ing) => {
                       const qty = Math.max(0, Math.min(ingredientQtys[ing.id] ?? ing.quantity, ing.quantity));
@@ -226,9 +231,9 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                         <div key={ing.id} className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[0.85rem] transition-colors ${qty === 0 ? "border-red-100 bg-red-50/60 text-[var(--muted)]/50" : "border-[var(--line)] bg-white"}`}>
                           <span className={qty === 0 ? "line-through" : "text-[var(--foreground)]"}>{ing.name}</span>
                           <div className="inline-flex items-center gap-2">
-                            <button aria-label={`Remover ${ing.name}`} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--line)]/60 text-[var(--foreground)] transition hover:bg-red-100 hover:text-red-600" onClick={() => setIngredientQtys((prev) => ({ ...prev, [ing.id]: Math.max(0, (prev[ing.id] ?? ing.quantity) - 1) }))} type="button"><MinusIcon /></button>
-                            <span className="min-w-[1.4rem] text-center text-[0.82rem] font-bold text-[var(--foreground)]">{qty}</span>
-                            <button aria-label={`Adicionar ${ing.name}`} className={`flex h-7 w-7 items-center justify-center rounded-full transition ${canIncrease ? "cursor-pointer bg-[var(--brand-green)]/20 text-[var(--green-rich)] hover:bg-[var(--brand-green)]/30" : "cursor-not-allowed bg-[var(--line)]/35 text-[var(--muted)] opacity-40"}`} disabled={!canIncrease} onClick={() => { if (!canIncrease) return; setIngredientQtys((prev) => ({ ...prev, [ing.id]: Math.min(ing.quantity, (prev[ing.id] ?? ing.quantity) + 1) })); }} type="button"><PlusIcon /></button>
+                            <Button aria-label={`Remover ${ing.name}`} className="h-7 w-7 bg-[var(--line)]/60 text-[var(--foreground)] hover:bg-red-100 hover:text-red-600" onClick={() => setIngredientQtys((prev) => ({ ...prev, [ing.id]: Math.max(0, (prev[ing.id] ?? ing.quantity) - 1) }))} size="sm" variant="unstyled"><MinusIcon /></Button>
+                            <Typography as="span" className="min-w-[1.4rem] text-center font-bold text-[var(--foreground)]" variant="body-sm">{qty}</Typography>
+                            <Button aria-label={`Adicionar ${ing.name}`} className={`h-7 w-7 ${canIncrease ? "bg-[var(--brand-green)]/20 text-[var(--green-rich)] hover:bg-[var(--brand-green)]/30" : "bg-[var(--line)]/35 text-[var(--muted)] opacity-40"}`} disabled={!canIncrease} onClick={() => { if (!canIncrease) return; setIngredientQtys((prev) => ({ ...prev, [ing.id]: Math.min(ing.quantity, (prev[ing.id] ?? ing.quantity) + 1) })); }} size="sm" variant="unstyled"><PlusIcon /></Button>
                           </div>
                         </div>
                       );
@@ -248,12 +253,12 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                         <div className="flex items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--cream)]/60 px-3 py-2">
                           <div className="flex items-center gap-1.5">
                             <p className="text-[0.85rem] font-semibold text-[var(--foreground)]">{group.name}</p>
-                            {group.isRequired ? <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wide text-red-600">obrigatório</span> : null}
+                            {group.isRequired ? <Badge className="bg-red-100 px-1.5 py-0.5 text-[0.55rem] text-red-600" tone="danger">obrigatório</Badge> : null}
                           </div>
-                          {group.maxSelections && group.maxSelections > 1 ? <span className="text-[0.68rem] text-[var(--muted)]">máx. {group.maxSelections}</span> : null}
+                          {group.maxSelections && group.maxSelections > 1 ? <Typography as="span" tone="muted" variant="caption-sm">máx. {group.maxSelections}</Typography> : null}
                         </div>
 
-                        {group.description ? <p className="px-3 pt-2 text-[0.72rem] text-[var(--muted)]">{group.description}</p> : null}
+                        {group.description ? <Typography className="px-3 pt-2" tone="muted" variant="caption">{group.description}</Typography> : null}
 
                         <div className="divide-y divide-[var(--line)]">
                           {group.options.map((option) => {
@@ -264,10 +269,10 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                               <div key={option.id} className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${isSelected ? "bg-[var(--brand-green)]/5" : "hover:bg-[var(--cream)]/60"}`}>
                                 <div className="min-w-0 flex-1">
                                   <p className={`text-[0.85rem] ${isSelected ? "font-semibold text-[var(--foreground)]" : "text-[var(--foreground)]"}`}>{option.name}</p>
-                                  {option.description ? <p className="text-[0.72rem] text-[var(--muted)]">{option.description}</p> : null}
+                                  {option.description ? <Typography tone="muted" variant="caption">{option.description}</Typography> : null}
                                 </div>
 
-                                <span className={`shrink-0 text-[0.78rem] font-semibold ${option.priceDelta > 0 ? "text-[var(--brand-green-dark)]" : "text-[var(--muted)]"}`}>{option.priceDelta > 0 ? `+${formatMoney(option.priceDelta)}` : "incluso"}</span>
+                                <Typography as="span" className={`shrink-0 font-semibold ${option.priceDelta > 0 ? "text-[var(--brand-green-dark)]" : "text-[var(--muted)]"}`} variant="body-sm">{option.priceDelta > 0 ? `+${formatMoney(option.priceDelta)}` : "incluso"}</Typography>
 
                                 {isRadio ? (
                                   <button aria-pressed={isSelected} className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 transition-all ${isSelected ? "border-[var(--brand-green)] bg-[var(--brand-green)]" : "border-[var(--line)] bg-white hover:border-[var(--brand-green)]"}`} onClick={() => toggleRadioOption(group.id, option.id)} type="button">
@@ -275,9 +280,9 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
                                   </button>
                                 ) : (
                                   <div className="inline-flex items-center gap-1.5">
-                                    <button aria-label={`Diminuir ${option.name}`} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--line)]/60 text-[var(--foreground)] transition hover:bg-red-100 hover:text-red-600" onClick={() => decrementOption(group.id, option.id)} type="button"><MinusIcon /></button>
-                                    <span className="min-w-[1.4rem] text-center text-[0.82rem] font-bold text-[var(--foreground)]">{optionQty}</span>
-                                    <button aria-label={`Adicionar ${option.name}`} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--brand-green)]/20 text-[var(--green-rich)] transition hover:bg-[var(--brand-green)]/30" onClick={() => incrementOption(group.id, option.id, group.maxSelections)} type="button"><PlusIcon /></button>
+                                    <Button aria-label={`Diminuir ${option.name}`} className="h-7 w-7 bg-[var(--line)]/60 text-[var(--foreground)] hover:bg-red-100 hover:text-red-600" onClick={() => decrementOption(group.id, option.id)} size="sm" variant="unstyled"><MinusIcon /></Button>
+                                    <Typography as="span" className="min-w-[1.4rem] text-center font-bold text-[var(--foreground)]" variant="body-sm">{optionQty}</Typography>
+                                    <Button aria-label={`Adicionar ${option.name}`} className="h-7 w-7 bg-[var(--brand-green)]/20 text-[var(--green-rich)] hover:bg-[var(--brand-green)]/30" onClick={() => incrementOption(group.id, option.id, group.maxSelections)} size="sm" variant="unstyled"><PlusIcon /></Button>
                                   </div>
                                 )}
                               </div>
@@ -292,32 +297,32 @@ export function ComandaMenuItemDialog({ item, categoryName, open, loading, error
 
               <div className="mb-4">
                 <label className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--background)] px-4 py-4">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Observação do item</span>
+                  <Typography as="span" tone="muted" variant="caption-sm">Observação do item</Typography>
                   <textarea className="mt-3 h-28 w-full resize-none rounded-[1rem] border border-[var(--line)] bg-white px-3 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/60 focus:border-[var(--brand-orange)]/35" maxLength={180} onChange={(event) => setNotes(event.target.value)} placeholder="Ex: sem cebola, molho a parte, dividir em 2 pratos..." value={notes} />
                 </label>
               </div>
 
               {ingredientDelta > 0 || optionDelta > 0 ? (
                 <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1 rounded-xl bg-[var(--brand-green)]/8 px-3 py-2 text-[0.75rem] text-[var(--muted)]">
-                  {ingredientDelta > 0 ? <span>Extras: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(ingredientDelta)}</strong></span> : null}
-                  {optionDelta > 0 ? <span>Adicionais: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(optionDelta)}</strong></span> : null}
+                  {ingredientDelta > 0 ? <Typography as="span" tone="muted" variant="caption">Extras: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(ingredientDelta)}</strong></Typography> : null}
+                  {optionDelta > 0 ? <Typography as="span" tone="muted" variant="caption">Adicionais: <strong className="text-[var(--brand-green-dark)]">+{formatMoney(optionDelta)}</strong></Typography> : null}
                 </div>
               ) : null}
 
-              {validationError || error ? <div className="mb-4 rounded-[1.3rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{validationError || error}</div> : null}
+              {validationError || error ? <Alert className="mb-4 rounded-[1.3rem] px-4 py-3 text-sm" tone="error">{validationError || error}</Alert> : null}
             </div>
 
             <div className="shrink-0 border-t border-[var(--line)] bg-[var(--background)] px-4 pb-5 pt-3 sm:px-5 sm:pb-4">
               <div className="flex items-center gap-3">
                 <div className="inline-flex items-center gap-0.5 rounded-full border border-[var(--line)] bg-white p-0.5">
-                  <button aria-label="Diminuir quantidade" className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.max(1, current - 1))} type="button"><MinusIcon /></button>
-                  <span className="min-w-7 text-center text-[0.9rem] font-bold text-[var(--foreground)]">{quantity}</span>
-                  <button aria-label="Aumentar quantidade" className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.min(100, current + 1))} type="button"><PlusIcon /></button>
+                  <Button aria-label="Diminuir quantidade" className="h-9 w-9 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.max(1, current - 1))} variant="unstyled"><MinusIcon /></Button>
+                  <Typography as="span" className="min-w-7 text-center font-bold text-[var(--foreground)]" variant="body-md">{quantity}</Typography>
+                  <Button aria-label="Aumentar quantidade" className="h-9 w-9 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]" onClick={() => setQuantity((current) => Math.min(100, current + 1))} variant="unstyled"><PlusIcon /></Button>
                 </div>
 
-                <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--green-rich)] px-4 py-2.5 text-[0.88rem] font-bold text-white transition-all duration-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60" disabled={submitDisabled} onClick={() => void handleSubmit()} type="button">
+                <Button className="flex-1 gap-2 bg-[var(--green-rich)] text-[0.88rem] font-bold text-white active:scale-[0.97] hover:bg-[var(--green-deep)]" disabled={submitDisabled} onClick={() => void handleSubmit()} variant="unstyled">
                   {loading ? "Lançando item..." : "Lançar na comanda"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

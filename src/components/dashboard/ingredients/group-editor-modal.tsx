@@ -1,5 +1,9 @@
 import { useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Modal } from "@/components/ui/modal";
+import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
 import { Field, Toggle } from "./form-controls";
 import { totalDelta } from "./helpers";
@@ -36,38 +40,29 @@ export function GroupEditorModal({
   const itemsSum = totalDelta(editor.items);
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(45,24,11,0.45)] backdrop-blur-[3px] sm:items-center sm:p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !saving) onClose();
-      }}
-    >
-      <div className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-3xl sm:rounded-2xl">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--line)] px-5 py-4">
-          <div className="min-w-0">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-              {editor.id ? "Editando grupo" : "Novo grupo"}
-            </p>
-            <h2 className="mt-0.5 truncate text-lg font-bold leading-tight">
-              {editor.name.trim() || "Sem nome"}
-            </h2>
-          </div>
-          <button
-            aria-label="Fechar"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] hover:bg-[var(--background)]"
-            disabled={saving}
-            onClick={onClose}
-            type="button"
-          >
-            <CloseIcon />
-          </button>
+    <Modal
+      bodyClassName="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5"
+      closeDisabled={saving}
+      closeIcon={<CloseIcon />}
+      contentClassName="flex max-h-[92dvh] max-w-3xl flex-col"
+      eyebrow={editor.id ? "Editando grupo" : "Novo grupo"}
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <Button disabled={saving} onClick={onClose} size="sm" variant="secondary">Cancelar</Button>
+          <Button disabled={saving || !editor.name.trim()} onClick={() => void onSave()} size="sm">
+            {saving ? "Salvando…" : editor.id ? "Salvar alterações" : "Criar grupo"}
+          </Button>
         </div>
-
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
+      }
+      footerClassName="border-t border-[var(--line)] px-5 py-3"
+      headerClassName="border-b border-[var(--line)] px-5 py-4"
+      onClose={onClose}
+      placement="bottom"
+      size="lg"
+      title={editor.name.trim() || "Sem nome"}
+    >
           <section className="space-y-3">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Dados do grupo
-            </p>
+            <Typography tone="muted" variant="caption-sm">Dados do grupo</Typography>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Nome do grupo" required>
                 <input
@@ -150,28 +145,22 @@ export function GroupEditorModal({
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
-                  Opções do grupo
-                </p>
-                <p className="mt-0.5 text-xs text-[var(--foreground)]">
+                <Typography tone="muted" variant="caption-sm">Opções do grupo</Typography>
+                <Typography className="mt-0.5" variant="caption">
                   {editor.items.length} {editor.items.length === 1 ? "opção" : "opções"}
                   {itemsSum > 0 ? ` · soma ${formatMoney(itemsSum)}` : ""}
-                </p>
+                </Typography>
               </div>
-              <button
-                className="flex items-center gap-1 rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
-                onClick={onAddItem}
-                type="button"
-              >
+              <Button className="hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5" onClick={onAddItem} size="xs" variant="secondary">
                 <PlusIcon />
                 Adicionar opção
-              </button>
+              </Button>
             </div>
 
             {editor.items.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-8 text-center text-xs text-[var(--muted)]">
+              <EmptyState className="bg-[var(--background)] text-xs">
                 Nenhuma opção. Clique em <strong>Adicionar opção</strong> para começar.
-              </div>
+              </EmptyState>
             ) : (
               <div className="space-y-2">
                 {editor.items.map((item, index) => (
@@ -186,28 +175,7 @@ export function GroupEditorModal({
               </div>
             )}
           </section>
-        </div>
-
-        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[var(--line)] px-5 py-3">
-          <button
-            className="rounded-full border border-[var(--line)] px-4 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)] disabled:opacity-50"
-            disabled={saving}
-            onClick={onClose}
-            type="button"
-          >
-            Cancelar
-          </button>
-          <button
-            className="rounded-full bg-[var(--brand-orange)] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={saving || !editor.name.trim()}
-            onClick={() => void onSave()}
-            type="button"
-          >
-            {saving ? "Salvando…" : editor.id ? "Salvar alterações" : "Criar grupo"}
-          </button>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconButton } from "@/components/ui/icon-button";
+import { Typography } from "@/components/ui/typography";
 
 type MessageItem = {
   id: string;
@@ -117,17 +121,22 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
       >
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
-            <p className="rounded-xl border border-dashed border-[var(--line)] bg-white px-4 py-6 text-center text-xs text-[var(--muted)]">
+            <EmptyState className="bg-white px-4 py-6 text-xs">
               Nenhuma mensagem ainda. Envie a primeira para iniciar.
-            </p>
+            </EmptyState>
           </div>
         ) : (
           grouped.map((group) => (
             <div className="space-y-2" key={group.label}>
               <div className="flex justify-center">
-                <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-[var(--muted)] shadow-sm">
+                <Typography
+                  as="span"
+                  className="rounded-full bg-white/80 px-2.5 py-0.5 shadow-sm"
+                  tone="muted"
+                  variant="caption-sm"
+                >
                   {group.label}
-                </span>
+                </Typography>
               </div>
               {group.items.map((item) => {
                 const outbound = item.direction === "outbound";
@@ -162,11 +171,7 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
 
       {/* Composer */}
       <div className="shrink-0 border-t border-[var(--line)] bg-[var(--surface)] p-3">
-        {error ? (
-          <div className="mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-700">
-            {error}
-          </div>
-        ) : null}
+        {error ? <Alert className="mb-2 px-3 py-1.5" tone="error">{error}</Alert> : null}
         <div className="flex items-end gap-2">
           <textarea
             className="min-h-[42px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-sm leading-5 outline-none transition focus:border-[var(--brand-orange)]"
@@ -177,19 +182,18 @@ export function DashboardWhatsAppConversation({ conversationId, initialMessages 
             rows={1}
             value={message}
           />
-          <button
-            aria-label="Enviar"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+          <IconButton
             disabled={pending || !message.trim()}
+            className="h-10 w-10 bg-emerald-500 text-white hover:bg-emerald-600 hover:text-white"
+            label="Enviar"
             onClick={() => void sendMessage()}
-            type="button"
           >
             {pending ? (
-              <span className="text-[0.65rem]">…</span>
+              <Typography as="span" className="text-white" variant="caption-sm">…</Typography>
             ) : (
               <SendIcon />
             )}
-          </button>
+          </IconButton>
         </div>
       </div>
     </section>

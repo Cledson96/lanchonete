@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import { useCallback, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import { MenuItemDetailDialog } from "@/components/menu/item-detail-dialog";
 import { formatMenuWeekdays } from "@/lib/menu-item-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
@@ -178,36 +181,36 @@ export function MenuItemCard({
 
           {/* Badges — só os que adicionam valor real */}
           {displayCompare ? (
-            <span className="absolute left-3 top-3 rounded-full bg-[var(--accent)] px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-white shadow-sm">
+            <Badge className="absolute left-3 top-3 bg-[var(--accent)] px-2.5 py-0.5 text-[0.6rem] uppercase tracking-widest text-white shadow-sm">
               Oferta
-            </span>
+            </Badge>
           ) : null}
 
           {weekdaysLabel !== "todos os dias" ? (
-            <span className="absolute bottom-2.5 left-3 rounded-full bg-black/70 px-2.5 py-0.5 text-[0.6rem] font-semibold text-white backdrop-blur-sm">
+            <Badge className="absolute bottom-2.5 left-3 bg-black/70 px-2.5 py-0.5 text-[0.6rem] text-white backdrop-blur-sm">
               {weekdaysLabel}
-            </span>
+            </Badge>
           ) : null}
 
           {(hasOptions || hasIngredients) && weekdaysLabel === "todos os dias" ? (
-            <span className="absolute bottom-3 right-3 rounded-full bg-white/92 px-2.5 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.06em] text-[var(--brand-orange-dark)] shadow-sm backdrop-blur-sm">
+            <Badge className="absolute bottom-3 right-3 bg-white/92 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.06em] text-[var(--brand-orange-dark)] shadow-sm backdrop-blur-sm">
               + opções
-            </span>
+            </Badge>
           ) : null}
         </button>
 
         {/* Conteúdo */}
         <div className="flex flex-1 flex-col p-4">
           <button className="cursor-pointer text-left" onClick={openDetails} type="button">
-            <h3 className="line-clamp-2 text-[1rem] font-extrabold leading-snug text-[var(--foreground)] transition-colors duration-150 group-hover:text-[var(--brand-orange-dark)]">
+            <Typography className="line-clamp-2 text-[1rem] leading-snug transition-colors duration-150 group-hover:text-[var(--brand-orange-dark)]" variant="title-md">
               {name}
-            </h3>
+            </Typography>
           </button>
 
           {description?.trim() ? (
-            <p className="mt-1.5 line-clamp-2 text-[0.78rem] leading-relaxed text-[var(--muted)]">
+            <Typography className="mt-1.5 line-clamp-2 leading-relaxed" tone="muted" variant="caption">
               {description}
-            </p>
+            </Typography>
           ) : null}
 
           <div className="flex-1" />
@@ -216,24 +219,23 @@ export function MenuItemCard({
           <div className="mt-3 flex items-end justify-between gap-2">
             <div>
               {displayCompare ? (
-                <p className="text-[0.7rem] text-[var(--muted)] line-through leading-none mb-0.5">{displayCompare}</p>
+                <Typography className="mb-0.5 leading-none line-through" tone="muted" variant="caption-sm">{displayCompare}</Typography>
               ) : null}
-              <p className="menu-price text-[1.28rem] font-extrabold leading-none text-[var(--accent)]">
+              <Typography className="menu-price text-[1.28rem] leading-none text-[var(--accent)]" variant="title-lg">
                 {displayPrice}
-              </p>
+              </Typography>
             </div>
 
-            <button
+            <Button
               aria-label={`Adicionar ${name} ao pedido`}
-              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-4 py-2.5 text-[0.8rem] font-extrabold text-white shadow-[0_8px_18px_rgba(234,106,28,0.22)] transition-all duration-200 hover:bg-[var(--brand-orange-dark)] active:scale-[0.96]"
+              className="shrink-0 gap-1.5 px-4 py-2.5 text-[0.8rem] shadow-[0_8px_18px_rgba(234,106,28,0.22)] active:scale-[0.96]"
               onClick={openDetails}
-              type="button"
             >
               <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.8} viewBox="0 0 24 24">
                 <path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               Adicionar
-            </button>
+            </Button>
           </div>
         </div>
       </article>

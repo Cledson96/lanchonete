@@ -1,4 +1,8 @@
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Typography } from "@/components/ui/typography";
 import { formatMenuWeekdays } from "@/lib/menu-item-availability";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import { formatMoney } from "@/lib/utils";
@@ -88,11 +92,11 @@ export function ItemsPanel({
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-4 py-12 text-center text-sm text-[var(--muted)]">
+        <EmptyState className="bg-[var(--surface)] px-4 py-12">
           {totalItems === 0
             ? "Nenhum item cadastrado. Clique em 'Novo item' para começar."
             : "Nenhum item bate com os filtros. Ajuste a busca ou categoria."}
-        </div>
+        </EmptyState>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => (
@@ -149,36 +153,36 @@ function ItemCard({
       <div className="relative h-36 w-full bg-[var(--background)]">
         <Image alt={item.name} className="object-cover" fill sizes="320px" src={resolveMenuItemImage(item.imageUrl)} />
         {!item.imageUrl ? (
-          <span className="absolute bottom-2 left-2 rounded-full bg-white/92 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[var(--muted)] shadow-sm">
+          <Badge className="absolute bottom-2 left-2 bg-white/92 px-2 py-0.5 text-[0.6rem] uppercase shadow-sm" tone="neutral">
             Sem foto
-          </span>
+          </Badge>
         ) : null}
         <div className="absolute left-2 top-2 flex flex-wrap gap-1">
-          <span className="rounded-full bg-white/95 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[var(--foreground)]">
+          <Badge className="bg-white/95 px-2 py-0.5 text-[0.6rem] uppercase text-[var(--foreground)]">
             {item.category.name}
-          </span>
+          </Badge>
           {item.kind === "combo" ? (
-            <span className="rounded-full bg-[var(--brand-orange)] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+            <Badge className="bg-[var(--brand-orange)] px-2 py-0.5 text-[0.6rem] uppercase text-white">
               combo
-            </span>
+            </Badge>
           ) : null}
         </div>
         {!item.isActive || item.isFeatured || item.availableWeekdays?.length ? (
           <div className="absolute right-2 top-2 flex flex-wrap justify-end gap-1">
             {!item.isActive ? (
-              <span className="rounded-full bg-red-500/95 px-2 py-0.5 text-[0.6rem] font-bold uppercase text-white">
+              <Badge className="bg-red-500/95 px-2 py-0.5 text-[0.6rem] uppercase text-white">
                 Inativo
-              </span>
+              </Badge>
             ) : null}
             {item.isFeatured ? (
-              <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[0.6rem] font-bold uppercase text-amber-900">
+              <Badge className="bg-amber-400 px-2 py-0.5 text-[0.6rem] uppercase text-amber-900">
                 Destaque
-              </span>
+              </Badge>
             ) : null}
             {item.availableWeekdays?.length ? (
-              <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[0.6rem] font-bold uppercase text-white">
+              <Badge className="bg-[var(--brand-green)] px-2 py-0.5 text-[0.6rem] uppercase text-white">
                 {formatMenuWeekdays(item.availableWeekdays)}
-              </span>
+              </Badge>
             ) : null}
           </div>
         ) : null}
@@ -186,51 +190,52 @@ function ItemCard({
 
       <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-bold leading-tight">{item.name}</h3>
+          <Typography as="h3" className="leading-tight" variant="title-sm">{item.name}</Typography>
           <div className="shrink-0 text-right">
-            <p className="text-sm font-bold text-[var(--brand-orange-dark)]">{formatMoney(price)}</p>
+            <Typography tone="orange" variant="body-sm">{formatMoney(price)}</Typography>
             {comparePrice ? (
-              <p className="text-[0.65rem] text-[var(--muted)] line-through">{formatMoney(comparePrice)}</p>
+              <Typography className="line-through" tone="muted" variant="caption-sm">{formatMoney(comparePrice)}</Typography>
             ) : null}
           </div>
         </div>
 
         {item.description ? (
-          <p className="line-clamp-2 text-xs leading-5 text-[var(--muted)]">{item.description}</p>
+          <Typography className="line-clamp-2 leading-5" tone="muted" variant="caption">{item.description}</Typography>
         ) : null}
 
         {optionCount > 0 || comboCount > 0 ? (
           <div className="flex flex-wrap gap-1">
             {optionCount > 0 ? (
-              <span className="rounded-md bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--brand-green-dark)]">
+              <Badge className="rounded-md px-1.5 py-0.5 text-[0.6rem]" tone="success">
                 {optionCount} {optionCount === 1 ? "grupo" : "grupos"} de opcionais
-              </span>
+              </Badge>
             ) : null}
             {comboCount > 0 ? (
-              <span className="rounded-md bg-[var(--brand-orange)]/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-[var(--brand-orange-dark)]">
+              <Badge className="rounded-md px-1.5 py-0.5 text-[0.6rem]" tone="orange">
                 {comboCount} {comboCount === 1 ? "item" : "itens"} no combo
-              </span>
+              </Badge>
             ) : null}
           </div>
         ) : null}
 
         <div className="mt-auto flex items-center gap-1 border-t border-[var(--line)] pt-2">
-          <button
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[var(--brand-orange)] px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
+          <Button
+            className="flex-1 rounded-lg px-2 py-1.5 text-xs"
             onClick={onEdit}
-            type="button"
+            size="xs"
           >
             <EditIcon />
             Editar
-          </button>
-          <button
-            className="rounded-lg border border-[var(--line)] px-2 py-1.5 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]"
+          </Button>
+          <Button
+            className="rounded-lg px-2 py-1.5 text-xs"
             onClick={onToggleActive}
+            size="xs"
             title={item.isActive ? "Desativar" : "Ativar"}
-            type="button"
+            variant="secondary"
           >
             {item.isActive ? "Pausar" : "Ativar"}
-          </button>
+          </Button>
           <label
             className="flex cursor-pointer items-center justify-center rounded-lg border border-[var(--line)] p-1.5 text-[var(--muted)] transition hover:bg-[var(--background)] hover:text-[var(--foreground)]"
             title={item.imageUrl ? "Trocar imagem" : "Enviar imagem"}
@@ -247,15 +252,16 @@ function ItemCard({
             />
           </label>
           {item.imageUrl ? (
-            <button
-              className="rounded-lg border border-[var(--line)] p-1.5 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+            <Button
+              className="rounded-lg p-1.5 text-red-600 hover:bg-red-50"
               disabled={removing}
               onClick={onRemoveImage}
+              size="xs"
               title="Remover imagem"
-              type="button"
+              variant="unstyled"
             >
               <TrashIcon />
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>
@@ -274,9 +280,9 @@ export function CategoriesPanel({
 }) {
   if (categories.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-4 py-12 text-center text-sm text-[var(--muted)]">
+      <EmptyState className="bg-[var(--surface)] px-4 py-12">
         Nenhuma categoria cadastrada. Clique em &quot;Nova categoria&quot; para começar.
-      </div>
+      </EmptyState>
     );
   }
 

@@ -1,3 +1,5 @@
+import { Typography } from "@/components/ui/typography";
+
 type CheckoutCustomerDetailsSectionProps = {
   customerName: string;
   setCustomerName: (value: string) => void;
@@ -10,10 +12,8 @@ export function CheckoutCustomerDetailsSection(props: CheckoutCustomerDetailsSec
 
   return (
     <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
-      <p className="eyebrow mb-3">Seus dados</p>
-      <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
-        Quem vai receber o pedido
-      </h2>
+      <Typography className="mb-3" variant="eyebrow">Seus dados</Typography>
+      <Typography variant="title-lg">Quem vai receber o pedido</Typography>
       <div className="mt-5 grid gap-4 md:grid-cols-1">
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Nome</span>
@@ -27,14 +27,14 @@ export function CheckoutCustomerDetailsSection(props: CheckoutCustomerDetailsSec
       </div>
 
       <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-5 py-4">
-        <p className="text-sm font-semibold text-[var(--foreground)]">Sessao atual</p>
-        <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+        <Typography variant="body-sm">Sessao atual</Typography>
+        <Typography className="mt-1 leading-6" tone="muted" variant="body-sm">
           {isLoadingCustomer
             ? "Verificando se ja existe telefone validado..."
             : verificationConfirmed
               ? "Telefone validado para esta sessao."
               : "Voce vai validar o telefone na etapa final antes de enviar."}
-        </p>
+        </Typography>
       </div>
     </section>
   );

@@ -1,5 +1,9 @@
 import type { DeliveryQuote } from "@/lib/contracts/checkout";
 import type { FulfillmentType } from "@/lib/contracts/common";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import { brandContent } from "@/lib/brand-content";
 import { formatMoney } from "@/lib/utils";
 
@@ -70,40 +74,38 @@ export function CheckoutFulfillmentSection(props: CheckoutFulfillmentSectionProp
 
   return (
     <section className="panel rounded-[2rem] px-6 py-6 md:px-8">
-      <p className="eyebrow mb-3">Como quer receber</p>
-      <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
-        Entrega ou retirada
-      </h2>
+      <Typography className="mb-3" variant="eyebrow">Como quer receber</Typography>
+      <Typography variant="title-lg">Entrega ou retirada</Typography>
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
-        <button
+        <Button
           className={`cursor-pointer rounded-[1.4rem] border px-5 py-4 text-left transition ${
             fulfillmentType === "delivery"
               ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 shadow-[0_18px_30px_rgba(242,122,34,0.15)]"
               : "border-[var(--line)] bg-white hover:border-[var(--brand-orange)]/40 hover:bg-[var(--surface)] hover:shadow-md hover:-translate-y-0.5"
           }`}
           onClick={() => setFulfillmentType("delivery")}
-          type="button"
+          variant="unstyled"
         >
-          <p className="text-lg font-semibold text-[var(--foreground)]">Entrega</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+          <Typography variant="title-sm">Entrega</Typography>
+          <Typography className="mt-2 leading-6" tone="muted" variant="body-sm">
             Calcule o frete por bairro ou CEP e receba em casa.
-          </p>
-        </button>
-        <button
+          </Typography>
+        </Button>
+        <Button
           className={`cursor-pointer rounded-[1.4rem] border px-5 py-4 text-left transition ${
             fulfillmentType === "retirada"
               ? "border-[var(--brand-green)] bg-[var(--brand-green)]/10 shadow-[0_18px_30px_rgba(140,198,63,0.15)]"
               : "border-[var(--line)] bg-white hover:border-[var(--brand-green)]/40 hover:bg-[var(--surface)] hover:shadow-md hover:-translate-y-0.5"
           }`}
           onClick={() => setFulfillmentType("retirada")}
-          type="button"
+          variant="unstyled"
         >
-          <p className="text-lg font-semibold text-[var(--foreground)]">Retirada</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+          <Typography variant="title-sm">Retirada</Typography>
+          <Typography className="mt-2 leading-6" tone="muted" variant="body-sm">
             Retire direto na loja e finalize sem custo de entrega.
-          </p>
-        </button>
+          </Typography>
+        </Button>
       </div>
 
       {fulfillmentType === "delivery" ? (
@@ -198,19 +200,19 @@ export function CheckoutFulfillmentSection(props: CheckoutFulfillmentSectionProp
           </div>
         </div>
       ) : (
-        <div className="mt-6 rounded-[1rem] border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 px-5 py-4 text-[0.88rem] leading-6 text-[var(--brand-green-dark)] font-medium">
+        <Alert className="mt-6 rounded-[1rem] border-[var(--brand-green)]/20 px-5 py-4 text-[0.88rem] font-medium leading-6" tone="success">
           Retirada selecionada. O pedido sera separado para buscar na {brandContent.location}.
-        </div>
+        </Alert>
       )}
 
       {fulfillmentType === "delivery" ? (
         <div className={`mt-5 rounded-[1.4rem] border px-5 py-4 ${deliveryQuoteError ? "border-red-200 bg-red-50" : "border-[var(--line)] bg-white/85"}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className={`text-sm font-semibold ${deliveryQuoteError ? "text-red-800" : "text-[var(--foreground)]"}`}>
+              <Typography className={deliveryQuoteError ? "text-red-800" : undefined} variant="body-sm">
                 {deliveryQuoteError ? "Endereco fora da area de entrega" : "Status do frete"}
-              </p>
-              <p className={`mt-1 text-sm leading-6 ${deliveryQuoteError ? "text-red-700" : "text-[var(--muted)]"}`}>
+              </Typography>
+              <Typography className={`mt-1 leading-6 ${deliveryQuoteError ? "text-red-700" : ""}`} tone={deliveryQuoteError ? "danger" : "muted"} variant="body-sm">
                 {deliveryQuoteLoading
                   ? "Calculando frete..."
                   : deliveryQuote
@@ -218,19 +220,19 @@ export function CheckoutFulfillmentSection(props: CheckoutFulfillmentSectionProp
                     : deliveryQuoteError
                       ? deliveryQuoteError
                       : "Preencha rua, numero, bairro, cidade e estado para calcular."}
-              </p>
+              </Typography>
             </div>
             {deliveryQuote ? (
-              <span className="rounded-full bg-[var(--brand-green)]/10 px-4 py-2 text-[0.8rem] font-bold text-[var(--brand-green-dark)]">
+              <Badge className="px-4 py-2 text-[0.8rem]" tone="success">
                 {deliveryQuote.estimatedMinMinutes && deliveryQuote.estimatedMaxMinutes
                   ? `${deliveryQuote.estimatedMinMinutes}-${deliveryQuote.estimatedMaxMinutes} min`
                   : "Entrega disponivel"}
-              </span>
+              </Badge>
             ) : null}
             {deliveryQuoteError ? (
-              <span className="rounded-full bg-red-100 px-4 py-2 text-[0.8rem] font-bold text-red-700">
+              <Badge className="px-4 py-2 text-[0.8rem]" tone="danger">
                 Nao atendemos
-              </span>
+              </Badge>
             ) : null}
           </div>
         </div>

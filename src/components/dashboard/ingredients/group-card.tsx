@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
 import { asNumber } from "./helpers";
 import { EditIcon, TrashIcon } from "./icons";
@@ -21,28 +24,28 @@ export function GroupCard({
       }`}
     >
       <div className="flex items-start justify-between gap-3 p-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <h3 className="truncate text-sm font-bold leading-tight">{group.name}</h3>
-            {!group.isActive ? (
-              <span className="rounded-full bg-red-50 px-1.5 py-0.5 text-[0.6rem] font-bold text-red-700">Inativo</span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Typography as="h3" className="truncate leading-tight" variant="title-sm">{group.name}</Typography>
+              {!group.isActive ? (
+                <Badge className="px-1.5 py-0.5 text-[0.6rem]" tone="danger">Inativo</Badge>
+              ) : null}
+              {group.isRequired ? (
+                <Badge className="px-1.5 py-0.5 text-[0.6rem]" tone="orange">
+                  Obrigatório
+                </Badge>
+              ) : null}
+            </div>
+            {group.description ? (
+              <Typography className="mt-0.5 line-clamp-1" tone="muted" variant="caption">{group.description}</Typography>
             ) : null}
-            {group.isRequired ? (
-              <span className="rounded-full bg-[var(--brand-orange)]/10 px-1.5 py-0.5 text-[0.6rem] font-bold text-[var(--brand-orange-dark)]">
-                Obrigatório
-              </span>
-            ) : null}
+            <Typography className="mt-1" tone="muted" variant="caption-sm">
+              {group.options.length} {group.options.length === 1 ? "opção" : "opções"}
+              {group.minSelections > 0 ? ` · mín ${group.minSelections}` : ""}
+              {group.maxSelections ? ` · máx ${group.maxSelections}` : ""}
+            </Typography>
           </div>
-          {group.description ? (
-            <p className="mt-0.5 line-clamp-1 text-xs text-[var(--muted)]">{group.description}</p>
-          ) : null}
-          <p className="mt-1 text-[0.65rem] text-[var(--muted)]">
-            {group.options.length} {group.options.length === 1 ? "opção" : "opções"}
-            {group.minSelections > 0 ? ` · mín ${group.minSelections}` : ""}
-            {group.maxSelections ? ` · máx ${group.maxSelections}` : ""}
-          </p>
         </div>
-      </div>
 
       {group.options.length > 0 ? (
         <div className="border-t border-[var(--line)] bg-[var(--background)]/40 px-4 py-3">
@@ -80,29 +83,31 @@ export function GroupCard({
       )}
 
       <div className="flex items-center gap-1 border-t border-[var(--line)] p-2">
-        <button
-          className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[var(--brand-orange)] px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
+        <Button
+          className="flex-1 rounded-lg px-2 py-1.5 text-xs"
           onClick={onEdit}
-          type="button"
+          size="xs"
         >
           <EditIcon />
           Editar
-        </button>
-        <button
-          className="rounded-lg border border-[var(--line)] px-2 py-1.5 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]"
+        </Button>
+        <Button
+          className="rounded-lg px-2 py-1.5 text-xs"
           onClick={onToggleActive}
-          type="button"
+          size="xs"
+          variant="secondary"
         >
           {group.isActive ? "Pausar" : "Ativar"}
-        </button>
-        <button
-          className="rounded-lg border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50"
+        </Button>
+        <Button
+          className="rounded-lg p-1.5 text-red-600 hover:bg-red-50"
           onClick={onDelete}
+          size="xs"
           title="Excluir"
-          type="button"
+          variant="unstyled"
         >
           <TrashIcon />
-        </button>
+        </Button>
       </div>
     </article>
   );

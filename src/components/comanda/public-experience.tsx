@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ComandaEntryList } from "@/components/comanda/entry-list";
 import { ComandaMenuLauncher } from "@/components/comanda/menu-launcher";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Typography } from "@/components/ui/typography";
 import type { PublicMenuCategory, PublicMenuResponse } from "@/lib/contracts/menu";
 import {
   canEditComanda,
@@ -121,7 +124,7 @@ export function PublicComandaExperience({ slug }: Props) {
   if (loading) {
     return (
       <main className="shell py-12">
-        <section className="panel rounded-[2rem] p-6 text-sm text-[var(--muted)]">Carregando comanda...</section>
+        <section className="panel rounded-[2rem] p-6"><Typography tone="muted" variant="body-sm">Carregando comanda...</Typography></section>
       </main>
     );
   }
@@ -129,9 +132,7 @@ export function PublicComandaExperience({ slug }: Props) {
   if (error || !comanda) {
     return (
       <main className="shell py-12">
-        <section className="panel rounded-[2rem] border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-          {error || "Comanda nao encontrada."}
-        </section>
+        <Alert className="panel rounded-[2rem] p-6 text-sm font-normal" tone="error">{error || "Comanda nao encontrada."}</Alert>
       </main>
     );
   }
@@ -142,56 +143,52 @@ export function PublicComandaExperience({ slug }: Props) {
         <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="eyebrow text-[var(--muted)]">Comanda da mesa</p>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[var(--foreground)]">
+              <Typography tone="muted" variant="eyebrow">Comanda da mesa</Typography>
+              <Typography as="h1" className="mt-2 text-4xl" variant="title-lg">
                 {comanda.name || "Comanda do cliente"}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+              </Typography>
+              <Typography className="mt-3 max-w-2xl leading-6" tone="muted" variant="body-sm">
                 {comanda.notes || "Use esta tela para acompanhar a parcial e adicionar novos itens direto para a cozinha."}
-              </p>
+              </Typography>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-[1.3rem] border border-[var(--line)] bg-[var(--background)] px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Codigo</p>
-                <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">{comanda.code}</p>
+                <Typography tone="muted" variant="caption-sm">Codigo</Typography>
+                <Typography className="mt-2" variant="title-md">{comanda.code}</Typography>
               </div>
               <div className="rounded-[1.3rem] border border-[var(--line)] bg-[var(--background)] px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Status</p>
-                <p className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusTone(comanda.status)}`}>
+                <Typography tone="muted" variant="caption-sm">Status</Typography>
+                <Badge className={`mt-2 border px-3 py-1 text-xs uppercase tracking-[0.18em] ${statusTone(comanda.status)}`}>
                   {humanizeComandaStatus(comanda.status)}
-                </p>
+                </Badge>
               </div>
               <div className="rounded-[1.3rem] border border-[var(--line)] bg-[var(--background)] px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Parcial</p>
-                <p className="mt-2 text-lg font-semibold text-[var(--brand-orange-dark)]">{formatMoney(comanda.totalAmount)}</p>
+                <Typography tone="muted" variant="caption-sm">Parcial</Typography>
+                <Typography className="mt-2" tone="orange" variant="title-md">{formatMoney(comanda.totalAmount)}</Typography>
               </div>
             </div>
           </div>
         </section>
 
         {feedback ? (
-          <div className="rounded-[1.4rem] border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/10 px-4 py-3 text-sm text-[var(--brand-green-dark)]">
-            {feedback}
-          </div>
+          <Alert className="rounded-[1.4rem] px-4 py-3 text-sm font-normal" tone="success">{feedback}</Alert>
         ) : null}
 
         {!canLaunch ? (
-          <div className="rounded-[1.4rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Esta comanda foi encerrada e nao aceita novos itens.
-          </div>
+          <Alert className="rounded-[1.4rem] px-4 py-3 text-sm font-normal" tone="warning">Esta comanda foi encerrada e nao aceita novos itens.</Alert>
         ) : null}
 
         <section className="grid gap-5 xl:grid-cols-[1.04fr_0.96fr]">
           <section className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] pb-4">
               <div>
-                <p className="eyebrow text-[var(--muted)]">Parcial acumulada</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)]">Itens ja lancados</h2>
+                <Typography tone="muted" variant="eyebrow">Parcial acumulada</Typography>
+                <Typography as="h2" className="mt-2" variant="title-lg">Itens ja lancados</Typography>
               </div>
-              <span className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+              <Badge className="border px-3 py-1 text-xs uppercase tracking-[0.18em]">
                 {comanda.entries.length} itens
-              </span>
+              </Badge>
             </div>
 
             <div className="mt-5">
@@ -204,11 +201,11 @@ export function PublicComandaExperience({ slug }: Props) {
 
           <section className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
             <div className="border-b border-[var(--line)] pb-4">
-              <p className="eyebrow text-[var(--muted)]">Novo lancamento</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)]">Adicionar mais itens</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+              <Typography tone="muted" variant="eyebrow">Novo lancamento</Typography>
+              <Typography as="h2" className="mt-2" variant="title-lg">Adicionar mais itens</Typography>
+              <Typography className="mt-2 leading-6" tone="muted" variant="body-sm">
                 Escolha a categoria, abra o item e confirme a quantidade. O lancamento entra direto na mesma comanda.
-              </p>
+              </Typography>
             </div>
 
             <div className="mt-5">

@@ -10,6 +10,9 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import type { OrderItemUnitStatus } from "@/lib/order-operations";
 import {
   DashboardOrderDetailSheet,
@@ -273,9 +276,15 @@ export function DashboardOrdersWorkspace({
     <main className="space-y-4 text-[var(--foreground)]">
       <section className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="eyebrow text-[var(--muted)]">Operação em tempo real</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--muted)]">{description}</p>
+          <Typography className="eyebrow" tone="muted" variant="eyebrow">
+            Operação em tempo real
+          </Typography>
+          <Typography as="h1" className="mt-1 text-2xl font-semibold" variant="title-lg">
+            {title}
+          </Typography>
+          <Typography className="mt-1 max-w-2xl leading-5" tone="muted" variant="caption-sm">
+            {description}
+          </Typography>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -301,36 +310,29 @@ export function DashboardOrdersWorkspace({
             ]}
             value={typeFilter}
           />
-          <button
-            className="rounded-full bg-[var(--brand-orange)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
+          <Button
             onClick={() => {
               setLoadingList(true);
               void refreshOrders(true);
             }}
-            type="button"
+            size="sm"
           >
             Atualizar
-          </button>
+          </Button>
         </div>
       </section>
 
-      {feedback ? (
-        <div className="rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green)]/10 px-4 py-2 text-xs font-medium text-[var(--brand-green-dark)]">
-          {feedback}
-        </div>
-      ) : null}
-      {listError ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-medium text-red-700">
-          {listError}
-        </div>
-      ) : null}
+      {feedback ? <Alert className="rounded-xl px-4" tone="success">{feedback}</Alert> : null}
+      {listError ? <Alert className="rounded-xl px-4" tone="error">{listError}</Alert> : null}
 
       {showOrderBoard ? (
         <section className="space-y-3">
           {showKitchenBoard ? (
             <div>
-              <p className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Pedidos e comandas</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">Visão consolidada do pedido inteiro para acompanhar status, total e contexto da comanda.</p>
+              <Typography variant="title-sm">Pedidos e comandas</Typography>
+              <Typography className="mt-1" tone="muted" variant="caption-sm">
+                Visão consolidada do pedido inteiro para acompanhar status, total e contexto da comanda.
+              </Typography>
             </div>
           ) : null}
 
@@ -365,8 +367,10 @@ export function DashboardOrdersWorkspace({
       {showKitchenBoard ? (
         <section className="space-y-3">
           <div>
-            <p className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Fila da cozinha por item</p>
-            <p className="mt-1 text-xs text-[var(--muted)]">Visão focada no que precisa ser preparado agora. Clique no item para abrir o pedido/comanda completo.</p>
+            <Typography variant="title-sm">Fila da cozinha por item</Typography>
+            <Typography className="mt-1" tone="muted" variant="caption-sm">
+              Visão focada no que precisa ser preparado agora. Clique no item para abrir o pedido/comanda completo.
+            </Typography>
           </div>
 
           <section className="-mx-4 overflow-x-auto pb-4 lg:mx-0">

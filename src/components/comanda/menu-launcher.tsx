@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Typography } from "@/components/ui/typography";
 import type { PublicMenuCategory } from "@/lib/contracts/menu";
 import { formatMoney } from "@/lib/utils";
 import { ComandaMenuItemDialog } from "@/components/comanda/menu-item-dialog";
@@ -67,25 +71,23 @@ export function ComandaMenuLauncher({
         {categories.map((category) => {
           const active = category.id === activeCategory?.id;
           return (
-            <button
-              className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition ${active
+            <Button
+              className={`${active
                 ? "border-[var(--brand-orange)]/25 bg-[var(--brand-orange)] text-white"
                 : "border-[var(--line)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--brand-orange)]/20 hover:bg-[var(--surface)]"
               }`}
               key={category.id}
               onClick={() => setActiveCategoryId(category.id)}
-              type="button"
+              variant="unstyled"
             >
               {category.name}
-            </button>
+            </Button>
           );
         })}
       </div>
 
       {disabled && disabledMessage ? (
-        <div className="rounded-[1.4rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {disabledMessage}
-        </div>
+        <Alert className="rounded-[1.4rem] px-4 py-3 text-sm font-normal" tone="warning">{disabledMessage}</Alert>
       ) : null}
 
       {activeCategory ? (
@@ -97,30 +99,29 @@ export function ComandaMenuLauncher({
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                  <Typography tone="muted" variant="caption-sm">
                     {activeCategory.name}
-                  </p>
-                  <h3 className="mt-2 text-lg font-semibold tracking-tight text-[var(--foreground)]">
+                  </Typography>
+                  <Typography className="mt-2" variant="title-md">
                     {item.name}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--muted)]">
+                  </Typography>
+                  <Typography className="mt-2 line-clamp-2 leading-6" tone="muted" variant="body-sm">
                     {item.description || "Sem ingredientes detalhados por enquanto."}
-                  </p>
+                  </Typography>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-semibold text-[var(--brand-orange-dark)]">{formatMoney(item.price)}</p>
+                  <Typography tone="orange" variant="title-md">{formatMoney(item.price)}</Typography>
                   {item.optionGroups.length ? (
-                    <p className="mt-1 text-xs text-[var(--brand-green-dark)]">+ complementos</p>
+                    <Typography className="mt-1" tone="green" variant="caption">+ complementos</Typography>
                   ) : null}
                 </div>
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
+                <Typography tone="muted" variant="caption-sm">
                   {item.optionGroups.length ? `${item.optionGroups.length} grupos de adicionais` : "Item simples"}
-                </p>
-                <button
-                  className="rounded-full bg-[var(--brand-green)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-green-dark)] disabled:cursor-not-allowed disabled:opacity-60"
+                </Typography>
+                <Button
                   disabled={disabled}
                   onClick={() => {
                     setDialogError(null);
@@ -128,18 +129,19 @@ export function ComandaMenuLauncher({
                     setSelectedItem(item);
                     setSelectedCategoryName(activeCategory.name);
                   }}
-                  type="button"
+                  size="sm"
+                  variant="success"
                 >
                   Lancar item
-                </button>
+                </Button>
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <div className="rounded-[1.4rem] border border-dashed border-[var(--line)] px-4 py-6 text-sm text-[var(--muted)]">
+        <EmptyState className="rounded-[1.4rem] px-4 py-6 text-left">
           Nenhuma categoria ativa disponivel para esta comanda.
-        </div>
+        </EmptyState>
       )}
 
       <ComandaMenuItemDialog

@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Modal } from "@/components/ui/modal";
+import { Typography } from "@/components/ui/typography";
 import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
 import { Field, Toggle } from "./form-controls";
 import { toggleWeekday } from "./helpers";
@@ -69,45 +74,31 @@ export function ItemEditorModal({
   ];
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(45,24,11,0.45)] backdrop-blur-[3px] sm:items-center sm:p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !saving) onClose();
-      }}
-    >
-      <div className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-3xl sm:rounded-2xl">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--line)] px-5 py-4">
-          <div className="min-w-0">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-              {isEditingExisting ? "Editando item" : "Novo item"}
-            </p>
-            <h2 className="mt-0.5 truncate text-lg font-bold leading-tight">
-              {editor.name.trim() || "Sem nome"}
-            </h2>
-          </div>
-          <div className="flex gap-1.5">
-            {isEditingExisting ? (
-              <button
-                className="rounded-full border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--background)]"
-                onClick={onCreateNew}
-                type="button"
-              >
-                Novo
-              </button>
-            ) : null}
-            <button
-              aria-label="Fechar"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] hover:bg-[var(--background)]"
-              disabled={saving}
-              onClick={onClose}
-              type="button"
-            >
-              <CloseIcon />
-            </button>
-          </div>
+    <Modal
+      bodyClassName="min-h-0 flex-1 overflow-y-auto px-5 py-5"
+      closeDisabled={saving}
+      closeIcon={<CloseIcon />}
+      contentClassName="flex max-h-[92dvh] max-w-3xl flex-col"
+      eyebrow={isEditingExisting ? "Editando item" : "Novo item"}
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <Button disabled={saving} onClick={onClose} size="sm" variant="secondary">Cancelar</Button>
+          <Button disabled={saving || !editor.name.trim() || !editor.price} onClick={() => void onSave()} size="sm">
+            {saving ? "Salvando…" : isEditingExisting ? "Salvar alterações" : "Criar item"}
+          </Button>
         </div>
-
-        <div className="flex shrink-0 gap-1 border-b border-[var(--line)] px-5">
+      }
+      footerClassName="border-t border-[var(--line)] px-5 py-3"
+      headerActions={
+        isEditingExisting ? <Button onClick={onCreateNew} size="xs" variant="secondary">Novo</Button> : null
+      }
+      headerClassName="border-b border-[var(--line)] px-5 py-4"
+      onClose={onClose}
+      placement="bottom"
+      size="lg"
+      title={editor.name.trim() || "Sem nome"}
+    >
+      <div className="-mx-5 -mt-5 flex shrink-0 gap-1 border-b border-[var(--line)] px-5">
           {tabs.map((t) => (
             <button
               className={`relative flex items-center px-3 py-2.5 text-xs font-semibold transition ${
@@ -121,57 +112,35 @@ export function ItemEditorModal({
             >
               {t.label}
               {t.hint && t.hint !== "0" ? (
-                <span className="ml-1.5 rounded-full bg-[var(--brand-orange)]/15 px-1.5 py-0.5 text-[0.6rem] font-bold text-[var(--brand-orange-dark)]">
+                <Badge className="ml-1.5 bg-[var(--brand-orange)]/15 px-1.5 py-0.5 text-[0.6rem] text-[var(--brand-orange-dark)]">
                   {t.hint}
-                </span>
+                </Badge>
               ) : null}
               {tab === t.id ? (
                 <span className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-[var(--brand-orange)]" />
               ) : null}
             </button>
           ))}
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-          {tab === "basic" ? (
-            <BasicTab categoryList={categoryList} editor={editor} onSetEditor={onSetEditor} />
-          ) : null}
-          {tab === "options" ? (
-            <OptionsTab editor={editor} onToggle={onToggleOptionGroup} optionGroups={optionGroups} />
-          ) : null}
-          {tab === "ingredients" ? (
-            <IngredientsTab editor={editor} ingredients={ingredients} onToggle={onToggleIngredient} />
-          ) : null}
-          {tab === "combo" && editor.kind === "combo" ? (
-            <ComboTab
-              candidates={componentCandidates}
-              editor={editor}
-              onToggle={onToggleComboComponent}
-              onUpdateQuantity={onUpdateComboQuantity}
-            />
-          ) : null}
-        </div>
-
-        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[var(--line)] px-5 py-3">
-          <button
-            className="rounded-full border border-[var(--line)] px-4 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)] disabled:opacity-50"
-            disabled={saving}
-            onClick={onClose}
-            type="button"
-          >
-            Cancelar
-          </button>
-          <button
-            className="rounded-full bg-[var(--brand-orange)] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)] disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={saving || !editor.name.trim() || !editor.price}
-            onClick={() => void onSave()}
-            type="button"
-          >
-            {saving ? "Salvando…" : isEditingExisting ? "Salvar alterações" : "Criar item"}
-          </button>
-        </div>
       </div>
-    </div>
+
+      {tab === "basic" ? (
+        <BasicTab categoryList={categoryList} editor={editor} onSetEditor={onSetEditor} />
+      ) : null}
+      {tab === "options" ? (
+        <OptionsTab editor={editor} onToggle={onToggleOptionGroup} optionGroups={optionGroups} />
+      ) : null}
+      {tab === "ingredients" ? (
+        <IngredientsTab editor={editor} ingredients={ingredients} onToggle={onToggleIngredient} />
+      ) : null}
+      {tab === "combo" && editor.kind === "combo" ? (
+        <ComboTab
+          candidates={componentCandidates}
+          editor={editor}
+          onToggle={onToggleComboComponent}
+          onUpdateQuantity={onUpdateComboQuantity}
+        />
+      ) : null}
+    </Modal>
   );
 }
 
@@ -288,16 +257,12 @@ function BasicTab({
       <div className="rounded-xl border border-[var(--line)] bg-[var(--background)] p-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold">Dias disponíveis</p>
-            <p className="text-[0.65rem] text-[var(--muted)]">Vazio = todos os dias</p>
+            <Typography variant="caption">Dias disponíveis</Typography>
+            <Typography tone="muted" variant="caption-sm">Vazio = todos os dias</Typography>
           </div>
-          <button
-            className="rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-[0.65rem] font-semibold text-[var(--muted)] transition hover:bg-[var(--background)]"
-            onClick={() => onSetEditor((c) => ({ ...c, availableWeekdays: [] }))}
-            type="button"
-          >
+          <Button onClick={() => onSetEditor((c) => ({ ...c, availableWeekdays: [] }))} size="xs" variant="secondary">
             Todos os dias
-          </button>
+          </Button>
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {MENU_WEEKDAYS.map((w) => {
@@ -345,9 +310,9 @@ function OptionsTab({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-[var(--muted)]">
+      <Typography tone="muted" variant="caption">
         Selecione os grupos de adicionais que aparecem ao cliente (bebidas, molhos, bordas etc).
-      </p>
+      </Typography>
       {optionGroups.length > 6 ? (
         <input
           className="input"
@@ -357,9 +322,9 @@ function OptionsTab({
         />
       ) : null}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-8 text-center text-xs text-[var(--muted)]">
+        <EmptyState className="bg-[var(--background)] text-xs">
           {optionGroups.length === 0 ? "Nenhum grupo cadastrado." : "Nenhum grupo bate com a busca."}
-        </div>
+        </EmptyState>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
           {filtered.map((g) => {
@@ -413,9 +378,9 @@ function IngredientsTab({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-[var(--muted)]">
+      <Typography tone="muted" variant="caption">
         Ingredientes que compõem o item. O cliente poderá remover ou pedir adicional no pedido.
-      </p>
+      </Typography>
       {ingredients.length > 8 ? (
         <input
           className="input"
@@ -425,9 +390,9 @@ function IngredientsTab({
         />
       ) : null}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-8 text-center text-xs text-[var(--muted)]">
+        <EmptyState className="bg-[var(--background)] text-xs">
           {ingredients.length === 0 ? "Nenhum ingrediente cadastrado." : "Nenhum ingrediente bate com a busca."}
-        </div>
+        </EmptyState>
       ) : (
         <div className="grid gap-1.5 sm:grid-cols-2 md:grid-cols-3">
           {filtered.map((ing) => {
@@ -497,22 +462,19 @@ function ComboTab({
           placeholder="Buscar item do combo…"
           value={filter}
         />
-        <button
-          className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
-            onlySelected
-              ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]"
-              : "border-[var(--line)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]"
-          }`}
+        <Button
+          className={onlySelected ? "border-[var(--brand-orange)] bg-[var(--brand-orange)]/10 text-[var(--brand-orange-dark)]" : undefined}
           onClick={() => setOnlySelected(!onlySelected)}
-          type="button"
+          size="sm"
+          variant="secondary"
         >
           Apenas selecionados ({editor.comboComponents.length})
-        </button>
+        </Button>
       </div>
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-8 text-center text-xs text-[var(--muted)]">
+        <EmptyState className="bg-[var(--background)] text-xs">
           Nenhum item bate com os filtros.
-        </div>
+        </EmptyState>
       ) : (
         <div className="grid gap-1.5 sm:grid-cols-2">
           {filtered.map((c) => {

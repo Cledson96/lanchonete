@@ -1,4 +1,7 @@
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
 import { resolveMenuItemImage } from "@/lib/menu-images.shared";
 import type { ComandaDetail } from "@/lib/comanda-ui";
@@ -27,9 +30,9 @@ export function ComandaEntryList({
 }: Props) {
   if (!entries.length) {
     return (
-      <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--background)] px-4 py-6 text-center text-sm text-[var(--muted)]">
+      <EmptyState className="bg-[var(--background)] px-4 py-6">
         {emptyLabel}
-      </div>
+      </EmptyState>
     );
   }
 
@@ -60,65 +63,68 @@ export function ComandaEntryList({
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">{entry.menuItem.name}</p>
-                  <p className="mt-0.5 text-[0.7rem] text-[var(--muted)]">
+                  <Typography className="truncate leading-tight" variant="body-sm">{entry.menuItem.name}</Typography>
+                  <Typography className="mt-0.5" tone="muted" variant="caption-sm">
                     {formatTime(entry.createdAt)} · Unitário {formatMoney(entry.unitPrice)}
-                  </p>
+                  </Typography>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--muted)]">
+                    <Badge className="rounded-md px-1.5 py-0.5 text-[0.65rem]" shape="square">
                       {describeEntrySummary(entry.operationalSummary)}
-                    </span>
-                    <span className="inline-flex rounded-md bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--brand-green-dark)]">
+                    </Badge>
+                    <Badge className="rounded-md px-1.5 py-0.5 text-[0.65rem]" shape="square" tone="success">
                       {entry.operationalSummary.readyOrDeliveredUnits}/{entry.operationalSummary.activeUnits} prontos
-                    </span>
+                    </Badge>
                     {entry.operationalSummary.deliveredUnits > 0 ? (
-                      <span className="inline-flex rounded-md bg-emerald-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-emerald-700">
+                      <Badge className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[0.65rem] text-emerald-700" shape="square">
                         {entry.operationalSummary.deliveredUnits} entregue(s)
-                      </span>
+                      </Badge>
                     ) : null}
                   </div>
                 </div>
-                <p className="shrink-0 text-sm font-bold">{formatMoney(entry.subtotalAmount)}</p>
+                <Typography className="shrink-0" variant="body-sm">{formatMoney(entry.subtotalAmount)}</Typography>
               </div>
 
               {(extras.length > 0 || modifiedIngredients.length > 0) ? (
                 <div className="mt-1.5 flex flex-wrap gap-1">
                   {extras.map((opt) => (
-                    <span
-                      className="inline-flex items-center gap-1 rounded-md bg-[var(--brand-green)]/10 px-1.5 py-0.5 text-[0.65rem] font-medium text-[var(--brand-green-dark)]"
+                    <Badge
+                      className="gap-1 rounded-md px-1.5 py-0.5 text-[0.65rem] font-medium"
                       key={`${entry.id}-${opt.optionItem.id}`}
+                      shape="square"
+                      tone="success"
                     >
                       + {opt.quantity > 1 ? `${opt.quantity}× ` : ""}{opt.optionItem.name}
                       {Number(opt.unitPriceDelta) > 0 ? (
                         <span className="text-[var(--muted)]">({formatMoney(opt.unitPriceDelta)})</span>
                       ) : null}
-                    </span>
+                    </Badge>
                   ))}
                   {modifiedIngredients.map((ing) => (
-                    <span
-                      className={`inline-flex rounded-md px-1.5 py-0.5 text-[0.65rem] font-medium ${
+                    <Badge
+                      className={`rounded-md px-1.5 py-0.5 text-[0.65rem] font-medium ${
                         ing.quantity === 0
                           ? "bg-red-50 text-red-600 line-through"
                           : "bg-sky-50 text-sky-700"
                       }`}
                       key={`${entry.id}-ing-${ing.ingredient.id}`}
+                      shape="square"
                     >
                       {ing.quantity === 0 ? `sem ${ing.ingredient.name}` : `${ing.quantity}× ${ing.ingredient.name}`}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               ) : null}
 
               {entry.notes ? (
-                <p className="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[0.7rem] leading-4 text-amber-800">
+                <Typography className="mt-1.5 rounded-md bg-amber-50 px-2 py-1 leading-4 text-amber-800" tone="amber" variant="caption-sm">
                   <span className="font-semibold">Obs:</span> {entry.notes}
-                </p>
+                </Typography>
               ) : null}
 
               <div className="mt-2 flex flex-wrap gap-1">
                 {entry.units.map((unit) => (
-                  <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${
+                  <Badge
+                    className={`px-2 py-0.5 text-[0.65rem] ${
                       unit.status === "novo"
                         ? "bg-amber-100 text-amber-700"
                         : unit.status === "em_preparo"
@@ -127,12 +133,12 @@ export function ComandaEntryList({
                             ? "bg-[var(--brand-green)]/15 text-[var(--brand-green-dark)]"
                             : unit.status === "entregue"
                               ? "bg-emerald-100 text-emerald-700"
-                              : "bg-red-100 text-red-700"
+                            : "bg-red-100 text-red-700"
                     }`}
                     key={unit.id}
                   >
                     #{unit.sequence} · {unit.status.replaceAll("_", " ")}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </div>

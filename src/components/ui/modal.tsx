@@ -20,6 +20,7 @@ export function Modal({
   eyebrow,
   footer,
   footerClassName,
+  headerActions,
   headerClassName,
   onClose,
   placement = "center",
@@ -34,6 +35,7 @@ export function Modal({
   eyebrow?: string;
   footer?: ReactNode;
   footerClassName?: string;
+  headerActions?: ReactNode;
   headerClassName?: string;
   onClose: () => void;
   placement?: ModalPlacement;
@@ -71,9 +73,12 @@ export function Modal({
             ) : null}
             <h3 className="mt-0.5 text-lg font-bold leading-tight">{title}</h3>
           </div>
-          <IconButton disabled={closeDisabled} label="Fechar" onClick={onClose}>
-            {closeIcon ?? "x"}
-          </IconButton>
+          <div className="flex items-center gap-1.5">
+            {headerActions}
+            <IconButton disabled={closeDisabled} label="Fechar" onClick={onClose}>
+              {closeIcon ?? "x"}
+            </IconButton>
+          </div>
         </div>
         <div className={cn("px-5 py-4", bodyClassName)}>{children}</div>
         {footer ? <div className={cn("px-5 pb-5", footerClassName)}>{footer}</div> : null}

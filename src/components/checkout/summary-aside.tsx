@@ -1,3 +1,6 @@
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import { checkoutPaymentOptions } from "@/lib/checkout/payment-options";
 import type { DeliveryQuote, CheckoutStoreStatus } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
@@ -42,10 +45,8 @@ export function CheckoutSummaryAside(props: CheckoutSummaryAsideProps) {
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start">
       <section className="panel rounded-[2rem] px-6 py-6">
-        <p className="eyebrow mb-3">Resumo</p>
-        <h2 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
-          Fechamento do pedido
-        </h2>
+        <Typography className="mb-3" variant="eyebrow">Resumo</Typography>
+        <Typography as="h2" variant="title-lg">Fechamento do pedido</Typography>
 
         <div className="mt-5 space-y-3 rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] px-5 py-5 shadow-sm">
           <div className="flex items-center justify-between gap-3 text-sm text-[var(--muted)]">
@@ -87,52 +88,48 @@ export function CheckoutSummaryAside(props: CheckoutSummaryAsideProps) {
 
         <div className="mt-5 space-y-3">
           {!isMenuAvailableNow ? (
-            <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              O cardapio de almoco esta disponivel apenas das 11:00 as 15:00.
-            </div>
+            <Alert className="rounded-[1.1rem] px-4 py-3 text-sm font-normal" tone="warning">O cardapio de almoco esta disponivel apenas das 11:00 as 15:00.</Alert>
           ) : null}
 
           {!storeStatus.isOpen ? (
-            <div className="rounded-[1.1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <Alert className="rounded-[1.1rem] px-4 py-3 text-sm font-normal" tone="error">
               A loja esta fechada agora. Horario de atendimento: {storeStatus.hoursLabel}.
-            </div>
+            </Alert>
           ) : null}
 
-          <button
-            className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--brand-green)] px-5 py-4 text-[1rem] font-bold text-white transition-all duration-300 hover:bg-[var(--brand-green-dark)] hover:shadow-[0_8px_25px_rgba(140,198,63,0.4)] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0"
+          <Button
+            className="group relative w-full overflow-hidden py-4 text-[1rem] hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(140,198,63,0.4)] disabled:hover:translate-y-0"
             disabled={!canSubmit}
             onClick={handleSubmitOrder}
-            type="button"
+            variant="success"
           >
             <span className="absolute inset-0 z-0 h-full w-full -translate-x-full animate-[sheen_3s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform" />
             <span className="relative z-10 flex items-center justify-center gap-2">
               {submitPending ? "Enviando pedido..." : "Finalizar pedido"}
               <svg className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
             </span>
-          </button>
-          <p className="text-sm leading-6 text-[var(--muted)]">
+          </Button>
+          <Typography className="leading-6" tone="muted" variant="body-sm">
             O botao libera quando itens, dados, telefone, frete e horario da loja
             estiverem validados.
-          </p>
+          </Typography>
           {fulfillmentType === "delivery" && !deliveryQuote && !deliveryQuoteLoading ? (
-            <p className="text-sm leading-6 text-amber-700">
+            <Typography className="leading-6 text-amber-700" tone="amber" variant="body-sm">
               {deliveryQuoteError
                 ? "Ajuste o endereco para um CEP atendido ou mude para retirada."
                 : "Complete o endereco para calcular o frete e liberar o botao."}
-            </p>
+            </Typography>
           ) : null}
         </div>
 
         {submitError ? (
-          <div className="mt-4 rounded-[1.3rem] border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
-            {submitError}
-          </div>
+          <Alert className="mt-4 rounded-[1.3rem] px-4 py-4 text-sm font-normal" tone="error">{submitError}</Alert>
         ) : null}
 
         <div className="mt-5 rounded-[1.4rem] border border-[var(--line)] bg-white/85 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
-          <p className="font-semibold text-[var(--foreground)]">Retirada na loja</p>
-          <p className="mt-2">{brandContent.location}</p>
-          <p>{storeStatus.hoursLabel}</p>
+          <Typography variant="body-sm">Retirada na loja</Typography>
+          <Typography className="mt-2 leading-6" tone="muted" variant="body-sm">{brandContent.location}</Typography>
+          <Typography className="leading-6" tone="muted" variant="body-sm">{storeStatus.hoursLabel}</Typography>
         </div>
       </section>
     </aside>

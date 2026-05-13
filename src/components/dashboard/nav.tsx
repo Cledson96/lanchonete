@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Typography } from "@/components/ui/typography";
 
 const nav = [
   {
@@ -126,9 +128,9 @@ export function DashboardNav() {
             >
               {item.icon}
             </span>
-            {item.label}
+            <Typography as="span" variant="body-sm">{item.label}</Typography>
             {isActive && (
-              <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--brand-orange)]" />
+              <Badge className="ml-auto h-1.5 w-1.5 min-w-0 bg-[var(--brand-orange)] p-0" />
             )}
           </Link>
         );

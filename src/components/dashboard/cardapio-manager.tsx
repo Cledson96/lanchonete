@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import { CategoryEditorModal } from "./cardapio/category-editor-modal";
 import { DeleteCategoryDialog } from "./cardapio/delete-category-dialog";
 import {
@@ -411,56 +415,47 @@ export function DashboardCardapioManager({
     <main className="space-y-4 text-[var(--foreground)]">
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="eyebrow text-[var(--muted)]">Catálogo</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Cardápio</h1>
-          <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
+          <Typography className="eyebrow" tone="muted" variant="eyebrow">
+            Catálogo
+          </Typography>
+          <Typography as="h1" className="mt-1 text-2xl font-semibold" variant="title-lg">
+            Cardápio
+          </Typography>
+          <Typography className="mt-0.5 leading-5" tone="muted" variant="caption-sm">
             {menuItems.length} itens · {activeCount} ativos · {comboCount} combos · {imageCount} com imagem
-          </p>
+          </Typography>
         </div>
         <div className="flex gap-2">
-          <button
-            className="flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
+          <Button
+            className="hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
             onClick={() => openCategoryEditor()}
-            type="button"
+            size="sm"
+            variant="secondary"
           >
             <PlusIcon />
             Nova categoria
-          </button>
-          <button
-            className="flex items-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
-            onClick={() => openEditor(null)}
-            type="button"
-          >
+          </Button>
+          <Button onClick={() => openEditor(null)} size="sm">
             <PlusIcon />
             Novo item
-          </button>
+          </Button>
         </div>
       </section>
 
-      {toast ? (
-        <div
-          className={`rounded-xl border px-4 py-2 text-xs font-medium ${
-            toast.tone === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
-          {toast.message}
-        </div>
-      ) : null}
+      {toast ? <Alert className="rounded-xl px-4" tone={toast.tone === "success" ? "success" : "error"}>{toast.message}</Alert> : null}
 
       <div className="flex gap-1 border-b border-[var(--line)]">
         <TabButton active={mainTab === "items"} onClick={() => setMainTab("items")}>
           Itens
-          <span className="ml-1.5 rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-bold text-[var(--muted)]">
+          <Badge className="ml-1.5 px-1.5 py-0.5 text-[0.65rem] font-bold">
             {menuItems.length}
-          </span>
+          </Badge>
         </TabButton>
         <TabButton active={mainTab === "categories"} onClick={() => setMainTab("categories")}>
           Categorias
-          <span className="ml-1.5 rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-bold text-[var(--muted)]">
+          <Badge className="ml-1.5 px-1.5 py-0.5 text-[0.65rem] font-bold">
             {categoryList.length}
-          </span>
+          </Badge>
         </TabButton>
       </div>
 

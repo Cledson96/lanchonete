@@ -1,5 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { Badge } from "@/components/ui/badge";
+import { Typography } from "@/components/ui/typography";
 import { channelMeta } from "./config";
 import { formatElapsed, humanize } from "./helpers";
 import type { KitchenItemCardData } from "./types";
@@ -33,24 +35,24 @@ export function KitchenItemCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="inline-flex rounded-md bg-[var(--background)] px-1.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[var(--muted)]">
+            <Badge className="px-1.5 py-0.5 uppercase tracking-wider" shape="square">
               {item.orderCode.slice(0, 8)}
-            </span>
-            <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.65rem] font-semibold ${channel.badge}`}>
+            </Badge>
+            <Badge className={`items-center gap-1 px-1.5 py-0.5 ${channel.badge}`} shape="square">
               {channel.icon}
               {channel.label}
-            </span>
+            </Badge>
             {item.comandaLabel ? (
-              <span className="inline-flex rounded-md bg-violet-100 px-1.5 py-0.5 text-[0.65rem] font-semibold text-violet-700">
+              <Badge className="px-1.5 py-0.5" shape="square" tone="violet">
                 Comanda {item.comandaLabel}
-              </span>
+              </Badge>
             ) : null}
           </div>
-          <p className="mt-1 text-[0.75rem] font-medium text-[var(--muted)]">
+          <Typography className="mt-1" tone="muted" variant="caption">
             {item.customerName || humanize(item.type)}
-          </p>
+          </Typography>
         </div>
-        <span className="text-[0.7rem] font-semibold text-[var(--foreground)]">{formatElapsed(item.createdAt)}</span>
+        <Typography as="span" variant="caption">{formatElapsed(item.createdAt)}</Typography>
       </div>
 
       <div className="mt-3 flex items-start gap-2">
@@ -58,19 +60,19 @@ export function KitchenItemCard({
           #{item.unitSequence}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-5 text-[var(--foreground)]">{item.name}</p>
-          <p className="mt-1 text-[0.72rem] leading-4 text-[var(--muted)]">Unidade {item.unitSequence} de {item.itemQuantity}</p>
+          <Typography className="leading-5" variant="body-sm">{item.name}</Typography>
+          <Typography className="mt-1 leading-4" tone="muted" variant="caption">Unidade {item.unitSequence} de {item.itemQuantity}</Typography>
           {item.optionLines.length ? (
-            <p className="mt-1 text-[0.75rem] leading-4 text-[var(--brand-green-dark)]">+ {item.optionLines.join(" • ")}</p>
+            <Typography className="mt-1 leading-4" tone="green" variant="caption">+ {item.optionLines.join(" • ")}</Typography>
           ) : null}
           {item.ingredientLines.length ? (
-            <p className="mt-1 text-[0.75rem] leading-4 text-[var(--muted)]">{item.ingredientLines.join(" • ")}</p>
+            <Typography className="mt-1 leading-4" tone="muted" variant="caption">{item.ingredientLines.join(" • ")}</Typography>
           ) : null}
           {item.itemNotes ? (
-            <p className="mt-1 text-[0.75rem] leading-4 text-amber-700">Obs. item: {item.itemNotes}</p>
+            <Typography className="mt-1 leading-4" tone="amber" variant="caption">Obs. item: {item.itemNotes}</Typography>
           ) : null}
           {item.orderNotes ? (
-            <p className="mt-1 text-[0.75rem] leading-4 text-amber-700/90">Obs. pedido: {item.orderNotes}</p>
+            <Typography className="mt-1 leading-4" tone="amber" variant="caption">Obs. pedido: {item.orderNotes}</Typography>
           ) : null}
         </div>
       </div>

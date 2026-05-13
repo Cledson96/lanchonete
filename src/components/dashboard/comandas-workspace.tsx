@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Typography } from "@/components/ui/typography";
 import { AddItemModal } from "./comandas/add-item-modal";
 import { CloseComandaModal } from "./comandas/close-comanda-modal";
 import { ComandaDetailPanel } from "./comandas/detail-panel";
@@ -210,44 +214,37 @@ export function DashboardComandasWorkspace() {
     <main className="space-y-4 text-[var(--foreground)]">
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="eyebrow text-[var(--muted)]">Salão em tempo real</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Comandas</h1>
-          <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
+          <Typography className="eyebrow" tone="muted" variant="eyebrow">
+            Salão em tempo real
+          </Typography>
+          <Typography as="h1" className="mt-1 text-2xl font-semibold" variant="title-lg">
+            Comandas
+          </Typography>
+          <Typography className="mt-0.5 leading-5" tone="muted" variant="caption-sm">
             Abra comandas, compartilhe o QR e acompanhe a parcial sem sair da tela.
-          </p>
+          </Typography>
         </div>
 
         <div className="flex gap-2">
-          <button
-            aria-label="Atualizar"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] transition hover:bg-[var(--background-strong)]"
+          <IconButton
+            className="h-10 w-10 hover:bg-[var(--background-strong)]"
+            label="Atualizar"
             onClick={() => {
               setLoading(true);
               void refreshList(true).finally(() => setLoading(false));
             }}
-            type="button"
           >
             <RefreshIcon />
-          </button>
-          <button
-            className="flex items-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
-            onClick={() => setCreateModal({ ...emptyCreateModal, open: true })}
-            type="button"
-          >
+          </IconButton>
+          <Button onClick={() => setCreateModal({ ...emptyCreateModal, open: true })} size="sm">
             <PlusIcon />
             Abrir comanda
-          </button>
+          </Button>
         </div>
       </section>
 
-      {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{error}</div>
-      ) : null}
-      {feedback ? (
-        <div className="rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green)]/10 px-4 py-2 text-xs font-medium text-[var(--brand-green-dark)]">
-          {feedback}
-        </div>
-      ) : null}
+      {error ? <Alert className="rounded-xl px-4" tone="error">{error}</Alert> : null}
+      {feedback ? <Alert className="rounded-xl px-4" tone="success">{feedback}</Alert> : null}
 
       <section className="grid gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <ComandaList
