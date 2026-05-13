@@ -13,7 +13,7 @@ import {
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
-import type { OrderItemUnitStatus } from "@/lib/order-operations";
+import type { OrderItemUnitStatus } from "@/lib/orders/operations";
 import {
   DashboardOrderDetailSheet,
   type DashboardOrderDetail,

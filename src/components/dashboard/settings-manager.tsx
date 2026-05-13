@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Typography } from "@/components/ui/typography";
 import type { DeliveryRule, StoreSettings } from "@/lib/contracts/store";
-import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
+import { MENU_WEEKDAYS } from "@/lib/menu/availability";
 import { formatMoney } from "@/lib/utils";
 
 type ApiErrorPayload = {

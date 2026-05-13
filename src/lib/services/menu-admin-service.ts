@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { ApiError } from "@/lib/api/error";
-import { deleteManagedMenuItemImage, saveMenuItemImage } from "@/lib/menu-images";
-import { normalizeMenuWeekdays } from "@/lib/menu-item-availability";
+import { deleteManagedMenuItemImage, saveMenuItemImage } from "@/lib/menu/images.server";
+import { normalizeMenuWeekdays } from "@/lib/menu/availability";
 import { prisma } from "@/lib/prisma";
 import { invalidatePublicMenuCache } from "@/lib/services/menu-service";
 import { decimal } from "@/lib/db/decimal";

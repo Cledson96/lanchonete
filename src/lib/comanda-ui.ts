@@ -1,4 +1,4 @@
-import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/order-operations";
+import type { OperationalSummary, OrderItemUnitStatus } from "@/lib/orders/operations";
 
 export type ComandaStatus =
   | "novo"

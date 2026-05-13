@@ -1,4 +1,4 @@
-import type { OperationalSummary } from "@/lib/order-operations";
+import type { OperationalSummary } from "@/lib/orders/operations";
 import type { OrderSummary } from "./types";
 
 export function toNumber(value: number | string | null | undefined) {

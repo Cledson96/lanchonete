@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Typography } from "@/components/ui/typography";
-import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { resolveMenuItemImage } from "@/lib/menu/images.shared";
 import type { PublicMenuCategory } from "@/lib/contracts/menu";
 import { formatMoney } from "@/lib/utils";
 

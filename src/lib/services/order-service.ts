@@ -1,9 +1,9 @@
 import { ApiError } from "@/lib/api/error";
-import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
-import { calculateLineItemPricing } from "@/lib/line-item-pricing";
-import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu-item-availability";
-import { buildOrderItemUnits } from "@/lib/order-item-units";
-import { groupRepeatedIds } from "@/lib/option-item-quantity";
+import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/menu/category-availability";
+import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu/availability";
+import { buildOrderItemUnits } from "@/lib/orders/item-units";
+import { groupRepeatedIds } from "@/lib/orders/option-quantities";
+import { calculateLineItemPricing } from "@/lib/orders/pricing";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
 import { assertStoreIsOpenForOrders } from "@/lib/services/store-settings-service";

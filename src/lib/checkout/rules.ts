@@ -1,6 +1,6 @@
 import type { DeliveryQuote } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
-import { isCategoryAvailableNow } from "@/lib/category-availability";
+import { isCategoryAvailableNow } from "@/lib/menu/category-availability";
 import { digitsOnly } from "@/lib/utils";
 
 type CheckoutAvailabilityItem = {

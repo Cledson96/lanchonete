@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
 import { Typography } from "@/components/ui/typography";
-import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
+import { MENU_WEEKDAYS } from "@/lib/menu/availability";
 import { Field, Toggle } from "./form-controls";
 import { toggleWeekday } from "./helpers";
 import { CloseIcon } from "./icons";

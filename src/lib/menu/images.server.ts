@@ -1,8 +1,10 @@
+import "server-only";
+
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ApiError } from "@/lib/api/error";
-import { MENU_ITEM_PLACEHOLDER_URL, resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { MENU_ITEM_PLACEHOLDER_URL, resolveMenuItemImage } from "@/lib/menu/images.shared";
 import { slugify } from "@/lib/utils";
 
 const MENU_UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "menu");

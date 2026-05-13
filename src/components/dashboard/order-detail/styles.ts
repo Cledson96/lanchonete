@@ -1,5 +1,5 @@
 import type { OrderChannel, OrderStatus } from "./types";
-import type { OrderItemUnitStatus } from "@/lib/order-operations";
+import type { OrderItemUnitStatus } from "@/lib/orders/operations";
 
 export const statusStyle: Record<OrderStatus, string> = {
   novo: "bg-amber-100 text-amber-700 border-amber-200",

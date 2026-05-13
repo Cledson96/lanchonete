@@ -1,4 +1,4 @@
-import { buildOrderItemUnits } from "@/lib/order-item-units";
+import { buildOrderItemUnits } from "@/lib/orders/item-units";
 import { prisma } from "@/lib/prisma";
 
 export async function syncMissingOrderItemUnits() {

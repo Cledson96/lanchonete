@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Typography } from "@/components/ui/typography";
-import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { resolveMenuItemImage } from "@/lib/menu/images.shared";
 import { useCart } from "@/lib/cart-store";
 
 export function CartDrawer() {

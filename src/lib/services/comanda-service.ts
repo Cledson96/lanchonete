@@ -1,10 +1,10 @@
 import { ApiError } from "@/lib/api/error";
-import { buildOrderItemUnits } from "@/lib/order-item-units";
-import { attachComandaOperationalSummary } from "@/lib/order-operations";
-import { calculateLineItemPricing } from "@/lib/line-item-pricing";
+import { buildOrderItemUnits } from "@/lib/orders/item-units";
+import { attachComandaOperationalSummary } from "@/lib/orders/operations";
+import { calculateLineItemPricing } from "@/lib/orders/pricing";
 import { prisma } from "@/lib/prisma";
 import { syncMissingOrderItemUnits } from "@/lib/services/order-item-unit-service";
-import { groupRepeatedIds } from "@/lib/option-item-quantity";
+import { groupRepeatedIds } from "@/lib/orders/option-quantities";
 import { coerceNumber, decimal } from "@/lib/db/decimal";
 import { optionalNullable, slugify } from "@/lib/utils";
 

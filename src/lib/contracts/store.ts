@@ -1,4 +1,4 @@
-import type { MenuWeekday } from "@/lib/menu-item-availability";
+import type { MenuWeekday } from "@/lib/menu/availability";
 
 export type StoreStatusWindow = {
   weekday: MenuWeekday;

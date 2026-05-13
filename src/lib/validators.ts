@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
+import { MENU_WEEKDAYS } from "@/lib/menu/availability";
 import { normalizePhone, normalizeZipCode, optionalTrimmed } from "@/lib/utils";
 
 const stringField = z.string().trim();

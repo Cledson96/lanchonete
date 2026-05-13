@@ -4,7 +4,7 @@ import type {
   StoreSettings,
   StoreStatus,
 } from "@/lib/contracts/store";
-import { MENU_WEEKDAYS } from "@/lib/menu-item-availability";
+import { MENU_WEEKDAYS } from "@/lib/menu/availability";
 import { prisma } from "@/lib/prisma";
 import {
   buildStoreHoursLabel,

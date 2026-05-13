@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { PublicMenuCategory, PublicMenuItem } from "@/lib/contracts/menu";
-import { isMenuItemAvailableNow } from "@/lib/menu-item-availability";
-import { isCategoryAvailableNow } from "@/lib/category-availability";
+import { isMenuItemAvailableNow } from "@/lib/menu/availability";
+import { isCategoryAvailableNow } from "@/lib/menu/category-availability";
 import { SimpleCache } from "@/lib/simple-cache";
 import { numberFromDecimal } from "@/lib/db/decimal";
 

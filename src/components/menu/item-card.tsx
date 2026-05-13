@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { MenuItemDetailDialog } from "@/components/menu/item-detail-dialog";
-import { formatMenuWeekdays } from "@/lib/menu-item-availability";
-import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { formatMenuWeekdays } from "@/lib/menu/availability";
+import { resolveMenuItemImage } from "@/lib/menu/images.shared";
 import { useCart } from "@/lib/cart-store";
 
 type OptionGroupForCard = {

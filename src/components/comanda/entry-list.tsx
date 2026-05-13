@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
-import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { resolveMenuItemImage } from "@/lib/menu/images.shared";
 import type { ComandaDetail } from "@/lib/comanda-ui";
 
 function describeEntrySummary(summary: ComandaDetail["entries"][number]["operationalSummary"]) {

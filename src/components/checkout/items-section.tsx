@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Typography } from "@/components/ui/typography";
 import type { CartItem } from "@/lib/contracts/cart";
-import { resolveMenuItemImage } from "@/lib/menu-images.shared";
+import { resolveMenuItemImage } from "@/lib/menu/images.shared";
 import { formatMoney } from "@/lib/utils";
 
 type CheckoutItemsSectionProps = {

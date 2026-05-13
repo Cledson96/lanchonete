@@ -4,7 +4,7 @@ import {
   ORDER_ITEM_UNIT_TRANSITIONS,
   attachOrderOperationalSummary,
   buildUnitTimestampPatch,
-} from "@/lib/order-operations";
+} from "@/lib/orders/operations";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { syncLegacyCommandasToOrders } from "@/lib/services/comanda-service";
