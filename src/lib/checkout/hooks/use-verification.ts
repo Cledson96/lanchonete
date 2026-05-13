@@ -3,12 +3,11 @@ import type {
   ConfirmVerificationResponse,
   RequestVerificationResponse,
 } from "@/lib/contracts/checkout";
+import type { CheckoutJsonReader } from "@/lib/checkout/api-client";
 import {
   canRequestCheckoutVerification,
   normalizeCheckoutPhoneForCompare,
-} from "@/lib/checkout-client";
-
-type CheckoutJsonReader = <T>(input: RequestInfo, init?: RequestInit) => Promise<T>;
+} from "@/lib/checkout/rules";
 
 type SyncCustomerFromSession = (options?: { preserveVerified?: boolean }) => Promise<boolean>;
 

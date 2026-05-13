@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CheckoutStoreStatus } from "@/lib/contracts/checkout";
-import type { CheckoutJsonReader } from "@/lib/checkout-api";
+import type { CheckoutJsonReader } from "@/lib/checkout/api-client";
 import { brandContent } from "@/lib/brand-content";
 import { getCurrentWeekday } from "@/lib/menu-item-availability";
 

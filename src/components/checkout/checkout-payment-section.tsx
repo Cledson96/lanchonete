@@ -1,5 +1,5 @@
 import type { PaymentMethod } from "@/lib/contracts/common";
-import { checkoutPaymentOptions } from "@/lib/checkout-client";
+import { checkoutPaymentOptions } from "@/lib/checkout/payment-options";
 
 type CheckoutPaymentSectionProps = {
   paymentMethod: PaymentMethod;

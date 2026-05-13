@@ -1,5 +1,5 @@
 import { requireCustomer } from "@/lib/auth/customer";
-import { serializeCheckoutCustomerSnapshot } from "@/lib/checkout-serializers";
+import { serializeCheckoutCustomerSnapshot } from "@/lib/checkout/serializers";
 import { ApiError, handleRouteError, ok } from "@/lib/http";
 import { readRequestBody } from "@/lib/request";
 import { getCustomerCheckoutProfileByPhone } from "@/lib/services/customer-service";

@@ -1,5 +1,5 @@
 import { ApiError, handleRouteError, ok } from "@/lib/http";
-import { serializeCheckoutVerificationCustomer } from "@/lib/checkout-serializers";
+import { serializeCheckoutVerificationCustomer } from "@/lib/checkout/serializers";
 import { checkRateLimit, rateLimitByIp } from "@/lib/rate-limit";
 import { readRequestBody } from "@/lib/request";
 import { confirmPhoneVerification } from "@/lib/services/verification-service";

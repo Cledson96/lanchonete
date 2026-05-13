@@ -4,7 +4,8 @@ import { deleteManagedMenuItemImage, saveMenuItemImage } from "@/lib/menu-images
 import { normalizeMenuWeekdays } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";
 import { invalidatePublicMenuCache } from "@/lib/services/menu-service";
-import { decimal, optionalNullable, slugify } from "@/lib/utils";
+import { decimal } from "@/lib/db/decimal";
+import { optionalNullable, slugify } from "@/lib/utils";
 
 function hasOwn<T extends object>(value: T, key: keyof T) {
   return Object.prototype.hasOwnProperty.call(value, key);

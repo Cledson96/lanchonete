@@ -1,6 +1,6 @@
 import { requireCustomer } from "@/lib/auth/customer";
 import { config } from "@/lib/config";
-import { serializeCheckoutOrderSummary } from "@/lib/checkout-serializers";
+import { serializeCheckoutOrderSummary } from "@/lib/checkout/serializers";
 import { ApiError, handleRouteError, ok } from "@/lib/http";
 import { readRequestBody } from "@/lib/request";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";

@@ -5,7 +5,8 @@ import { calculateLineItemPricing } from "@/lib/line-item-pricing";
 import { prisma } from "@/lib/prisma";
 import { syncMissingOrderItemUnits } from "@/lib/services/order-item-unit-service";
 import { groupRepeatedIds } from "@/lib/option-item-quantity";
-import { coerceNumber, decimal, optionalNullable, slugify } from "@/lib/utils";
+import { coerceNumber, decimal } from "@/lib/db/decimal";
+import { optionalNullable, slugify } from "@/lib/utils";
 
 type ComandaItemInput = {
   menuItemId: string;

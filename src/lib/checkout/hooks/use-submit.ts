@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import type { CartItem } from "@/lib/cart-store";
 import type { CreateOrderResponse } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
-import { buildCheckoutSuccessParams } from "@/lib/checkout-ui";
-import type { CheckoutJsonReader } from "@/lib/checkout-api";
+import type { CheckoutJsonReader } from "@/lib/checkout/api-client";
+import { buildCheckoutSuccessParams } from "@/lib/checkout/success-params";
 import { optionalTrimmed } from "@/lib/utils";
 
 type CheckoutAddressInput = {

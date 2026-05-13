@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { parseCheckoutSuccessParams } from "@/lib/checkout-ui";
+import { parseCheckoutSuccessParams } from "@/lib/checkout/success-params";
 import { brandContent } from "@/lib/brand-content";
 import { formatMoney } from "@/lib/utils";
 

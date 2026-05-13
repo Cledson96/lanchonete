@@ -3,7 +3,7 @@ import type { PublicMenuCategory, PublicMenuItem } from "@/lib/contracts/menu";
 import { isMenuItemAvailableNow } from "@/lib/menu-item-availability";
 import { isCategoryAvailableNow } from "@/lib/category-availability";
 import { SimpleCache } from "@/lib/simple-cache";
-import { numberFromDecimal } from "@/lib/utils";
+import { numberFromDecimal } from "@/lib/db/decimal";
 
 const publicMenuCache = new SimpleCache<PublicMenuCategory[]>(30_000);
 

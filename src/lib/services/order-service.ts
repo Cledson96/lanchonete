@@ -7,7 +7,8 @@ import { groupRepeatedIds } from "@/lib/option-item-quantity";
 import { prisma } from "@/lib/prisma";
 import { resolveDeliveryFeeRule } from "@/lib/services/delivery-fee-service";
 import { assertStoreIsOpenForOrders } from "@/lib/services/store-settings-service";
-import { decimal, normalizePhone, optionalNullable } from "@/lib/utils";
+import { decimal } from "@/lib/db/decimal";
+import { normalizePhone, optionalNullable } from "@/lib/utils";
 
 type CreateOrderItemInput = {
   menuItemId: string;

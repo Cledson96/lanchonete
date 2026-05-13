@@ -10,17 +10,17 @@ import type {
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import {
   canSubmitCheckoutOrder,
-  formatCheckoutPhoneNumber,
   getCheckoutUnavailableItems,
   isCheckoutDeliveryAddressValid,
-} from "@/lib/checkout-client";
-import { readCheckoutJson } from "@/lib/checkout-api";
-import { buildCheckoutPricingSummary } from "@/lib/checkout-ui";
-import { useCheckoutDeliveryFlow } from "@/lib/use-checkout-delivery-flow";
-import { useCheckoutCustomerSession } from "@/lib/use-checkout-customer-session";
-import { useCheckoutStoreStatus } from "@/lib/use-checkout-store-status";
-import { useCheckoutSubmit } from "@/lib/use-checkout-submit";
-import { useCheckoutVerification } from "@/lib/use-checkout-verification";
+} from "@/lib/checkout/rules";
+import { formatCheckoutPhoneNumber } from "@/lib/checkout/formatters";
+import { readCheckoutJson } from "@/lib/checkout/api-client";
+import { buildCheckoutPricingSummary } from "@/lib/checkout/pricing";
+import { useCheckoutDeliveryFlow } from "@/lib/checkout/hooks/use-delivery-flow";
+import { useCheckoutCustomerSession } from "@/lib/checkout/hooks/use-customer-session";
+import { useCheckoutStoreStatus } from "@/lib/checkout/hooks/use-store-status";
+import { useCheckoutSubmit } from "@/lib/checkout/hooks/use-submit";
+import { useCheckoutVerification } from "@/lib/checkout/hooks/use-verification";
 import { CheckoutCustomerDetailsSection } from "@/components/checkout/checkout-customer-details-section";
 import { CheckoutFulfillmentSection } from "@/components/checkout/checkout-fulfillment-section";
 import { CheckoutItemsSection } from "@/components/checkout/checkout-items-section";

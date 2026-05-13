@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CheckoutAddress, DeliveryQuote, ViaCepResponse } from "@/lib/contracts/checkout";
+import type { FulfillmentType } from "@/lib/contracts/common";
+import type { CheckoutJsonReader } from "@/lib/checkout/api-client";
+import { formatCheckoutZipCode } from "@/lib/checkout/formatters";
 import {
   buildCheckoutZipState,
-  formatCheckoutZipCode,
   hasCheckoutLocationForQuote,
-} from "@/lib/checkout-client";
-import type { FulfillmentType } from "@/lib/contracts/common";
+} from "@/lib/checkout/rules";
 import { digitsOnly } from "@/lib/utils";
-
-type CheckoutJsonReader = <T>(input: RequestInfo, init?: RequestInit) => Promise<T>;
 
 type UseCheckoutDeliveryFlowInput = {
   fulfillmentType: FulfillmentType;

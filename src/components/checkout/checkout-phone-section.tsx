@@ -1,4 +1,4 @@
-import { isCheckoutVerificationExpired } from "@/lib/checkout-client";
+import { isCheckoutVerificationExpired } from "@/lib/checkout/rules";
 
 type CheckoutPhoneSectionProps = {
   verificationConfirmed: boolean;

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { coerceNumber } from "@/lib/utils";
+import { coerceNumber } from "@/lib/db/decimal";
 
 type PriceValue = Prisma.Decimal | number | string | null | undefined;
 

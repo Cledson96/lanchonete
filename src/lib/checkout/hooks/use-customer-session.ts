@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CheckoutCustomerSnapshot, CustomerMeResponse } from "@/lib/contracts/checkout";
-
-type CheckoutJsonReader = <T>(input: RequestInfo, init?: RequestInit) => Promise<T>;
+import type { CheckoutJsonReader } from "@/lib/checkout/api-client";
 
 type SyncCustomerOptions = {
   preserveVerified?: boolean;

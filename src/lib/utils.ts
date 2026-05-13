@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client";
-
 export function digitsOnly(value?: string | null) {
   return (value || "").replace(/\D/g, "");
 }
@@ -39,36 +37,8 @@ export function optionalNullable(value?: string | null) {
   return trimmed ? trimmed : null;
 }
 
-export function decimal(value: number) {
-  return new Prisma.Decimal(value.toFixed(2));
-}
-
-export function numberFromDecimal(value?: Prisma.Decimal | null) {
-  return value ? Number(value) : null;
-}
-
-export function coerceNumber(
-  value?: Prisma.Decimal | number | string | null,
-  fallback = 0,
-) {
-  if (value == null || value === "") {
-    return fallback;
-  }
-
-  return value instanceof Prisma.Decimal ? Number(value) : Number(value);
-}
-
-export function coerceNullableNumber(value?: Prisma.Decimal | number | string | null) {
-  if (value == null || value === "") {
-    return null;
-  }
-
-  return coerceNumber(value);
-}
-
-export function formatMoney(value?: Prisma.Decimal | number | string | null) {
-  const numeric =
-    value instanceof Prisma.Decimal ? Number(value) : Number(value ?? 0);
+export function formatMoney(value?: number | string | { toString(): string } | null) {
+  const numeric = Number(value ?? 0);
 
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",

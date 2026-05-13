@@ -11,7 +11,7 @@ import {
   serializeStoreSettings,
   serializeStoreStatus,
 } from "@/lib/store-serializers";
-import { decimal } from "@/lib/utils";
+import { decimal } from "@/lib/db/decimal";
 const STORE_SLUG = "loja-principal";
 
 type StoreHoursInput = {

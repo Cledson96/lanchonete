@@ -7,7 +7,7 @@ import type {
   StoreStatus,
 } from "@/lib/contracts/store";
 import { MENU_WEEKDAYS, type MenuWeekday } from "@/lib/menu-item-availability";
-import { coerceNullableNumber, coerceNumber, numberFromDecimal } from "@/lib/utils";
+import { coerceNullableNumber, coerceNumber, numberFromDecimal } from "@/lib/db/decimal";
 
 const TIME_ZONE = "America/Sao_Paulo";
 

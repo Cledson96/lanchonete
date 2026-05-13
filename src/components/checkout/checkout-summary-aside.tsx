@@ -1,4 +1,4 @@
-import { checkoutPaymentOptions } from "@/lib/checkout-client";
+import { checkoutPaymentOptions } from "@/lib/checkout/payment-options";
 import type { DeliveryQuote, CheckoutStoreStatus } from "@/lib/contracts/checkout";
 import type { FulfillmentType, PaymentMethod } from "@/lib/contracts/common";
 import { brandContent } from "@/lib/brand-content";

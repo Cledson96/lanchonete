@@ -10,7 +10,7 @@ import type {
   CheckoutVerificationCustomer,
 } from "@/lib/contracts/checkout";
 import type { OrderType, PaymentMethod } from "@/lib/contracts/common";
-import { coerceNumber, coerceNullableNumber } from "@/lib/utils";
+import { coerceNumber, coerceNullableNumber } from "@/lib/db/decimal";
 
 type CheckoutAddressRecord = {
   id: string;

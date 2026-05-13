@@ -6,10 +6,10 @@ import {
   haversineDistanceInKm,
 } from "@/lib/geocoding";
 import { config } from "@/lib/config";
-import { serializeCheckoutDeliveryQuote } from "@/lib/checkout-serializers";
+import { serializeCheckoutDeliveryQuote } from "@/lib/checkout/serializers";
 import type { DeliveryQuote } from "@/lib/contracts/checkout";
 import type { DeliveryRule } from "@/lib/contracts/store";
-import { decimal, numberFromDecimal } from "@/lib/utils";
+import { decimal, numberFromDecimal } from "@/lib/db/decimal";
 import { getMainStoreProfile } from "@/lib/services/store-settings-service";
 import { serializeStoreDeliveryRule } from "@/lib/store-serializers";
 

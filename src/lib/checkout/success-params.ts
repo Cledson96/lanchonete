@@ -1,6 +1,5 @@
-import type { CheckoutOrderSummary, DeliveryQuote } from "@/lib/contracts/checkout";
-import type { FulfillmentType, OrderType, PaymentMethod } from "@/lib/contracts/common";
-import { coerceNumber } from "@/lib/utils";
+import type { CheckoutOrderSummary } from "@/lib/contracts/checkout";
+import type { OrderType, PaymentMethod } from "@/lib/contracts/common";
 
 type CheckoutSuccessSearchParamsInput = {
   code?: string;
@@ -10,19 +9,12 @@ type CheckoutSuccessSearchParamsInput = {
   total?: string;
 };
 
-export function buildCheckoutPricingSummary(input: {
-  subtotalAmount: number;
-  fulfillmentType: FulfillmentType;
-  deliveryQuote: DeliveryQuote | null;
-}) {
-  const deliveryFeeAmount =
-    input.fulfillmentType === "delivery" ? input.deliveryQuote?.feeAmount ?? 0 : 0;
+function coerceSearchParamNumber(value?: string) {
+  if (value == null || value === "") {
+    return 0;
+  }
 
-  return {
-    subtotalAmount: input.subtotalAmount,
-    deliveryFeeAmount,
-    totalAmount: input.subtotalAmount + deliveryFeeAmount,
-  };
+  return Number(value);
 }
 
 export function buildCheckoutSuccessParams(
@@ -44,6 +36,6 @@ export function parseCheckoutSuccessParams(params: CheckoutSuccessSearchParamsIn
     name: params.name,
     type: params.type as OrderType | undefined,
     payment: params.payment as PaymentMethod | undefined,
-    totalAmount: coerceNumber(params.total),
+    totalAmount: coerceSearchParamNumber(params.total),
   };
 }
