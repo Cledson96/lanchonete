@@ -1,4 +1,4 @@
-import { handleRouteError, ok } from "@/lib/http";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { getPublicStoreStatus } from "@/lib/services/store-settings-service";
 
 export async function GET() {

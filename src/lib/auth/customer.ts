@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { getCustomerSession } from "@/lib/auth/session";
 
 export async function requireCustomer() {

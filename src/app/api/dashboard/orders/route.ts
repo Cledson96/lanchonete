@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth/admin";
-import { handleRouteError, ok } from "@/lib/http";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { listOrders } from "@/lib/services/order-admin-service";
 import { orderStatusSchema, orderTypeSchema } from "@/lib/validators";
 import { z } from "zod";

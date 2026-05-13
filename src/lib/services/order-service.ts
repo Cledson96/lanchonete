@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { formatAvailabilityWindow, isCategoryAvailableNow } from "@/lib/category-availability";
 import { calculateLineItemPricing } from "@/lib/line-item-pricing";
 import { formatMenuWeekdays, isMenuItemAvailableNow } from "@/lib/menu-item-availability";

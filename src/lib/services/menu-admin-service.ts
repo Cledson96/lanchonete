@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { deleteManagedMenuItemImage, saveMenuItemImage } from "@/lib/menu-images";
 import { normalizeMenuWeekdays } from "@/lib/menu-item-availability";
 import { prisma } from "@/lib/prisma";

@@ -1,5 +1,6 @@
 import { config } from "@/lib/config";
-import { ApiError, fail, handleRouteError, ok } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
+import { fail, handleRouteError, ok } from "@/lib/api/response";
 import type { WhatsAppWebhookEvent } from "@/lib/whatsapp-contract";
 import {
   handleWhatsAppInboundEvent,

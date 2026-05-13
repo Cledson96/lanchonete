@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { buildOrderItemUnits } from "@/lib/order-item-units";
 import { attachComandaOperationalSummary } from "@/lib/order-operations";
 import { calculateLineItemPricing } from "@/lib/line-item-pricing";

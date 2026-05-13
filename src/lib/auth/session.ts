@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { cookieNames, config } from "@/lib/config";
+import { cookieNames } from "@/lib/auth/cookies";
+import { config } from "@/lib/config";
 import { blacklistToken, isTokenBlacklisted } from "./token-blacklist";
 
 function generateJti(): string {

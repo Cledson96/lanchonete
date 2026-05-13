@@ -1,7 +1,8 @@
 import { requireCustomer } from "@/lib/auth/customer";
 import { config } from "@/lib/config";
 import { serializeCheckoutOrderSummary } from "@/lib/checkout/serializers";
-import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { readRequestBody } from "@/lib/request";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { createOrder } from "@/lib/services/order-service";

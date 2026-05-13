@@ -1,6 +1,7 @@
 import { getAdminSession } from "@/lib/auth/session";
 import { requireCustomer } from "@/lib/auth/customer";
-import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { getOrderByCode } from "@/lib/services/order-service";
 
 type OrderCodeRouteContext = {

@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/admin";
-import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { removeMenuItemImage, uploadMenuItemImage } from "@/lib/services/menu-admin-service";
 
 export const runtime = "nodejs";

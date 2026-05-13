@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth/admin";
-import { handleRouteError } from "@/lib/http";
+import { handleRouteError } from "@/lib/api/response";
 import { getWhatsAppSession } from "@/lib/services/whatsapp-service";
 
 export const runtime = "nodejs";

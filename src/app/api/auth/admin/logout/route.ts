@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearAdminSession } from "@/lib/auth/session";
-import { handleRouteError, ok } from "@/lib/http";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { publicRedirectUrl } from "@/lib/redirect-url";
 import { isFormRequest } from "@/lib/request";
 

@@ -1,5 +1,5 @@
 import { requireCustomer } from "@/lib/auth/customer";
-import { handleRouteError, ok } from "@/lib/http";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { serializeCheckoutCustomerSnapshot } from "@/lib/checkout/serializers";
 import { getCustomerById } from "@/lib/services/customer-service";
 

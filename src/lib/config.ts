@@ -47,8 +47,3 @@ export const config = {
   ),
   storePixKey: process.env.STORE_PIX_KEY || "",
 };
-
-export const cookieNames = {
-  admin: "lanchonete_admin",
-  customer: "lanchonete_customer",
-};

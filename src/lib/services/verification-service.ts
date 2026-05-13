@@ -1,6 +1,6 @@
 import { createHash, randomInt } from "node:crypto";
 import { VerificationPurpose } from "@prisma/client";
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { prisma } from "@/lib/prisma";
 import { getCustomerByPhone } from "@/lib/services/customer-service";
 import { setCustomerSession } from "@/lib/auth/session";

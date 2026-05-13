@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { SimpleCache } from "@/lib/simple-cache";
 import { config } from "@/lib/config";
 

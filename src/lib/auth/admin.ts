@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { prisma } from "@/lib/prisma";
 import { setAdminSession, getAdminSession } from "@/lib/auth/session";
 

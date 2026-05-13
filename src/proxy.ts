@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { cookieNames } from "@/lib/config";
+import { cookieNames } from "@/lib/auth/cookies";
 import { publicRedirectUrl } from "@/lib/redirect-url";
 
 export function proxy(request: NextRequest) {

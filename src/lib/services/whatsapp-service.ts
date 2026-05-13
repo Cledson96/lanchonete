@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
+import { ApiError } from "@/lib/api/error";
 import { config } from "@/lib/config";
 import type { WhatsAppInboxConversationItem, WhatsAppInboxPriority } from "@/lib/contracts/whatsapp";
-import { ApiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { createOrder } from "@/lib/services/order-service";
 import { getPublicMenu } from "@/lib/services/menu-service";

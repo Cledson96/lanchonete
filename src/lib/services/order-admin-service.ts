@@ -1,5 +1,5 @@
 import { Prisma, OrderItemUnitStatus, OrderStatus } from "@prisma/client";
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import {
   ORDER_ITEM_UNIT_TRANSITIONS,
   attachOrderOperationalSummary,

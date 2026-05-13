@@ -1,4 +1,5 @@
-import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { rateLimitByIp } from "@/lib/rate-limit";
 import { getPublicMenu } from "@/lib/services/menu-service";
 

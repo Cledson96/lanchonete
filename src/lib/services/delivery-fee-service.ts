@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
 import { prisma } from "@/lib/prisma";
 import {
   drivingDistanceInKm,

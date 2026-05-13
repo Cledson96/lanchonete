@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loginAdmin } from "@/lib/auth/admin";
-import { ApiError, handleRouteError, ok } from "@/lib/http";
+import { ApiError } from "@/lib/api/error";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { rateLimitByIp } from "@/lib/rate-limit";
 import { publicRedirectUrl } from "@/lib/redirect-url";
 import { isFormRequest, readRequestBody } from "@/lib/request";

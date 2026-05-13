@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth/admin";
-import { handleRouteError, notFound, ok } from "@/lib/http";
+import { handleRouteError, notFound, ok } from "@/lib/api/response";
 import { readRequestBody } from "@/lib/request";
 import {
   createOptionGroup,

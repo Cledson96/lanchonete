@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth/admin";
-import { handleRouteError, ok } from "@/lib/http";
+import { handleRouteError, ok } from "@/lib/api/response";
 import { readRequestBody } from "@/lib/request";
 import { closeComanda } from "@/lib/services/comanda-service";
 import { closeComandaSchema } from "@/lib/validators";
