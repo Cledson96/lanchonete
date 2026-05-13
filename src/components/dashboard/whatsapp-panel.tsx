@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Typography } from "@/components/ui/typography";
-import type { WhatsAppInboxConversationItem, WhatsAppInboxPriority } from "@/lib/services/whatsapp-service";
+import type { WhatsAppInboxConversationItem, WhatsAppInboxPriority } from "@/lib/contracts/whatsapp";
 
 /* ═══════════════════════════════════════════════
    Types
