@@ -1,3 +1,4 @@
+import { Typography } from "@/components/ui/typography";
 import { formatDateTime, humanizeStatus } from "./helpers";
 import type { DashboardOrderDetail } from "./types";
 
@@ -6,13 +7,13 @@ export function TimelineSection({ order }: { order: DashboardOrderDetail }) {
 
   return (
     <section>
-      <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Histórico</p>
+      <Typography className="mb-2" tone="muted" variant="eyebrow">Histórico</Typography>
       <ol className="relative space-y-3 border-l-2 border-[var(--line)] pl-4">
         {(order.statusEvents || []).map((event) => (
           <li key={event.id} className="relative">
             <span className="absolute -left-[1.4rem] top-1 h-3 w-3 rounded-full border-2 border-[var(--brand-orange)] bg-white" />
             <div className="flex items-baseline justify-between gap-2">
-              <p className="text-sm font-semibold">
+              <Typography variant="title-sm">
                 {event.fromStatus ? (
                   <>
                     <span className="text-[var(--muted)]">{humanizeStatus(event.fromStatus)}</span>
@@ -22,14 +23,14 @@ export function TimelineSection({ order }: { order: DashboardOrderDetail }) {
                 ) : (
                   humanizeStatus(event.toStatus)
                 )}
-              </p>
-              <span className="shrink-0 text-[0.7rem] text-[var(--muted)]">{formatDateTime(event.createdAt)}</span>
+              </Typography>
+              <Typography as="span" className="shrink-0" tone="muted" variant="caption">{formatDateTime(event.createdAt)}</Typography>
             </div>
-            {event.note ? <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">{event.note}</p> : null}
+            {event.note ? <Typography className="mt-0.5 leading-5" tone="muted" variant="caption-sm">{event.note}</Typography> : null}
             {event.changedBy?.email || event.changedBy?.name ? (
-              <p className="mt-0.5 text-[0.7rem] italic text-[var(--muted)]">
+              <Typography className="mt-0.5 italic" tone="muted" variant="caption">
                 por {event.changedBy.name || event.changedBy.email}
-              </p>
+              </Typography>
             ) : null}
           </li>
         ))}

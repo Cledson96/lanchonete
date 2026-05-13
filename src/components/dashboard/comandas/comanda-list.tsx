@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import {
   canEditComanda,
   humanizeComandaStatus,
@@ -30,29 +33,29 @@ export function ComandaList({
     <aside className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 shadow-sm">
       <div className="flex items-center justify-between px-1 pb-2">
         <div className="flex items-center gap-2">
-          <button
-            className={`text-sm font-bold tracking-tight transition ${
+          <Button
+            className={`px-0 py-0 ${
               !showClosed ? "text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
             }`}
             onClick={() => setShowClosed(false)}
-            type="button"
+            variant="unstyled"
           >
             Abertas
-          </button>
-          <span className="text-[var(--line)]">|</span>
-          <button
-            className={`text-sm font-bold tracking-tight transition ${
+          </Button>
+          <Typography as="span" className="text-[var(--line)]" variant="body-sm">|</Typography>
+          <Button
+            className={`px-0 py-0 ${
               showClosed ? "text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
             }`}
             onClick={() => setShowClosed(true)}
-            type="button"
+            variant="unstyled"
           >
             Fechadas
-          </button>
+          </Button>
         </div>
-        <span className="rounded-full bg-[var(--background)] px-2 py-0.5 text-xs font-semibold text-[var(--muted)]">
+        <Badge className="px-2 py-0.5 text-xs">
           {visibleCommandas.length}
-        </span>
+        </Badge>
       </div>
 
       <div className="space-y-2">
@@ -82,31 +85,31 @@ export function ComandaList({
               >
                 <div className="flex items-start justify-between gap-2 p-3">
                   <div className="min-w-0">
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wider text-[var(--muted)]">
+                    <Typography tone="muted" variant="eyebrow">
                       {comanda.code.slice(0, 8)}
-                    </p>
-                    <p className="mt-0.5 truncate text-sm font-semibold leading-tight">
+                    </Typography>
+                    <Typography className="mt-0.5 truncate" variant="title-sm">
                       {comanda.name || comanda.customerProfile?.fullName || "Sem nome"}
-                    </p>
+                    </Typography>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      <span className="rounded-full bg-[var(--background)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--muted)]">
+                      <Badge className="px-2 py-0.5 text-[0.65rem]">
                         {progressLabel}
-                      </span>
-                      <span className="rounded-full bg-[var(--brand-green)]/12 px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--brand-green-dark)]">
+                      </Badge>
+                      <Badge className="px-2 py-0.5 text-[0.65rem]" tone="success">
                         {comanda.operationalSummary.readyOrDeliveredUnits}/{comanda.operationalSummary.activeUnits} prontos
-                      </span>
+                      </Badge>
                     </div>
                   </div>
-                  <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[0.6rem] font-semibold ${statusTone(comanda.status)}`}>
+                  <Badge className={`shrink-0 border px-1.5 py-0.5 text-[0.6rem] ${statusTone(comanda.status)}`}>
                     {humanizeComandaStatus(comanda.status)}
-                  </span>
+                  </Badge>
                 </div>
 
                 <div className="flex items-center justify-between gap-2 border-t border-[var(--line)] bg-[var(--background)]/50 px-3 py-2">
-                  <p className="text-[0.7rem] text-[var(--muted)]">
+                  <Typography tone="muted" variant="caption">
                     {entryCount} {entryCount === 1 ? "item" : "itens"} · {formatElapsed(comanda.updatedAt)}
-                  </p>
-                  <p className="text-sm font-bold text-[var(--brand-orange-dark)]">{formatMoney(comanda.totalAmount)}</p>
+                  </Typography>
+                  <Typography tone="orange" variant="title-sm">{formatMoney(comanda.totalAmount)}</Typography>
                 </div>
               </button>
             );

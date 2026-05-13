@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import { formatMoney } from "@/lib/utils";
 import {
   describeOperationalSummary,
@@ -25,10 +28,10 @@ export function OrderItemsSection({
   return (
     <section>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Itens do pedido</p>
-        <span className="rounded-full bg-[var(--brand-green)]/12 px-2 py-0.5 text-[0.65rem] font-bold text-[var(--brand-green-dark)]">
+        <Typography tone="muted" variant="eyebrow">Itens do pedido</Typography>
+        <Badge className="px-2 py-0.5 text-[0.65rem] font-bold" tone="success">
           {totalItems} {totalItems === 1 ? "item" : "itens"}
-        </span>
+        </Badge>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-white">
@@ -45,13 +48,13 @@ export function OrderItemsSection({
                     {item.quantity}×
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">{item.menuItem?.name || "Item"}</p>
-                    <p className="mt-0.5 text-[0.7rem] text-[var(--muted)]">
+                    <Typography variant="title-sm">{item.menuItem?.name || "Item"}</Typography>
+                    <Typography className="mt-0.5" tone="muted" variant="caption">
                       Unitário {formatMoney(toNumber(item.unitPrice))}
-                    </p>
+                    </Typography>
                   </div>
                 </div>
-                <p className="shrink-0 text-sm font-bold">{formatMoney(toNumber(item.subtotalAmount))}</p>
+                <Typography as="p" className="shrink-0" variant="title-sm">{formatMoney(toNumber(item.subtotalAmount))}</Typography>
               </div>
 
               {extras.length ? (
@@ -97,15 +100,15 @@ export function OrderItemsSection({
               <div className="mt-3 rounded-lg border border-[var(--line)] bg-[var(--background)]/70 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Operação por unidade</p>
-                    <p className="mt-1 text-[0.75rem] text-[var(--muted)]">
-                      {itemSummary.length ? itemSummary.join(" • ") : "Nenhuma unidade operacional registrada."}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-white px-2 py-0.5 text-[0.7rem] font-semibold text-[var(--foreground)]">
-                    {item.operationalSummary.readyOrDeliveredUnits}/{item.operationalSummary.activeUnits} pronto(s)
-                  </span>
-                </div>
+                     <Typography tone="muted" variant="overline">Operação por unidade</Typography>
+                     <Typography className="mt-1" tone="muted" variant="caption">
+                       {itemSummary.length ? itemSummary.join(" • ") : "Nenhuma unidade operacional registrada."}
+                     </Typography>
+                   </div>
+                   <Badge className="bg-white px-2 py-0.5 text-[0.7rem]">
+                     {item.operationalSummary.readyOrDeliveredUnits}/{item.operationalSummary.activeUnits} pronto(s)
+                   </Badge>
+                 </div>
 
                 <div className="mt-3 space-y-2">
                   {(item.units || []).map((unit) => {
@@ -115,44 +118,45 @@ export function OrderItemsSection({
                       <div key={unit.id} className="rounded-lg border border-[var(--line)] bg-white px-3 py-2.5">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-md bg-[var(--background)] px-2 py-0.5 text-[0.7rem] font-bold text-[var(--foreground)]">
-                              Unidade {unit.sequence}
-                            </span>
-                            <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold ${unitStatusStyle[unit.status]}`}>
-                              {humanizeUnitStatus(unit.status)}
-                            </span>
-                          </div>
-                          <p className="text-[0.65rem] text-[var(--muted)]">
-                            {unit.deliveredAt
-                              ? `Entregue ${formatTime(unit.deliveredAt)}`
-                              : unit.readyAt
+                             <Badge className="rounded-md bg-[var(--background)] px-2 py-0.5 text-[0.7rem]" shape="square">
+                               Unidade {unit.sequence}
+                             </Badge>
+                             <Badge className={`border px-2 py-0.5 text-[0.65rem] ${unitStatusStyle[unit.status]}`}>
+                               {humanizeUnitStatus(unit.status)}
+                             </Badge>
+                           </div>
+                           <Typography tone="muted" variant="eyebrow">
+                             {unit.deliveredAt
+                               ? `Entregue ${formatTime(unit.deliveredAt)}`
+                               : unit.readyAt
                                 ? `Pronto ${formatTime(unit.readyAt)}`
                                 : unit.startedAt
-                                  ? `Iniciado ${formatTime(unit.startedAt)}`
-                                  : "Aguardando"}
-                          </p>
-                        </div>
+                                 ? `Iniciado ${formatTime(unit.startedAt)}`
+                                 : "Aguardando"}
+                           </Typography>
+                         </div>
 
-                        {unitActions.length ? (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {unitActions.map((action) => (
-                              <button
-                                key={`${unit.id}-${action.toStatus}`}
-                                className="rounded-full border border-[var(--line)] bg-[var(--background)] px-3 py-1.5 text-[0.75rem] font-semibold text-[var(--foreground)] transition hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5 disabled:cursor-not-allowed disabled:opacity-55"
-                                disabled={pendingUnitId === unit.id || pendingStatus !== null}
-                                onClick={() => void onUnitTransition({
-                                  orderId: order.id,
+                         {unitActions.length ? (
+                           <div className="mt-2 flex flex-wrap gap-2">
+                             {unitActions.map((action) => (
+                               <Button
+                                 key={`${unit.id}-${action.toStatus}`}
+                                 className="hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
+                                 disabled={pendingUnitId === unit.id || pendingStatus !== null}
+                                 onClick={() => void onUnitTransition({
+                                   orderId: order.id,
                                   itemId: item.id,
-                                  unitId: unit.id,
-                                  toStatus: action.toStatus,
-                                })}
-                                type="button"
-                              >
-                                {pendingUnitId === unit.id ? "Atualizando…" : action.label}
-                              </button>
-                            ))}
-                          </div>
-                        ) : null}
+                                   unitId: unit.id,
+                                   toStatus: action.toStatus,
+                                 })}
+                                 size="xs"
+                                 variant="secondary"
+                               >
+                                 {pendingUnitId === unit.id ? "Atualizando…" : action.label}
+                               </Button>
+                             ))}
+                           </div>
+                         ) : null}
                       </div>
                     );
                   })}
