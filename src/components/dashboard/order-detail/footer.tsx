@@ -1,3 +1,5 @@
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { actionClassName, getActions } from "./helpers";
 import type { DashboardOrderDetail, OrderStatus } from "./types";
 
@@ -22,29 +24,22 @@ export function OrderDetailFooter({
 
   return (
     <footer className="sticky bottom-0 shrink-0 border-t border-[var(--line)] bg-white p-4 shadow-[0_-4px_20px_rgba(45,24,11,0.06)]">
-      {feedback ? (
-        <div className="mb-2.5 rounded-lg border border-[var(--brand-green)]/30 bg-[var(--brand-green)]/10 px-3 py-2 text-xs font-medium text-[var(--brand-green-dark)]">
-          {feedback}
-        </div>
-      ) : null}
-      {error ? (
-        <div className="mb-2.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
-          {error}
-        </div>
-      ) : null}
+      {feedback ? <Alert className="mb-2.5" tone="success">{feedback}</Alert> : null}
+      {error ? <Alert className="mb-2.5" tone="error">{error}</Alert> : null}
 
       {actions.length ? (
         <div className="flex flex-wrap gap-2">
           {actions.map((action) => (
-            <button
+            <Button
               key={action.toStatus}
-              className={`flex-1 rounded-full px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-55 ${actionClassName(action.tone)}`}
+              className={`flex-1 ${actionClassName(action.tone)}`}
               disabled={pendingStatus !== null}
               onClick={() => void onTransition(action.toStatus)}
-              type="button"
+              size="lg"
+              variant="unstyled"
             >
               {pendingStatus === action.toStatus ? "Atualizando…" : action.label}
-            </button>
+            </Button>
           ))}
         </div>
       ) : (

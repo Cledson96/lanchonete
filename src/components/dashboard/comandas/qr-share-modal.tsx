@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { CloseIcon, CopyIcon } from "./icons";
 
 export function QrShareModal({
@@ -59,54 +61,15 @@ export function QrShareModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[rgba(45,24,11,0.4)] p-4 backdrop-blur-[3px]">
-      <button aria-label="Fechar" className="absolute inset-0" onClick={onClose} type="button" />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-[var(--line)] bg-white p-5 shadow-2xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-              Compartilhar comanda
-            </p>
-            <h3 className="mt-0.5 text-lg font-bold leading-tight">{comandaName}</h3>
-          </div>
-          <button
-            aria-label="Fechar"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] hover:bg-[var(--background)]"
-            onClick={onClose}
-            type="button"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        <div className="mt-4 flex justify-center">
-          <div className="rounded-xl border border-[var(--line)] bg-white p-3">
-            {qrDataUrl ? (
-              <Image alt="QR code" className="h-56 w-56" height={224} src={qrDataUrl} width={224} />
-            ) : (
-              <div className="flex h-56 w-56 items-center justify-center border border-dashed border-[var(--line)] text-sm text-[var(--muted)]">
-                Gerando…
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-lg bg-[var(--background)] p-2.5 text-xs">
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
-            Link público
-          </p>
-          <p className="mt-1 break-all font-mono text-[0.7rem] text-[var(--foreground)]">{publicUrl}</p>
-        </div>
-
-        <div className="mt-3 flex gap-2">
-          <button
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--brand-orange-dark)]"
-            onClick={() => void handleCopy()}
-            type="button"
-          >
+    <Modal
+      closeIcon={<CloseIcon />}
+      eyebrow="Compartilhar comanda"
+      footer={
+        <div className="flex gap-2">
+          <Button fullWidth onClick={() => void handleCopy()}>
             <CopyIcon />
             {copyFeedback ?? "Copiar link"}
-          </button>
+          </Button>
           <a
             className="flex items-center justify-center rounded-full border border-[var(--line)] px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--background)]"
             href={publicUrl}
@@ -116,7 +79,28 @@ export function QrShareModal({
             Abrir
           </a>
         </div>
+      }
+      onClose={onClose}
+      title={comandaName}
+    >
+      <div className="flex justify-center">
+        <div className="rounded-xl border border-[var(--line)] bg-white p-3">
+          {qrDataUrl ? (
+            <Image alt="QR code" className="h-56 w-56" height={224} src={qrDataUrl} width={224} />
+          ) : (
+            <div className="flex h-56 w-56 items-center justify-center border border-dashed border-[var(--line)] text-sm text-[var(--muted)]">
+              Gerando…
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      <div className="mt-4 rounded-lg bg-[var(--background)] p-2.5 text-xs">
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
+          Link público
+        </p>
+        <p className="mt-1 break-all font-mono text-[0.7rem] text-[var(--foreground)]">{publicUrl}</p>
+      </div>
+    </Modal>
   );
 }

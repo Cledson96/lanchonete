@@ -1,4 +1,7 @@
 import { ComandaEntryList } from "@/components/comanda/entry-list";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   humanizeComandaStatus,
   humanizePaymentMethod,
@@ -55,9 +58,9 @@ export function ComandaDetailPanel({
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
                 {selectedComanda.code.slice(0, 8)}
               </p>
-              <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold ${statusTone(selectedComanda.status)}`}>
+              <Badge className={`border px-2 py-0.5 text-[0.65rem] ${statusTone(selectedComanda.status)}`}>
                 {humanizeComandaStatus(selectedComanda.status)}
-              </span>
+              </Badge>
             </div>
             <h2 className="mt-1 truncate text-xl font-bold tracking-tight">
               {selectedComanda.name || selectedComanda.customerProfile?.fullName || "Sem nome"}
@@ -69,41 +72,39 @@ export function ComandaDetailPanel({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              className="flex items-center gap-1.5 rounded-full border border-[var(--line)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
+            <Button
+              className="hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
               onClick={onOpenQr}
+              size="sm"
               type="button"
+              variant="secondary"
             >
               <QrIcon />
               QR da mesa
-            </button>
+            </Button>
             {canEdit ? (
-              <button
-                className="rounded-full bg-[var(--brand-green)] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[var(--brand-green-dark)]"
-                onClick={onOpenClose}
-                type="button"
-              >
+              <Button onClick={onOpenClose} size="sm" variant="success">
                 Fechar comanda
-              </button>
+              </Button>
             ) : (
-              <span className="rounded-full bg-[var(--background)] px-3 py-2 text-xs font-semibold text-[var(--muted)]">
+              <Badge className="px-3 py-2 text-xs">
                 Encerrada · {humanizePaymentMethod(selectedComanda.paymentMethod)}
-              </span>
+              </Badge>
             )}
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-4">
-          <span className="rounded-full bg-[var(--background)] px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--muted)]">
+          <Badge>
             {describeComandaProgress(selectedComanda)}
-          </span>
-          <span className="rounded-full bg-[var(--brand-green)]/12 px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--brand-green-dark)]">
+          </Badge>
+          <Badge tone="success">
             {selectedComanda.operationalSummary.readyOrDeliveredUnits}/{selectedComanda.operationalSummary.activeUnits} prontos
-          </span>
+          </Badge>
           {selectedComanda.operationalSummary.deliveredUnits > 0 ? (
-            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[0.7rem] font-semibold text-emerald-700">
+            <Badge className="bg-emerald-100 text-emerald-700">
               {selectedComanda.operationalSummary.deliveredUnits} entregue(s)
-            </span>
+            </Badge>
           ) : null}
         </div>
 
@@ -132,27 +133,21 @@ export function ComandaDetailPanel({
         ) : null}
       </section>
 
-      {detailError ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{detailError}</div>
-      ) : null}
+      {detailError ? <Alert className="rounded-xl px-4" tone="error">{detailError}</Alert> : null}
 
       <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-sm font-bold tracking-tight">Itens lançados</p>
-            <span className="rounded-full bg-[var(--brand-green)]/12 px-2 py-0.5 text-[0.65rem] font-bold text-[var(--brand-green-dark)]">
+            <Badge className="px-2 py-0.5 text-[0.65rem] font-bold" tone="success">
               {selectedComanda.entries.reduce((sum, entry) => sum + entry.quantity, 0)} itens
-            </span>
+            </Badge>
           </div>
           {canEdit ? (
-            <button
-              className="flex items-center gap-1.5 rounded-full bg-[var(--brand-orange)] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-orange-dark)]"
-              onClick={onOpenAddItem}
-              type="button"
-            >
+            <Button onClick={onOpenAddItem} size="xs">
               <PlusIcon />
               Adicionar item
-            </button>
+            </Button>
           ) : null}
         </div>
         <ComandaEntryList

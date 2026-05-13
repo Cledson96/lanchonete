@@ -2,6 +2,10 @@ export function digitsOnly(value?: string | null) {
   return (value || "").replace(/\D/g, "");
 }
 
+export function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
 export function normalizePhone(value: string) {
   const digits = digitsOnly(value);
 

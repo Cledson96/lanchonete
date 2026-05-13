@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+import { IconButton } from "@/components/ui/icon-button";
 import { formatTime, humanizeStatus, humanizeType } from "./helpers";
 import { CloseIcon } from "./icons";
 import { channelStyle, statusStyle } from "./styles";
@@ -17,14 +19,9 @@ export function OrderDetailHeader({
       {loading || !order ? (
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-[var(--muted)]">Carregando pedido…</p>
-          <button
-            aria-label="Fechar"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] hover:bg-[var(--background)]"
-            onClick={onClose}
-            type="button"
-          >
+          <IconButton label="Fechar" onClick={onClose}>
             <CloseIcon />
-          </button>
+          </IconButton>
         </div>
       ) : (
         <>
@@ -32,26 +29,21 @@ export function OrderDetailHeader({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Pedido</p>
-                <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[0.6rem] font-semibold ${channelStyle[order.channel].cls}`}>
+                <Badge className={channelStyle[order.channel].cls} shape="square">
                   {channelStyle[order.channel].label}
-                </span>
+                </Badge>
               </div>
               <h2 className="mt-0.5 truncate text-xl font-bold tracking-tight">{order.code.slice(0, 8)}</h2>
             </div>
-            <button
-              aria-label="Fechar"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--line)] text-[var(--muted)] hover:bg-[var(--background)]"
-              onClick={onClose}
-              type="button"
-            >
+            <IconButton label="Fechar" onClick={onClose}>
               <CloseIcon />
-            </button>
+            </IconButton>
           </div>
 
           <div className="mt-3 flex items-center gap-2">
-            <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyle[order.status]}`}>
+            <Badge className={`border text-xs ${statusStyle[order.status]}`}>
               {humanizeStatus(order.status)}
-            </span>
+            </Badge>
             <span className="text-xs text-[var(--muted)]">•</span>
             <span className="text-xs font-medium text-[var(--muted)]">{humanizeType(order.type)}</span>
             <span className="text-xs text-[var(--muted)]">•</span>
