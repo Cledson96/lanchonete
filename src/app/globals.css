@@ -280,9 +280,20 @@ select {
   animation: hero-pulse 2.2s ease-in-out infinite;
 }
 
+.hero-status__dot--closed {
+  background: #f87171;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.25);
+  animation-name: hero-pulse-closed;
+}
+
 @keyframes hero-pulse {
   0%, 100% { box-shadow: 0 0 0 4px rgba(111, 226, 111, 0.25); }
   50% { box-shadow: 0 0 0 7px rgba(111, 226, 111, 0.08); }
+}
+
+@keyframes hero-pulse-closed {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.25); }
+  50% { box-shadow: 0 0 0 7px rgba(248, 113, 113, 0.08); }
 }
 
 .hero-underline {
