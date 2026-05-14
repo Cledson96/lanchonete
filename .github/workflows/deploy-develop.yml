@@ -94,6 +94,6 @@ jobs:
             git pull --ff-only origin develop
             docker compose --env-file .env.production pull
             docker compose --env-file .env.production run --rm app npx prisma migrate deploy
-            docker compose --env-file .env.production run --rm -v "$PWD/public/uploads/menu:/seed-menu:ro" app sh -c 'mkdir -p /app/public/uploads/menu && cp -n /seed-menu/* /app/public/uploads/menu/ 2>/dev/null || true'
+            docker compose --env-file .env.production run --rm -v "$PWD/public/uploads/menu:/seed-menu:ro" app sh -c 'mkdir -p /app/public/uploads/menu && cp -f /seed-menu/* /app/public/uploads/menu/ 2>/dev/null || true'
             docker compose --env-file .env.production up -d --remove-orphans
             docker image prune -f
