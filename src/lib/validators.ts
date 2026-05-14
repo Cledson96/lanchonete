@@ -53,7 +53,7 @@ export const ingredientCustomizationSchema = z.object({
 
 export const orderItemSchema = z.object({
   menuItemId: stringField.min(1),
-  quantity: z.coerce.number().int().min(1).max(99),
+  quantity: z.coerce.number().int().min(1).max(100),
   notes: optionalStringField,
   optionItemIds: z.array(stringField.min(1)).optional().default([]),
   ingredients: z.array(ingredientCustomizationSchema).optional().default([]),

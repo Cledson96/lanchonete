@@ -47,6 +47,14 @@ type MenuItemDetailDialogProps = {
   ingredients?: IngredientForDialog[];
 };
 
+const MIN_ITEM_QUANTITY = 1;
+const MAX_ITEM_QUANTITY = 100;
+
+function normalizeItemQuantity(value: number) {
+  if (!Number.isFinite(value)) return MIN_ITEM_QUANTITY;
+  return Math.max(MIN_ITEM_QUANTITY, Math.min(MAX_ITEM_QUANTITY, Math.trunc(value)));
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <Typography className="flex items-center gap-2 text-[var(--ink-soft)]" variant="caption-sm">
@@ -153,6 +161,10 @@ export function MenuItemDetailDialog({
       if (index === -1) return prev;
       return { ...prev, [groupId]: [...current.slice(0, index), ...current.slice(index + 1)] };
     });
+  }
+
+  function handleQuantityChange(value: string) {
+    setQuantity(normalizeItemQuantity(Number.parseInt(value, 10)));
   }
 
   if (!open) return null;
@@ -475,27 +487,35 @@ export function MenuItemDetailDialog({
             <div className="shrink-0 border-t border-[var(--line)] bg-[var(--background)] px-4 pb-5 pt-3 sm:px-5 sm:pb-4">
               <div className="flex items-center gap-3">
                 {/* Stepper de quantidade */}
-                <div className="inline-flex items-center gap-0.5 rounded-full border border-[var(--line)] bg-white p-0.5">
+                <div className="inline-flex items-center gap-1 rounded-full border border-[var(--line)] bg-white p-0.5">
                   <Button
                     aria-label="Diminuir quantidade"
-                    className="h-9 w-9 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
-                    onClick={() => setQuantity((c) => Math.max(c - 1, 1))}
+                    className="h-10 w-10 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
+                    onClick={() => setQuantity((c) => normalizeItemQuantity(c - 1))}
                     variant="unstyled"
                   >
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </Button>
-                  <Typography as="span" className="min-w-7 text-center font-bold text-[var(--foreground)]" variant="body-md">
-                    {quantity}
-                  </Typography>
+                  <input
+                    aria-label="Quantidade"
+                    className="h-10 w-14 bg-transparent text-center text-base font-bold text-[var(--foreground)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    inputMode="numeric"
+                    max={MAX_ITEM_QUANTITY}
+                    min={MIN_ITEM_QUANTITY}
+                    onChange={(event) => handleQuantityChange(event.currentTarget.value)}
+                    onFocus={(event) => event.currentTarget.select()}
+                    type="number"
+                    value={quantity}
+                  />
                   <Button
                     aria-label="Aumentar quantidade"
-                    className="h-9 w-9 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
-                    onClick={() => setQuantity((c) => Math.min(c + 1, 100))}
+                    className="h-10 w-10 text-[var(--muted)] hover:bg-[var(--cream)] hover:text-[var(--foreground)]"
+                    onClick={() => setQuantity((c) => normalizeItemQuantity(c + 1))}
                     variant="unstyled"
                   >
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </Button>

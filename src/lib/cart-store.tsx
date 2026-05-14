@@ -51,13 +51,15 @@ function createCartLineId(menuItemId: string) {
   return `${menuItemId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+const MAX_CART_ITEM_QUANTITY = 100;
+
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "HYDRATE":
       return { ...state, items: action.items };
     case "ADD_ITEM": {
       const incomingNotes = normalizeNotes(action.item.notes);
-      const incomingQuantity = Math.min(Math.max(action.item.quantity, 1), 99);
+      const incomingQuantity = Math.min(Math.max(action.item.quantity, 1), MAX_CART_ITEM_QUANTITY);
       const incomingKey = cartLineKey(action.item);
       const existing = state.items.find(
         (i) => cartLineKey(i) === incomingKey,
@@ -68,7 +70,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ...state,
           items: state.items.map((i) =>
             i.id === existing.id
-              ? { ...i, quantity: i.quantity + incomingQuantity }
+              ? { ...i, quantity: Math.min(i.quantity + incomingQuantity, MAX_CART_ITEM_QUANTITY) }
               : i,
           ),
         };
@@ -101,7 +103,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: state.items.map((i) =>
-          i.id === action.id ? { ...i, quantity: action.quantity } : i,
+          i.id === action.id ? { ...i, quantity: Math.min(Math.floor(action.quantity), MAX_CART_ITEM_QUANTITY) } : i,
         ),
       };
     }
@@ -186,7 +188,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     : undefined,
                 quantity:
                   typeof item.quantity === "number" && item.quantity > 0
-                    ? Math.min(Math.floor(item.quantity), 99)
+                    ? Math.min(Math.floor(item.quantity), MAX_CART_ITEM_QUANTITY)
                     : 1,
                 notes: normalizeNotes(
                   typeof item.notes === "string" ? item.notes : null,
