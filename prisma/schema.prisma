@@ -93,17 +93,17 @@ enum WhatsAppMessageStatus {
 }
 
 model User {
-  id              String             @id @default(cuid())
-  email           String             @unique
-  passwordHash    String?
-  role            UserRole           @default(cliente)
-  isActive        Boolean            @default(true)
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  customerProfile CustomerProfile?
-  statusEvents    OrderStatusEvent[] @relation("StatusChangedBy")
-  acceptedOrders  Order[]            @relation("AcceptedBy")
-  commandas       Comanda[]          @relation("OpenedBy")
+  id                            String                 @id @default(cuid())
+  email                         String                 @unique
+  passwordHash                  String?
+  role                          UserRole               @default(cliente)
+  isActive                      Boolean                @default(true)
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  customerProfile               CustomerProfile?
+  statusEvents                  OrderStatusEvent[]     @relation("StatusChangedBy")
+  acceptedOrders                Order[]                @relation("AcceptedBy")
+  commandas                     Comanda[]              @relation("OpenedBy")
   assignedWhatsAppConversations WhatsAppConversation[] @relation("WhatsAppConversationOwner")
 }
 
@@ -148,21 +148,25 @@ model Address {
 }
 
 model StoreProfile {
-  id                    String   @id @default(cuid())
-  slug                  String   @unique
-  name                  String
-  zipCode               String?
-  street                String
-  number                String
-  neighborhood          String?
-  city                  String
-  state                 String
-  latitude              Decimal? @db.Decimal(9, 6)
-  longitude             Decimal? @db.Decimal(9, 6)
-  maxDeliveryDistanceKm Decimal  @default(5) @db.Decimal(5, 2)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  businessHours         StoreBusinessHour[]
+  id                               String              @id @default(cuid())
+  slug                             String              @unique
+  name                             String
+  zipCode                          String?
+  street                           String
+  number                           String
+  neighborhood                     String?
+  city                             String
+  state                            String
+  latitude                         Decimal?            @db.Decimal(9, 6)
+  longitude                        Decimal?            @db.Decimal(9, 6)
+  maxDeliveryDistanceKm            Decimal             @default(5) @db.Decimal(5, 2)
+  whatsappPublicSiteReplyMessage   String?             @db.Text
+  whatsappOutForDeliveryMessage    String?             @db.Text
+  whatsappOrderConfirmationMessage String?             @db.Text
+  whatsappVerificationCodeMessage  String?             @db.Text
+  createdAt                        DateTime            @default(now())
+  updatedAt                        DateTime            @updatedAt
+  businessHours                    StoreBusinessHour[]
 }
 
 model StoreBusinessHour {
@@ -181,42 +185,42 @@ model StoreBusinessHour {
 }
 
 model Category {
-  id          String     @id @default(cuid())
-  name        String
-  slug        String     @unique
-  description String?
-  sortOrder   Int        @default(0)
+  id             String     @id @default(cuid())
+  name           String
+  slug           String     @unique
+  description    String?
+  sortOrder      Int        @default(0)
   availableFrom  String?
   availableUntil String?
-  isActive    Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  menuItems   MenuItem[]
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  menuItems      MenuItem[]
 }
 
 model MenuItem {
-  id             String                @id @default(cuid())
-  categoryId     String
-  name           String
-  slug           String                @unique
-  description    String?
-  imageUrl       String?
-  kind           MenuItemKind          @default(simples)
-  price          Decimal               @db.Decimal(10, 2)
-  compareAtPrice Decimal?              @db.Decimal(10, 2)
-  availableWeekdays String[]           @default([])
-  isActive       Boolean               @default(true)
-  isFeatured     Boolean               @default(false)
-  sortOrder      Int                   @default(0)
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  optionGroups   MenuItemOptionGroup[]
-  ingredients    MenuItemIngredient[]
-  comboItems     MenuItemComponent[]   @relation("ComboParent")
-  usedInCombos   MenuItemComponent[]   @relation("ComboComponent")
-  orderItems     OrderItem[]
-  comandaEntries ComandaEntry[]
+  id                String                @id @default(cuid())
+  categoryId        String
+  name              String
+  slug              String                @unique
+  description       String?
+  imageUrl          String?
+  kind              MenuItemKind          @default(simples)
+  price             Decimal               @db.Decimal(10, 2)
+  compareAtPrice    Decimal?              @db.Decimal(10, 2)
+  availableWeekdays String[]              @default([])
+  isActive          Boolean               @default(true)
+  isFeatured        Boolean               @default(false)
+  sortOrder         Int                   @default(0)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  category          Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  optionGroups      MenuItemOptionGroup[]
+  ingredients       MenuItemIngredient[]
+  comboItems        MenuItemComponent[]   @relation("ComboParent")
+  usedInCombos      MenuItemComponent[]   @relation("ComboComponent")
+  orderItems        OrderItem[]
+  comandaEntries    ComandaEntry[]
 }
 
 model MenuItemComponent {
@@ -278,48 +282,48 @@ model MenuItemOptionGroup {
 }
 
 model Ingredient {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  price     Decimal  @default(0) @db.Decimal(10, 2)
-  isActive  Boolean  @default(true)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String                   @id @default(cuid())
+  name              String
+  slug              String                   @unique
+  price             Decimal                  @default(0) @db.Decimal(10, 2)
+  isActive          Boolean                  @default(true)
+  sortOrder         Int                      @default(0)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
   menuItems         MenuItemIngredient[]
   orderItemLinks    OrderItemIngredient[]
   comandaEntryLinks ComandaEntryIngredient[]
 }
 
 model MenuItemIngredient {
-  id            String    @id @default(cuid())
-  menuItemId    String
-  ingredientId  String
-  quantity      Int       @default(1)
-  sortOrder     Int       @default(0)
-  createdAt     DateTime  @default(now())
-  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  id           String     @id @default(cuid())
+  menuItemId   String
+  ingredientId String
+  quantity     Int        @default(1)
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  menuItem     MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
 
   @@unique([menuItemId, ingredientId])
 }
 
 model OrderItemIngredient {
-  id            String    @id @default(cuid())
-  orderItemId   String
-  ingredientId  String
-  quantity      Int       @default(1)
-  orderItem     OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  id           String     @id @default(cuid())
+  orderItemId  String
+  ingredientId String
+  quantity     Int        @default(1)
+  orderItem    OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
 }
 
 model ComandaEntryIngredient {
-  id             String         @id @default(cuid())
+  id             String       @id @default(cuid())
   comandaEntryId String
-  ingredientId  String
-  quantity      Int             @default(1)
-  comandaEntry  ComandaEntry    @relation(fields: [comandaEntryId], references: [id], onDelete: Cascade)
-  ingredient    Ingredient      @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  ingredientId   String
+  quantity       Int          @default(1)
+  comandaEntry   ComandaEntry @relation(fields: [comandaEntryId], references: [id], onDelete: Cascade)
+  ingredient     Ingredient   @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
 }
 
 model DeliveryFeeRule {
@@ -380,20 +384,20 @@ model Order {
 }
 
 model OrderItem {
-  id              String            @id @default(cuid())
-  orderId         String
-  menuItemId      String
-  quantity        Int
-  unitPrice       Decimal           @db.Decimal(10, 2)
-  subtotalAmount  Decimal           @db.Decimal(10, 2)
-  notes           String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItem        MenuItem          @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
-  selectedOptions OrderItemOption[]
+  id                       String                @id @default(cuid())
+  orderId                  String
+  menuItemId               String
+  quantity                 Int
+  unitPrice                Decimal               @db.Decimal(10, 2)
+  subtotalAmount           Decimal               @db.Decimal(10, 2)
+  notes                    String?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  order                    Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem                 MenuItem              @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  selectedOptions          OrderItemOption[]
   ingredientCustomizations OrderItemIngredient[]
-  units           OrderItemUnit[]
+  units                    OrderItemUnit[]
 }
 
 model OrderItemOption {
@@ -432,37 +436,37 @@ model Comanda {
 }
 
 model ComandaEntry {
-  id              String               @id @default(cuid())
-  comandaId       String
-  menuItemId      String
-  quantity        Int
-  unitPrice       Decimal              @db.Decimal(10, 2)
-  subtotalAmount  Decimal              @db.Decimal(10, 2)
-  notes           String?
-  sentToKitchenAt DateTime?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  comanda         Comanda              @relation(fields: [comandaId], references: [id], onDelete: Cascade)
-  menuItem        MenuItem             @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
-  selectedOptions ComandaEntryOption[]
+  id                       String                   @id @default(cuid())
+  comandaId                String
+  menuItemId               String
+  quantity                 Int
+  unitPrice                Decimal                  @db.Decimal(10, 2)
+  subtotalAmount           Decimal                  @db.Decimal(10, 2)
+  notes                    String?
+  sentToKitchenAt          DateTime?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  comanda                  Comanda                  @relation(fields: [comandaId], references: [id], onDelete: Cascade)
+  menuItem                 MenuItem                 @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  selectedOptions          ComandaEntryOption[]
   ingredientCustomizations ComandaEntryIngredient[]
-  units           OrderItemUnit[]
+  units                    OrderItemUnit[]
 }
 
 model OrderItemUnit {
-  id            String              @id @default(cuid())
-  orderItemId   String
+  id             String              @id @default(cuid())
+  orderItemId    String
   comandaEntryId String?
-  sequence      Int
-  status        OrderItemUnitStatus @default(novo)
-  startedAt     DateTime?
-  readyAt       DateTime?
-  deliveredAt   DateTime?
-  cancelledAt   DateTime?
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  orderItem     OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-  comandaEntry  ComandaEntry?       @relation(fields: [comandaEntryId], references: [id], onDelete: SetNull)
+  sequence       Int
+  status         OrderItemUnitStatus @default(novo)
+  startedAt      DateTime?
+  readyAt        DateTime?
+  deliveredAt    DateTime?
+  cancelledAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  orderItem      OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  comandaEntry   ComandaEntry?       @relation(fields: [comandaEntryId], references: [id], onDelete: SetNull)
 
   @@unique([orderItemId, sequence])
   @@index([status, createdAt])
@@ -493,26 +497,26 @@ model OrderStatusEvent {
 }
 
 model WhatsAppConversation {
-  id                String              @id @default(cuid())
-  customerProfileId String
-  orderId           String?             @unique
-  ownerId           String?
-  channel           ConversationChannel @default(whatsapp)
-  priority          WhatsAppConversationPriority @default(normal)
-  phone             String
-  externalThreadId  String?             @unique
-  state             String
-  botContext        Json?
-  startedAt         DateTime            @default(now())
-  lastInboundAt     DateTime?
-  lastMessageAt     DateTime?
+  id                  String                       @id @default(cuid())
+  customerProfileId   String
+  orderId             String?                      @unique
+  ownerId             String?
+  channel             ConversationChannel          @default(whatsapp)
+  priority            WhatsAppConversationPriority @default(normal)
+  phone               String
+  externalThreadId    String?                      @unique
+  state               String
+  botContext          Json?
+  startedAt           DateTime                     @default(now())
+  lastInboundAt       DateTime?
+  lastMessageAt       DateTime?
   lastStandardReplyAt DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  customerProfile   CustomerProfile     @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
-  owner             User?               @relation("WhatsAppConversationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  order             Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  messages          WhatsAppMessage[]
+  createdAt           DateTime                     @default(now())
+  updatedAt           DateTime                     @updatedAt
+  customerProfile     CustomerProfile              @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  owner               User?                        @relation("WhatsAppConversationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  order               Order?                       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  messages            WhatsAppMessage[]
 
   @@index([priority, updatedAt])
   @@index([ownerId])

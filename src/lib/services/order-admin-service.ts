@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
 import { syncLegacyCommandasToOrders } from "@/lib/services/comanda-service";
 import { syncMissingOrderItemUnits } from "@/lib/services/order-item-unit-service";
+import { renderWhatsAppMessageTemplate } from "@/lib/services/whatsapp-template-service";
 import { normalizePhone } from "@/lib/utils";
 
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -240,9 +241,11 @@ function syncUnitStatusesForOrderTransition(tx: Prisma.TransactionClient, orderI
 
 export type DashboardOrderView = keyof typeof dashboardOrderViewStatuses;
 
-function getStatusMessage(code: string, status: OrderStatus, type: "delivery" | "retirada" | "local") {
+async function getStatusMessage(code: string, status: OrderStatus, type: "delivery" | "retirada" | "local") {
   if (status === "saiu_para_entrega" && type === "delivery") {
-    return `Pedido ${code} saiu para entrega. Ja esta a caminho.`;
+    return renderWhatsAppMessageTemplate("order_out_for_delivery", {
+      codigoPedido: code,
+    });
   }
 
   return null;
@@ -621,7 +624,7 @@ export async function transitionOrderStatus(input: {
     return attachOrderOperationalSummary(updated as typeof updated & { comanda?: null });
   });
 
-  const message = getStatusMessage(updatedOrder.code, input.toStatus, order.type);
+  const message = await getStatusMessage(updatedOrder.code, input.toStatus, order.type);
 
   if (message && updatedOrder.customerPhone) {
     try {

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       customerProfileId: session.customerProfileId,
     });
 
-    const confirmationMessage = buildOrderConfirmationMessage(order, {
+    const confirmationMessage = await buildOrderConfirmationMessage(order, {
       pixKey: config.storePixKey,
       publicSiteUrl: config.publicSiteUrl,
       paymentMethodFallback: input.paymentMethod,

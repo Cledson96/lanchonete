@@ -1,3 +1,4 @@
+import { renderWhatsAppMessageTemplate } from "@/lib/services/whatsapp-template-service";
 import { formatMoney } from "@/lib/utils";
 
 type OrderConfirmationItem = {
@@ -156,7 +157,7 @@ function buildTrackingUrl(code: string, publicSiteUrl: string) {
   return new URL(`/pedido/${code}`, publicSiteUrl).toString();
 }
 
-export function buildOrderConfirmationMessage(
+export async function buildOrderConfirmationMessage(
   order: OrderConfirmationInput,
   options: {
     pixKey?: string;
@@ -168,26 +169,22 @@ export function buildOrderConfirmationMessage(
   const paymentLabel = paymentMethodLabel(order.paymentMethod || options.paymentMethodFallback || "outro");
   const trackingUrl = buildTrackingUrl(order.code, options.publicSiteUrl || "http://localhost:3000");
 
-  return [
-    "✅ Pedido enviado e já está a caminho da preparação.",
-    order.customerName ? `Cliente: *${order.customerName}*` : null,
-    `Código: *${order.code}*`,
-    `Acompanhe seu pedido: ${trackingUrl}`,
-    "",
-    "*Resumo do pedido*",
-    ...lines,
-    "",
-    `Subtotal: ${formatMoney(Number(order.subtotalAmount))}`,
-    `Frete: ${formatMoney(Number(order.deliveryFeeAmount))}`,
-    `Total: ${formatMoney(Number(order.totalAmount))}`,
-    `Pagamento: ${paymentLabel}`,
-    order.type === "delivery" && order.deliveryAddress
-      ? `Endereço: ${formatAddress(order.deliveryAddress)}`
-      : "Retirada na loja.",
-    (order.paymentMethod || options.paymentMethodFallback) === "pix"
-      ? `PIX da loja: ${options.pixKey || "configure a STORE_PIX_KEY"}\nEnvie o comprovante nesta conversa.`
-      : null,
-  ]
-    .filter((line): line is string => Boolean(line))
-    .join("\n");
+  return renderWhatsAppMessageTemplate("order_confirmation", {
+    cliente: order.customerName ? `Cliente: *${order.customerName}*` : "",
+    codigoPedido: order.code,
+    linkPedido: trackingUrl,
+    itens: lines.join("\n"),
+    subtotal: formatMoney(Number(order.subtotalAmount)),
+    frete: formatMoney(Number(order.deliveryFeeAmount)),
+    total: formatMoney(Number(order.totalAmount)),
+    pagamento: paymentLabel,
+    endereco:
+      order.type === "delivery" && order.deliveryAddress
+        ? `Endereco: ${formatAddress(order.deliveryAddress)}`
+        : "Retirada na loja.",
+    pix:
+      (order.paymentMethod || options.paymentMethodFallback) === "pix"
+        ? `PIX da loja: ${options.pixKey || "configure a STORE_PIX_KEY"}\nEnvie o comprovante nesta conversa.`
+        : "",
+  });
 }

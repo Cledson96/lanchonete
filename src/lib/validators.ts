@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { WHATSAPP_MESSAGE_TEMPLATE_KEYS } from "@/lib/contracts/whatsapp-templates";
 import { MENU_WEEKDAYS } from "@/lib/menu/availability";
 import { normalizePhone, normalizeZipCode, optionalTrimmed } from "@/lib/utils";
 
@@ -322,4 +323,13 @@ export const sendWhatsAppConversationMessageSchema = z.object({
 export const updateWhatsAppConversationInboxSchema = z.object({
   priority: z.enum(["low", "normal", "high"]).optional(),
   ownerId: z.union([stringField.min(1), z.null()]).optional(),
+});
+
+export const updateWhatsAppMessageTemplatesSchema = z.object({
+  templates: z.array(
+    z.object({
+      key: z.enum(WHATSAPP_MESSAGE_TEMPLATE_KEYS),
+      content: stringField.min(1).max(4000),
+    }),
+  ).min(1),
 });

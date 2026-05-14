@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Typography } from "@/components/ui/typography";
 import type { WhatsAppInboxConversationItem, WhatsAppInboxPriority } from "@/lib/contracts/whatsapp";
+import type { WhatsAppMessageTemplate } from "@/lib/contracts/whatsapp-templates";
 
 /* ═══════════════════════════════════════════════
    Types
@@ -35,8 +36,13 @@ type ConversationItem = WhatsAppInboxConversationItem;
 type Props = {
   initialSession: SessionInfo;
   initialConversations: ConversationItem[];
+  initialTemplates: WhatsAppMessageTemplate[];
   currentAdmin: { id: string; email: string } | null;
 };
+
+function createTemplateDrafts(templates: WhatsAppMessageTemplate[]) {
+  return Object.fromEntries(templates.map((template) => [template.key, template.content])) as Record<string, string>;
+}
 
 async function parseJson<T>(response: Response): Promise<T> {
   const payload = (await response.json()) as T & { error?: { message?: string } };
@@ -173,11 +179,14 @@ function hasSessionStartTimedOut(session: SessionInfo) {
    Main component
 ═══════════════════════════════════════════════ */
 
-export function DashboardWhatsAppPanel({ initialSession, initialConversations, currentAdmin }: Props) {
+export function DashboardWhatsAppPanel({ initialSession, initialConversations, initialTemplates, currentAdmin }: Props) {
   const [session, setSession] = useState(initialSession);
   const [conversations, setConversations] = useState(initialConversations);
+  const [templates, setTemplates] = useState(initialTemplates);
+  const [templateDrafts, setTemplateDrafts] = useState(() => createTemplateDrafts(initialTemplates));
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [pendingConversationId, setPendingConversationId] = useState<string | null>(null);
+  const [pendingTemplateKey, setPendingTemplateKey] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [convSearch, setConvSearch] = useState("");
@@ -224,6 +233,43 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
     },
     [refresh],
   );
+
+  async function saveTemplate(template: WhatsAppMessageTemplate, content = templateDrafts[template.key]) {
+    try {
+      setPendingTemplateKey(template.key);
+      setError(null);
+      setFeedback(null);
+
+      const trimmed = content.trim();
+      if (!trimmed) {
+        throw new Error("A mensagem nao pode ficar vazia.");
+      }
+
+      const response = await fetch("/api/dashboard/whatsapp/templates", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          templates: [
+            {
+              key: template.key,
+              content: trimmed,
+            },
+          ],
+        }),
+      });
+
+      const payload = await parseJson<{ templates: WhatsAppMessageTemplate[] }>(response);
+      setTemplates(payload.templates);
+      setTemplateDrafts(createTemplateDrafts(payload.templates));
+      setFeedback(content === template.defaultContent ? "Mensagem restaurada para o padrao." : "Mensagem salva.");
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : "Falha ao salvar a mensagem.");
+    } finally {
+      setPendingTemplateKey(null);
+    }
+  }
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -440,6 +486,90 @@ export function DashboardWhatsAppPanel({ initialSession, initialConversations, c
             Escaneie com o WhatsApp Business da loja.
           </Typography>
         </article>
+      </section>
+
+      {/* ─── Mensagens automáticas ─── */}
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <Typography variant="title-sm">Mensagens automáticas</Typography>
+            <Typography className="mt-0.5" tone="muted" variant="caption-sm">
+              Edite os textos que o robo envia sozinho. Use as variaveis exatamente como aparecem.
+            </Typography>
+          </div>
+          <Badge className="w-fit border border-emerald-200 bg-emerald-50 text-emerald-700">
+            {templates.length} templates
+          </Badge>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {templates.map((template) => {
+            const isSavingTemplate = pendingTemplateKey === template.key;
+            const draft = templateDrafts[template.key] ?? template.content;
+            const hasChanges = draft !== template.content;
+
+            return (
+              <article className="rounded-xl border border-[var(--line)] bg-white p-3" key={template.key}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <Typography variant="title-sm">{template.label}</Typography>
+                    <Typography className="mt-0.5 leading-4" tone="muted" variant="caption-sm">
+                      {template.description}
+                    </Typography>
+                  </div>
+                  {hasChanges ? (
+                    <Badge className="shrink-0 px-1.5 py-0.5 text-[0.6rem]" tone="warning">
+                      Alterado
+                    </Badge>
+                  ) : null}
+                </div>
+
+                <textarea
+                  className="mt-3 min-h-36 w-full resize-y rounded-lg border border-[var(--line)] bg-[var(--background)] px-3 py-2 font-mono text-xs leading-5 outline-none transition focus:border-[var(--brand-orange)] focus:bg-white"
+                  disabled={isSavingTemplate}
+                  onChange={(event) =>
+                    setTemplateDrafts((current) => ({
+                      ...current,
+                      [template.key]: event.target.value,
+                    }))
+                  }
+                  value={draft}
+                />
+
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {template.variables.map((variable) => (
+                    <code
+                      className="rounded-full border border-[var(--line)] bg-[var(--background)] px-2 py-1 text-[0.65rem] font-semibold text-[var(--muted)]"
+                      key={variable}
+                    >
+                      {`{{${variable}}}`}
+                    </code>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex flex-wrap justify-end gap-2 border-t border-[var(--line)] pt-3">
+                  <Button
+                    className="px-3 py-1.5 text-[0.65rem] text-[var(--muted)]"
+                    disabled={isSavingTemplate}
+                    onClick={() => void saveTemplate(template, template.defaultContent)}
+                    size="xs"
+                    variant="secondary"
+                  >
+                    Restaurar padrão
+                  </Button>
+                  <Button
+                    className="px-3 py-1.5 text-[0.65rem]"
+                    disabled={isSavingTemplate || !hasChanges}
+                    onClick={() => void saveTemplate(template)}
+                    size="xs"
+                  >
+                    {isSavingTemplate ? "Salvando..." : "Salvar"}
+                  </Button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       {/* ─── Conversas + Eventos ─── */}

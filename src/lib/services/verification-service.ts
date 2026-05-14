@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getCustomerByPhone } from "@/lib/services/customer-service";
 import { setCustomerSession } from "@/lib/auth/session";
 import { sendWhatsAppTextMessage } from "@/lib/integrations/whatsapp";
+import { renderWhatsAppMessageTemplate } from "@/lib/services/whatsapp-template-service";
 import { normalizePhone } from "@/lib/utils";
 
 const OTP_EXPIRATION_MINUTES = 10;
@@ -49,7 +50,9 @@ export async function requestPhoneVerification(input: {
     },
   });
 
-  const message = `Seu codigo da lanchonete: ${code}. Ele vale por 10 minutos.`;
+  const message = await renderWhatsAppMessageTemplate("phone_verification_code", {
+    codigo: code,
+  });
   const delivery = await sendWhatsAppTextMessage({
     to: phone,
     body: message,
