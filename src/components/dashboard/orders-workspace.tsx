@@ -213,6 +213,8 @@ export function DashboardOrdersWorkspace({
     toStatus: "em_preparo" | "pronto" | "entregue" | "cancelado";
   }) {
     try {
+      const shouldUpdateOpenDetail = selectedOrderId === input.orderId || selectedOrder?.id === input.orderId;
+
       setPendingUnitId(input.unitId);
       setDetailError(null);
       setFeedback(null);
@@ -222,9 +224,13 @@ export function DashboardOrdersWorkspace({
         body: JSON.stringify({ toStatus: input.toStatus, source: input.source }),
       });
       await parseJson<{ order: DashboardOrderDetail }>(response);
-      const detailResponse = await fetch(`/api/dashboard/orders/${input.orderId}`, { cache: "no-store" });
-      const detailPayload = await parseJson<{ order: DashboardOrderDetail }>(detailResponse);
-      setSelectedOrder(detailPayload.order);
+
+      if (shouldUpdateOpenDetail) {
+        const detailResponse = await fetch(`/api/dashboard/orders/${input.orderId}`, { cache: "no-store" });
+        const detailPayload = await parseJson<{ order: DashboardOrderDetail }>(detailResponse);
+        setSelectedOrder(detailPayload.order);
+      }
+
       setFeedback(`Item atualizado para ${humanize(input.toStatus)}.`);
       await refreshOrders(false);
     } catch (error) {
