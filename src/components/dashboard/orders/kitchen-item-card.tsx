@@ -1,4 +1,3 @@
-import { useRef, type PointerEvent } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Badge } from "@/components/ui/badge";
@@ -22,35 +21,20 @@ export function KitchenItemCard({
     disabled: isOverlay,
   });
   const channel = channelMeta[item.channel];
-  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
-
-  function handlePointerUp(event: PointerEvent<HTMLButtonElement>) {
-    if (isOverlay || isDragging) return;
-
-    const start = pointerStartRef.current;
-    pointerStartRef.current = null;
-    if (!start) return;
-
-    const deltaX = Math.abs(event.clientX - start.x);
-    const deltaY = Math.abs(event.clientY - start.y);
-    if (deltaX > 4 || deltaY > 4) return;
-
-    onOpen({ orderId: item.orderId, itemId: item.itemId, unitId: item.unitId });
-  }
 
   return (
-    <button
+    <div
       ref={isOverlay ? undefined : setNodeRef}
       style={isOverlay ? undefined : { transform: CSS.Translate.toString(transform) }}
-      className={`w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition ${isDragging && !isOverlay ? "opacity-40" : ""} ${isOverlay ? "cursor-grabbing rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
-      onClick={(event) => event.preventDefault()}
-      onPointerDown={(event) => {
-        pointerStartRef.current = { x: event.clientX, y: event.clientY };
+      className={`w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition ${isDragging && !isOverlay ? "opacity-40" : ""} ${isOverlay ? "rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : "hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
+      onClick={isOverlay ? undefined : () => onOpen({ orderId: item.orderId, itemId: item.itemId, unitId: item.unitId })}
+      onKeyDown={isOverlay ? undefined : (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        onOpen({ orderId: item.orderId, itemId: item.itemId, unitId: item.unitId });
       }}
-      onPointerUp={handlePointerUp}
-      type="button"
-      {...(isOverlay ? {} : listeners)}
-      {...(isOverlay ? {} : attributes)}
+      role={isOverlay ? undefined : "button"}
+      tabIndex={isOverlay ? -1 : 0}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -72,7 +56,27 @@ export function KitchenItemCard({
             {item.customerName || humanize(item.type)}
           </Typography>
         </div>
-        <Typography as="span" variant="caption">{formatElapsed(item.createdAt)}</Typography>
+        <div className="flex items-start gap-2">
+          <Typography as="span" variant="caption">{formatElapsed(item.createdAt)}</Typography>
+          {!isOverlay ? (
+            <button
+              type="button"
+              aria-label="Mover item"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--background)] text-[var(--muted-foreground)] transition hover:border-[var(--brand-orange)] hover:text-[var(--brand-orange-dark)] cursor-grab active:cursor-grabbing"
+              onClick={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
+              {...listeners}
+              {...attributes}
+            >
+              <span aria-hidden="true" className="grid grid-cols-2 gap-0.5">
+                <span className="h-1 w-1 rounded-full bg-current" />
+                <span className="h-1 w-1 rounded-full bg-current" />
+                <span className="h-1 w-1 rounded-full bg-current" />
+                <span className="h-1 w-1 rounded-full bg-current" />
+              </span>
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-3 flex items-start gap-2">
@@ -96,6 +100,6 @@ export function KitchenItemCard({
           ) : null}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
