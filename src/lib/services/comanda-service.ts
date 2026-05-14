@@ -1,3 +1,4 @@
+import { OrderStatus } from "@prisma/client";
 import { ApiError } from "@/lib/api/error";
 import { buildOrderItemUnits } from "@/lib/orders/item-units";
 import { attachComandaOperationalSummary } from "@/lib/orders/operations";
@@ -78,6 +79,29 @@ async function generateUniqueQrSlug(name: string) {
       return qrCodeSlug;
     }
   }
+}
+
+const reopenedOrderStatuses = new Set<OrderStatus>(["pronto", "saiu_para_entrega", "entregue"]);
+
+function buildOrderReopenPatch(status: OrderStatus) {
+  if (!reopenedOrderStatuses.has(status)) {
+    return null;
+  }
+
+  return {
+    status: "novo" as const,
+    acceptedAt: null,
+    preparedAt: null,
+    dispatchedAt: null,
+    deliveredAt: null,
+    statusEvents: {
+      create: {
+        fromStatus: status,
+        toStatus: "novo" as const,
+        note: "Novos itens foram adicionados a comanda.",
+      },
+    },
+  };
 }
 
 export async function createComanda(input: {
@@ -345,6 +369,8 @@ export async function addItemsToComanda(
     );
 
     if (comanda.orderId) {
+      const reopenOrderPatch = buildOrderReopenPatch(comanda.order?.status ?? "novo");
+
       await Promise.all(
         normalizedItems.map(({ item, menuItem, selectedOptions, ingredientCustomizations, unitPrice, subtotalAmount }, index) =>
           tx.orderItem.create({
@@ -381,8 +407,16 @@ export async function addItemsToComanda(
         data: {
           subtotalAmount: decimal(newSubtotal),
           totalAmount: decimal(newTotal),
+          ...(reopenOrderPatch ?? {}),
         },
       });
+
+      if (reopenOrderPatch) {
+        await tx.comanda.update({
+          where: { id: comandaId },
+          data: { status: "novo" },
+        });
+      }
     }
 
     return tx.comanda.update({

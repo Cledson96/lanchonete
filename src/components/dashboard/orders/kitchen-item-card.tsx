@@ -1,3 +1,4 @@
+import { useRef, type PointerEvent } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +22,32 @@ export function KitchenItemCard({
     disabled: isOverlay,
   });
   const channel = channelMeta[item.channel];
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  function handlePointerUp(event: PointerEvent<HTMLButtonElement>) {
+    if (isOverlay || isDragging) return;
+
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
+    if (!start) return;
+
+    const deltaX = Math.abs(event.clientX - start.x);
+    const deltaY = Math.abs(event.clientY - start.y);
+    if (deltaX > 4 || deltaY > 4) return;
+
+    onOpen({ orderId: item.orderId, itemId: item.itemId, unitId: item.unitId });
+  }
 
   return (
     <button
       ref={isOverlay ? undefined : setNodeRef}
       style={isOverlay ? undefined : { transform: CSS.Translate.toString(transform) }}
       className={`w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition ${isDragging && !isOverlay ? "opacity-40" : ""} ${isOverlay ? "cursor-grabbing rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
-      onClick={() => onOpen({ orderId: item.orderId, itemId: item.itemId, unitId: item.unitId })}
+      onClick={(event) => event.preventDefault()}
+      onPointerDown={(event) => {
+        pointerStartRef.current = { x: event.clientX, y: event.clientY };
+      }}
+      onPointerUp={handlePointerUp}
       type="button"
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
