@@ -109,7 +109,7 @@ const nav = [
   },
 ];
 
-export function DashboardNav() {
+export function DashboardNav({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -123,7 +123,8 @@ export function DashboardNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+            title={item.label}
+            className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${collapsed ? "lg:justify-center lg:px-2" : ""} ${
               isActive
                 ? "bg-[var(--brand-orange)]/12 text-[var(--brand-orange-dark)]"
                 : "text-[var(--muted)] hover:bg-[var(--background-strong)] hover:text-[var(--foreground)]"
@@ -138,9 +139,9 @@ export function DashboardNav() {
             >
               {item.icon}
             </span>
-            <Typography as="span" variant="body-sm">{item.label}</Typography>
+            <Typography as="span" className={collapsed ? "lg:hidden" : ""} variant="body-sm">{item.label}</Typography>
             {isActive && (
-              <Badge className="ml-auto h-1.5 w-1.5 min-w-0 bg-[var(--brand-orange)] p-0" />
+              <Badge className={`ml-auto h-1.5 w-1.5 min-w-0 bg-[var(--brand-orange)] p-0 ${collapsed ? "lg:absolute lg:right-1.5 lg:top-1.5 lg:ml-0" : ""}`} />
             )}
           </Link>
         );
