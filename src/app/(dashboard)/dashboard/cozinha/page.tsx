@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import { DashboardOrdersWorkspace } from "@/components/dashboard/orders-workspace";
 
 export default function DashboardCozinhaPage() {
-  redirect("/dashboard/operacao");
+  return (
+    <DashboardOrdersWorkspace
+      description="Visualize a fila por item e mova o preparo conforme a cozinha avanca."
+      title="Cozinha"
+      view="kitchen"
+    />
+  );
 }

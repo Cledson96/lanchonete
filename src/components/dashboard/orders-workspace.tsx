@@ -148,7 +148,7 @@ export function DashboardOrdersWorkspace({
   }, [operationalOrders]);
 
   const showOrderBoard = view !== "kitchen";
-  const showKitchenBoard = view === "operation" || view === "kitchen";
+  const showKitchenBoard = view === "kitchen";
 
   async function handleTransition(toStatus: OrderStatus) {
     if (!selectedOrder) return;
@@ -327,7 +327,7 @@ export function DashboardOrdersWorkspace({
 
       {showOrderBoard ? (
         <section className="space-y-3">
-          {showKitchenBoard ? (
+          {view === "operation" ? (
             <div>
               <Typography variant="title-sm">Pedidos e comandas</Typography>
               <Typography className="mt-1" tone="muted" variant="caption-sm">

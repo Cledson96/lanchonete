@@ -3,7 +3,7 @@ import { DashboardOrdersWorkspace } from "@/components/dashboard/orders-workspac
 export default function DashboardOperationPage() {
   return (
     <DashboardOrdersWorkspace
-      description="Arraste os cards entre as colunas para mover o status. Novos, em preparo, prontos e saindo num só fluxo."
+      description="Acompanhe pedidos e comandas por status, com contexto completo para atendimento e expedicao."
       title="Operação"
       view="operation"
     />

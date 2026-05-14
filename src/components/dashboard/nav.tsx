@@ -27,6 +27,16 @@ const nav = [
     ),
   },
   {
+    href: "/dashboard/cozinha",
+    label: "Cozinha",
+    exact: false,
+    icon: (
+      <svg fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" className="h-4 w-4 shrink-0">
+        <path d="M4.5 6.75h15m-13.5 4.5h12m-10.5 4.5h9M6 3.75h12a1.5 1.5 0 011.5 1.5v13.5a1.5 1.5 0 01-1.5 1.5H6a1.5 1.5 0 01-1.5-1.5V5.25a1.5 1.5 0 011.5-1.5z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
     href: "/dashboard/relatorios",
     label: "Relatórios",
     exact: false,
