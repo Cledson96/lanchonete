@@ -17,16 +17,18 @@ import type { OrderSummary } from "./types";
 export function OrderCard({
   order,
   isOverlay,
+  draggable = true,
   onOpen,
 }: {
   order: OrderSummary;
   isOverlay?: boolean;
+  draggable?: boolean;
   onOpen?: () => void;
 }) {
   const { setNodeRef, attributes, listeners, transform, isDragging } = useDraggable({
     id: order.id,
     data: { order },
-    disabled: isOverlay,
+    disabled: isOverlay || !draggable,
   });
 
   const channel = channelMeta[order.channel];
@@ -43,7 +45,7 @@ export function OrderCard({
       style={isOverlay ? undefined : { transform: CSS.Translate.toString(transform) }}
       className={`relative overflow-hidden rounded-xl border border-[var(--line)] bg-white shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition ${
         isDragging && !isOverlay ? "opacity-40" : ""
-      } ${isOverlay ? "cursor-grabbing rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
+      } ${isOverlay ? "cursor-grabbing rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : draggable ? "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]" : "cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
       onClick={(e) => {

@@ -5,6 +5,7 @@ import type {
   OrderStatus,
   OrderType,
   PaymentMethod,
+  UnitActionScope,
   UnitActionStatus,
 } from "./types";
 
@@ -107,12 +108,19 @@ export function describeReadyState(summary: OperationalSummary) {
   return "Ainda há itens aguardando preparo.";
 }
 
-export function getUnitActions(unitStatus: OrderItemUnitStatus, orderType: OrderType) {
+export function getUnitActions(unitStatus: OrderItemUnitStatus, orderType: OrderType, scope: UnitActionScope) {
+  if (scope === "kitchen") {
+    switch (unitStatus) {
+      case "novo":
+        return [{ toStatus: "em_preparo", label: "Iniciar" } satisfies { toStatus: UnitActionStatus; label: string }];
+      case "em_preparo":
+        return [{ toStatus: "pronto", label: "Pronto" } satisfies { toStatus: UnitActionStatus; label: string }];
+      default:
+        return [] as Array<{ toStatus: UnitActionStatus; label: string }>;
+    }
+  }
+
   switch (unitStatus) {
-    case "novo":
-      return [{ toStatus: "em_preparo", label: "Iniciar" } satisfies { toStatus: UnitActionStatus; label: string }];
-    case "em_preparo":
-      return [{ toStatus: "pronto", label: "Pronto" } satisfies { toStatus: UnitActionStatus; label: string }];
     case "pronto":
       return orderType === "local"
         ? [{ toStatus: "entregue", label: "Entregue" } satisfies { toStatus: UnitActionStatus; label: string }]
@@ -122,22 +130,20 @@ export function getUnitActions(unitStatus: OrderItemUnitStatus, orderType: Order
   }
 }
 
-export function getActions(order: DashboardOrderDetail): OrderAction[] {
+export function getActions(order: DashboardOrderDetail, scope: UnitActionScope): OrderAction[] {
+  if (scope === "kitchen") {
+    return [];
+  }
+
   switch (order.status) {
     case "novo":
-      return [
-        { toStatus: "em_preparo", label: "Iniciar preparo", tone: "primary" },
-        { toStatus: "cancelado", label: "Cancelar", tone: "danger" },
-      ];
+      return [{ toStatus: "cancelado", label: "Cancelar", tone: "danger" }];
     case "em_preparo":
-      return [
-        { toStatus: "pronto", label: "Marcar pronto", tone: "success" },
-        { toStatus: "cancelado", label: "Cancelar", tone: "danger" },
-      ];
+      return [{ toStatus: "cancelado", label: "Cancelar", tone: "danger" }];
     case "pronto":
       return order.type === "delivery"
         ? [{ toStatus: "saiu_para_entrega", label: "Saiu para entrega", tone: "primary" }]
-        : [{ toStatus: "fechado", label: "Fechar pedido", tone: "success" }];
+        : [{ toStatus: "entregue", label: "Marcar entregue", tone: "success" }];
     case "saiu_para_entrega":
       return [{ toStatus: "entregue", label: "Marcar entregue", tone: "success" }];
     case "entregue":

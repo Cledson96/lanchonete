@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Typography } from "@/components/ui/typography";
 import { KitchenItemCard } from "./kitchen-item-card";
-import type { KitchenColumnConfig, KitchenItemCardData } from "./types";
+import type { KitchenColumnConfig, KitchenItemCardData, KitchenItemOpenTarget } from "./types";
 
 export function KitchenKanbanColumn({
   column,
@@ -14,7 +14,7 @@ export function KitchenKanbanColumn({
   column: KitchenColumnConfig;
   items: KitchenItemCardData[];
   loading: boolean;
-  onOpen: (orderId: string) => void;
+  onOpen: (target: KitchenItemOpenTarget) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.status });
 

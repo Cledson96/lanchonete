@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Typography } from "@/components/ui/typography";
 import { channelMeta } from "./config";
 import { formatElapsed, humanize } from "./helpers";
-import type { KitchenItemCardData } from "./types";
+import type { KitchenItemCardData, KitchenItemOpenTarget } from "./types";
 
 export function KitchenItemCard({
   item,
@@ -13,7 +13,7 @@ export function KitchenItemCard({
 }: {
   item: KitchenItemCardData;
   isOverlay?: boolean;
-  onOpen: (orderId: string) => void;
+  onOpen: (target: KitchenItemOpenTarget) => void;
 }) {
   const { setNodeRef, attributes, listeners, transform, isDragging } = useDraggable({
     id: item.id,
@@ -27,7 +27,7 @@ export function KitchenItemCard({
       ref={isOverlay ? undefined : setNodeRef}
       style={isOverlay ? undefined : { transform: CSS.Translate.toString(transform) }}
       className={`w-full rounded-xl border border-[var(--line)] bg-white p-3 text-left shadow-[0_2px_8px_rgba(45,24,11,0.04)] transition ${isDragging && !isOverlay ? "opacity-40" : ""} ${isOverlay ? "cursor-grabbing rotate-2 shadow-[0_12px_32px_rgba(45,24,11,0.18)] ring-2 ring-[var(--brand-orange)]/40" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(45,24,11,0.08)]"}`}
-      onClick={() => onOpen(item.orderId)}
+      onClick={() => onOpen({ orderId: item.orderId, itemId: item.itemId, unitId: item.unitId })}
       type="button"
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}

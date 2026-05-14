@@ -1,11 +1,13 @@
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { actionClassName, getActions } from "./helpers";
-import type { DashboardOrderDetail, OrderStatus } from "./types";
+import type { DashboardOrderDetail, KitchenItemDetailTarget, OrderStatus, UnitActionScope } from "./types";
 
 export function OrderDetailFooter({
   order,
   loading,
+  actionScope,
+  kitchenItemTarget,
   pendingStatus,
   feedback,
   error,
@@ -13,6 +15,8 @@ export function OrderDetailFooter({
 }: {
   order: DashboardOrderDetail | null;
   loading: boolean;
+  actionScope: UnitActionScope;
+  kitchenItemTarget?: KitchenItemDetailTarget | null;
   pendingStatus: OrderStatus | null;
   feedback: string | null;
   error: string | null;
@@ -20,7 +24,18 @@ export function OrderDetailFooter({
 }) {
   if (!order || loading) return null;
 
-  const actions = getActions(order);
+  if (kitchenItemTarget) {
+    if (!feedback && !error) return null;
+
+    return (
+      <footer className="sticky bottom-0 shrink-0 border-t border-[var(--line)] bg-white p-4 shadow-[0_-4px_20px_rgba(45,24,11,0.06)]">
+        {feedback ? <Alert className="mb-2.5" tone="success">{feedback}</Alert> : null}
+        {error ? <Alert className="mb-2.5" tone="error">{error}</Alert> : null}
+      </footer>
+    );
+  }
+
+  const actions = getActions(order, actionScope);
 
   return (
     <footer className="sticky bottom-0 shrink-0 border-t border-[var(--line)] bg-white p-4 shadow-[0_-4px_20px_rgba(45,24,11,0.06)]">

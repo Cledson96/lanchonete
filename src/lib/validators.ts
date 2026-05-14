@@ -312,6 +312,7 @@ export const updateOrderStatusSchema = z.object({
 
 export const updateOrderItemUnitStatusSchema = z.object({
   toStatus: z.enum(["em_preparo", "pronto", "entregue", "cancelado"]),
+  source: z.enum(["operation", "kitchen"]).default("operation"),
 });
 
 export const sendWhatsAppConversationMessageSchema = z.object({

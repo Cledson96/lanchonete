@@ -29,6 +29,7 @@ import type {
   DashboardOrdersWorkspaceProps,
   KitchenColumnConfig,
   KitchenItemCardData,
+  KitchenItemOpenTarget,
   OrderChannel,
   OrderStatus,
   OrderSummary,
@@ -42,6 +43,7 @@ export function DashboardOrdersWorkspace({
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<DashboardOrderDetail | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedKitchenItem, setSelectedKitchenItem] = useState<KitchenItemOpenTarget | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
@@ -54,6 +56,8 @@ export function DashboardOrdersWorkspace({
   const [activeKitchenItem, setActiveKitchenItem] = useState<KitchenItemCardData | null>(null);
   const [pendingUnitId, setPendingUnitId] = useState<string | null>(null);
   const ordersRef = useRef<OrderSummary[]>([]);
+  const suppressKitchenClickRef = useRef(false);
+  const suppressKitchenClickTimeoutRef = useRef<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -103,6 +107,12 @@ export function DashboardOrdersWorkspace({
     }
   }, []);
 
+  const openKitchenItem = useCallback(async (target: KitchenItemOpenTarget) => {
+    if (suppressKitchenClickRef.current) return;
+    setSelectedKitchenItem(target);
+    await openOrder(target.orderId);
+  }, [openOrder]);
+
   useEffect(() => {
     setLoadingList(true);
     void refreshOrders(false);
@@ -124,6 +134,14 @@ export function DashboardOrdersWorkspace({
     }, 7000);
     return () => window.clearInterval(interval);
   }, [refreshOrders]);
+
+  useEffect(() => {
+    return () => {
+      if (suppressKitchenClickTimeoutRef.current) {
+        window.clearTimeout(suppressKitchenClickTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const operationalOrders = useMemo(() => orders.filter((order) => order.items.length > 0), [orders]);
 
@@ -149,6 +167,18 @@ export function DashboardOrdersWorkspace({
 
   const showOrderBoard = view !== "kitchen";
   const showKitchenBoard = view === "kitchen";
+
+  const actionScope = view === "kitchen" ? "kitchen" : "operation";
+
+  const canMoveOrderInBoard = useCallback((order: OrderSummary) => {
+    if (view !== "operation") return false;
+    return order.status === "pronto" && order.type === "delivery";
+  }, [view]);
+
+  const canDropOrderToStatus = useCallback((order: OrderSummary, toStatus: OrderStatus) => {
+    if (view !== "operation") return false;
+    return toStatus === "saiu_para_entrega" && order.status === "pronto" && order.type === "delivery";
+  }, [view]);
 
   async function handleTransition(toStatus: OrderStatus) {
     if (!selectedOrder) return;
@@ -179,6 +209,7 @@ export function DashboardOrdersWorkspace({
     orderId: string;
     itemId: string;
     unitId: string;
+    source: "operation" | "kitchen";
     toStatus: "em_preparo" | "pronto" | "entregue" | "cancelado";
   }) {
     try {
@@ -188,10 +219,12 @@ export function DashboardOrdersWorkspace({
       const response = await fetch(`/api/dashboard/orders/${input.orderId}/items/${input.itemId}/units/${input.unitId}/status`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ toStatus: input.toStatus }),
+        body: JSON.stringify({ toStatus: input.toStatus, source: input.source }),
       });
-      const payload = await parseJson<{ order: DashboardOrderDetail }>(response);
-      setSelectedOrder(payload.order);
+      await parseJson<{ order: DashboardOrderDetail }>(response);
+      const detailResponse = await fetch(`/api/dashboard/orders/${input.orderId}`, { cache: "no-store" });
+      const detailPayload = await parseJson<{ order: DashboardOrderDetail }>(detailResponse);
+      setSelectedOrder(detailPayload.order);
       setFeedback(`Item atualizado para ${humanize(input.toStatus)}.`);
       await refreshOrders(false);
     } catch (error) {
@@ -203,6 +236,7 @@ export function DashboardOrdersWorkspace({
 
   function closeDetail() {
     setSelectedOrderId(null);
+    setSelectedKitchenItem(null);
     setSelectedOrder(null);
     setDetailError(null);
     setFeedback(null);
@@ -222,6 +256,7 @@ export function DashboardOrdersWorkspace({
     const toStatus = over.id as OrderStatus;
     const current = ordersRef.current.find((o) => o.id === orderId);
     if (!current || current.status === toStatus) return;
+    if (!canDropOrderToStatus(current, toStatus)) return;
 
     const prev = ordersRef.current;
     const next = prev.map((o) => (o.id === orderId ? { ...o, status: toStatus } : o));
@@ -247,6 +282,10 @@ export function DashboardOrdersWorkspace({
   }
 
   function handleKitchenDragStart(event: DragStartEvent) {
+    suppressKitchenClickRef.current = true;
+    if (suppressKitchenClickTimeoutRef.current) {
+      window.clearTimeout(suppressKitchenClickTimeoutRef.current);
+    }
     const items = buildKitchenItems(ordersRef.current);
     const kitchenItem = items.find((item) => item.id === event.active.id);
     if (kitchenItem) setActiveKitchenItem(kitchenItem);
@@ -254,6 +293,10 @@ export function DashboardOrdersWorkspace({
 
   async function handleKitchenDragEnd(event: DragEndEvent) {
     setActiveKitchenItem(null);
+    suppressKitchenClickTimeoutRef.current = window.setTimeout(() => {
+      suppressKitchenClickRef.current = false;
+      suppressKitchenClickTimeoutRef.current = null;
+    }, 120);
     const { active, over } = event;
     if (!over) return;
 
@@ -268,6 +311,7 @@ export function DashboardOrdersWorkspace({
       orderId: current.orderId,
       itemId: current.itemId,
       unitId: current.unitId,
+      source: "kitchen",
       toStatus,
     });
   }
@@ -346,7 +390,8 @@ export function DashboardOrdersWorkspace({
               <div className="flex snap-x gap-4 px-4 lg:px-0">
                 {columns.map((column) => (
                   <KanbanColumn
-                    allowDrop={view !== "archive"}
+                    allowDrop={view === "operation" ? column.status === "saiu_para_entrega" : view !== "archive"}
+                    canDragOrder={canMoveOrderInBoard}
                     column={column}
                     key={column.status}
                     loading={loadingList}
@@ -369,13 +414,19 @@ export function DashboardOrdersWorkspace({
           <div>
             <Typography variant="title-sm">Fila da cozinha por item</Typography>
             <Typography className="mt-1" tone="muted" variant="caption-sm">
-              Visão focada no que precisa ser preparado agora. Clique no item para abrir o pedido/comanda completo.
+              Visão focada no que precisa ser preparado agora. Clique no item para ver os detalhes de preparo.
             </Typography>
           </div>
 
           <section className="-mx-4 overflow-x-auto pb-4 lg:mx-0">
             <DndContext
-              onDragCancel={() => setActiveKitchenItem(null)}
+              onDragCancel={() => {
+                setActiveKitchenItem(null);
+                suppressKitchenClickTimeoutRef.current = window.setTimeout(() => {
+                  suppressKitchenClickRef.current = false;
+                  suppressKitchenClickTimeoutRef.current = null;
+                }, 120);
+              }}
               onDragEnd={handleKitchenDragEnd}
               onDragStart={handleKitchenDragStart}
               sensors={sensors}
@@ -387,7 +438,7 @@ export function DashboardOrdersWorkspace({
                     items={column.items}
                     key={`kitchen-${column.status}`}
                     loading={loadingList}
-                    onOpen={(id) => void openOrder(id)}
+                    onOpen={(target) => void openKitchenItem(target)}
                   />
                 ))}
               </div>
@@ -401,9 +452,11 @@ export function DashboardOrdersWorkspace({
       ) : null}
 
       <DashboardOrderDetailSheet
+        actionScope={actionScope}
         error={detailError}
         feedback={feedback}
         loading={loadingDetail}
+        kitchenItemTarget={selectedKitchenItem}
         onClose={closeDetail}
         onTransition={handleTransition}
         onUnitTransition={handleUnitTransition}

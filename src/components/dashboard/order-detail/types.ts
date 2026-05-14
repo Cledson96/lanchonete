@@ -22,6 +22,8 @@ export type PaymentMethod =
 
 export type UnitActionStatus = "em_preparo" | "pronto" | "entregue" | "cancelado";
 
+export type UnitActionScope = "operation" | "kitchen";
+
 export type DashboardOrderDetail = {
   id: string;
   code: string;
@@ -109,6 +111,11 @@ export type DashboardOrderDetail = {
   }>;
 };
 
+export type KitchenItemDetailTarget = {
+  itemId: string;
+  unitId: string;
+};
+
 export type OrderAction = {
   toStatus: OrderStatus;
   label: string;
@@ -118,12 +125,15 @@ export type OrderAction = {
 export type DashboardOrderDetailSheetProps = {
   order: DashboardOrderDetail | null;
   loading: boolean;
+  actionScope?: UnitActionScope;
+  kitchenItemTarget?: KitchenItemDetailTarget | null;
   onClose: () => void;
   onTransition: (toStatus: OrderStatus) => Promise<void>;
   onUnitTransition: (input: {
     orderId: string;
     itemId: string;
     unitId: string;
+    source: UnitActionScope;
     toStatus: UnitActionStatus;
   }) => Promise<void>;
   pendingStatus: OrderStatus | null;

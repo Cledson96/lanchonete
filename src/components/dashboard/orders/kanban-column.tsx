@@ -10,12 +10,14 @@ export function KanbanColumn({
   orders,
   loading,
   allowDrop,
+  canDragOrder,
   onOpen,
 }: {
   column: ColumnConfig;
   orders: OrderSummary[];
   loading: boolean;
   allowDrop: boolean;
+  canDragOrder?: (order: OrderSummary) => boolean;
   onOpen: (id: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.status, disabled: !allowDrop });
@@ -38,7 +40,14 @@ export function KanbanColumn({
         {loading && !orders.length ? (
           <EmptyState className="px-3 py-6 text-xs">Carregando…</EmptyState>
         ) : orders.length ? (
-          orders.map((order) => <OrderCard key={order.id} order={order} onOpen={() => onOpen(order.id)} />)
+          orders.map((order) => (
+            <OrderCard
+              draggable={canDragOrder ? canDragOrder(order) : true}
+              key={order.id}
+              order={order}
+              onOpen={() => onOpen(order.id)}
+            />
+          ))
         ) : (
           <EmptyState className="px-3 py-6 text-xs">{isOver ? "Solte aqui" : "Vazio"}</EmptyState>
         )}

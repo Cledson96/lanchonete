@@ -84,4 +84,6 @@ export type KitchenItemCardData = {
   ingredientLines: string[];
 };
 
+export type KitchenItemOpenTarget = Pick<KitchenItemCardData, "orderId" | "itemId" | "unitId">;
+
 export type KitchenColumnConfig = ColumnConfig & { status: "novo" | "em_preparo" | "pronto" };

@@ -14,6 +14,8 @@ export type { DashboardOrderDetail } from "./order-detail/types";
 export function DashboardOrderDetailSheet({
   order,
   loading,
+  actionScope = "operation",
+  kitchenItemTarget,
   onClose,
   onTransition,
   onUnitTransition,
@@ -43,6 +45,8 @@ export function DashboardOrderDetailSheet({
 
         <div className="flex-1 overflow-y-auto">
           <OrderDetailContent
+            actionScope={actionScope}
+            kitchenItemTarget={kitchenItemTarget}
             loading={loading}
             onUnitTransition={onUnitTransition}
             order={order}
@@ -52,8 +56,10 @@ export function DashboardOrderDetailSheet({
         </div>
 
         <OrderDetailFooter
+          actionScope={actionScope}
           error={error}
           feedback={feedback}
+          kitchenItemTarget={kitchenItemTarget}
           loading={loading}
           onTransition={onTransition}
           order={order}

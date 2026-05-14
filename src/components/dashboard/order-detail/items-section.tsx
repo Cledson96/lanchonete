@@ -10,19 +10,21 @@ import {
   toNumber,
 } from "./helpers";
 import { unitStatusStyle } from "./styles";
-import type { DashboardOrderDetail, DashboardOrderDetailSheetProps } from "./types";
+import type { DashboardOrderDetail, DashboardOrderDetailSheetProps, UnitActionScope } from "./types";
 
 export function OrderItemsSection({
   order,
   totalItems,
   pendingStatus,
   pendingUnitId,
+  actionScope,
   onUnitTransition,
 }: {
   order: DashboardOrderDetail;
   totalItems: number;
   pendingStatus: DashboardOrderDetailSheetProps["pendingStatus"];
   pendingUnitId: string | null;
+  actionScope: UnitActionScope;
   onUnitTransition: DashboardOrderDetailSheetProps["onUnitTransition"];
 }) {
   return (
@@ -112,7 +114,7 @@ export function OrderItemsSection({
 
                 <div className="mt-3 space-y-2">
                   {(item.units || []).map((unit) => {
-                    const unitActions = getUnitActions(unit.status, order.type);
+                    const unitActions = getUnitActions(unit.status, order.type, actionScope);
 
                     return (
                       <div key={unit.id} className="rounded-lg border border-[var(--line)] bg-white px-3 py-2.5">
@@ -143,12 +145,13 @@ export function OrderItemsSection({
                                  key={`${unit.id}-${action.toStatus}`}
                                  className="hover:border-[var(--brand-orange)]/40 hover:bg-[var(--brand-orange)]/5"
                                  disabled={pendingUnitId === unit.id || pendingStatus !== null}
-                                 onClick={() => void onUnitTransition({
-                                   orderId: order.id,
-                                  itemId: item.id,
-                                   unitId: unit.id,
-                                   toStatus: action.toStatus,
-                                 })}
+                                  onClick={() => void onUnitTransition({
+                                    orderId: order.id,
+                                    itemId: item.id,
+                                    unitId: unit.id,
+                                    source: actionScope,
+                                    toStatus: action.toStatus,
+                                  })}
                                  size="xs"
                                  variant="secondary"
                                >

@@ -14,7 +14,7 @@ import { normalizePhone } from "@/lib/utils";
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
   novo: ["em_preparo", "cancelado"],
   em_preparo: ["pronto", "cancelado"],
-  pronto: ["saiu_para_entrega", "fechado"],
+  pronto: ["saiu_para_entrega", "entregue", "fechado"],
   saiu_para_entrega: ["entregue", "cancelado"],
   entregue: ["fechado"],
   fechado: [],
@@ -70,6 +70,10 @@ const orderInclude = {
 
 const readyStatusTransitions = new Set<OrderStatus>(["novo", "em_preparo"]);
 
+const preparingStatusTransitions = new Set<OrderStatus>(["novo"]);
+
+const deliveredStatusTransitions = new Set<OrderStatus>(["novo", "em_preparo", "pronto"]);
+
 async function loadOrderOperationalState(tx: Prisma.TransactionClient, orderId: string) {
   const order = await tx.order.findUnique({
     where: { id: orderId },
@@ -93,70 +97,88 @@ async function loadOrderOperationalState(tx: Prisma.TransactionClient, orderId: 
 }
 
 async function syncLinkedComandaStatus(tx: Prisma.TransactionClient, orderId: string, status: OrderStatus) {
-  if (status !== "pronto") {
-    return;
-  }
-
   await tx.comanda.updateMany({
     where: { orderId },
-    data: { status: "pronto" },
+    data: { status },
   });
 }
 
-async function promoteOrderWhenAllUnitsReady(tx: Prisma.TransactionClient, orderId: string, now: Date) {
+async function reconcileOrderStatusFromUnits(tx: Prisma.TransactionClient, orderId: string, now: Date) {
   const order = await loadOrderOperationalState(tx, orderId);
 
-  if (!order || !order.operationalSummary.isFullyReady) {
+  if (!order) {
     return null;
   }
 
-  if (readyStatusTransitions.has(order.status)) {
-    const updated = await tx.order.update({
-      where: { id: orderId },
-      data: {
-        status: "pronto",
-        acceptedAt: order.status === "novo" && !order.acceptedAt ? now : order.acceptedAt,
-        preparedAt: now,
-        statusEvents: {
-          create: {
-            fromStatus: order.status,
-            toStatus: "pronto",
-            note: "Todos os itens ficaram prontos.",
-          },
-        },
-      },
-      include: {
-        customerProfile: true,
-        items: {
-          include: {
-            menuItem: true,
-            units: {
-              orderBy: { sequence: "asc" },
-            },
-            selectedOptions: {
-              include: {
-                optionItem: true,
-              },
-            },
-            ingredientCustomizations: {
-              include: {
-                ingredient: true,
-              },
-            },
-          },
-        },
-        statusEvents: {
-          orderBy: { createdAt: "asc" },
-        },
-      },
-    });
+  let nextStatus: OrderStatus | null = null;
+  let note: string | null = null;
 
-    await syncLinkedComandaStatus(tx, orderId, "pronto");
-
-    return attachOrderOperationalSummary(updated as typeof updated & { comanda?: null });
+  if (order.type === "local" && order.operationalSummary.isFullyDelivered && deliveredStatusTransitions.has(order.status)) {
+    nextStatus = "entregue";
+    note = "Todos os itens foram entregues.";
+  } else if (order.operationalSummary.isFullyReady && readyStatusTransitions.has(order.status)) {
+    nextStatus = "pronto";
+    note = "Todos os itens ficaram prontos.";
+  } else if (
+    order.operationalSummary.activeUnits > 0
+    && order.operationalSummary.pendingUnits === 0
+    && preparingStatusTransitions.has(order.status)
+  ) {
+    nextStatus = "em_preparo";
+    note = "Todos os itens entraram em preparo.";
   }
 
-  return null;
+  if (!nextStatus) {
+    return order;
+  }
+
+  const updated = await tx.order.update({
+    where: { id: orderId },
+    data: {
+      status: nextStatus,
+      acceptedAt:
+        nextStatus === "em_preparo" || nextStatus === "pronto"
+          ? order.acceptedAt || now
+          : order.acceptedAt,
+      preparedAt: nextStatus === "pronto" ? now : order.preparedAt,
+      deliveredAt: nextStatus === "entregue" ? now : order.deliveredAt,
+      statusEvents: {
+        create: {
+          fromStatus: order.status,
+          toStatus: nextStatus,
+          note,
+        },
+      },
+    },
+    include: {
+      customerProfile: true,
+      items: {
+        include: {
+          menuItem: true,
+          units: {
+            orderBy: { sequence: "asc" },
+          },
+          selectedOptions: {
+            include: {
+              optionItem: true,
+            },
+          },
+          ingredientCustomizations: {
+            include: {
+              ingredient: true,
+            },
+          },
+        },
+      },
+      statusEvents: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  await syncLinkedComandaStatus(tx, orderId, nextStatus);
+
+  return attachOrderOperationalSummary(updated as typeof updated & { comanda?: null });
 }
 
 function syncUnitStatusesForOrderTransition(tx: Prisma.TransactionClient, orderId: string, toStatus: OrderStatus, now: Date) {
@@ -337,6 +359,7 @@ export async function transitionOrderItemUnitStatus(input: {
   orderItemId: string;
   unitId: string;
   toStatus: OrderItemUnitStatus;
+  source: "operation" | "kitchen";
 }) {
   const unit = await prisma.orderItemUnit.findUnique({
     where: { id: input.unitId },
@@ -367,6 +390,14 @@ export async function transitionOrderItemUnitStatus(input: {
     throw new ApiError(409, "Transicao de status da unidade invalida.");
   }
 
+  if ((input.toStatus === "em_preparo" || input.toStatus === "pronto") && input.source !== "kitchen") {
+    throw new ApiError(422, "Somente a cozinha pode iniciar ou concluir o preparo dos itens.");
+  }
+
+  if (input.toStatus === "entregue" && input.source !== "operation") {
+    throw new ApiError(422, "Somente a operacao pode marcar itens como entregues.");
+  }
+
   if (input.toStatus === "entregue" && unit.orderItem.order.type !== "local") {
     throw new ApiError(422, "Entrega por unidade so esta disponivel para consumo local.");
   }
@@ -382,12 +413,7 @@ export async function transitionOrderItemUnitStatus(input: {
       },
     });
 
-    const promoted = await promoteOrderWhenAllUnitsReady(tx, input.orderId, now);
-    if (promoted) {
-      return promoted;
-    }
-
-    const order = await loadOrderOperationalState(tx, input.orderId);
+    const order = await reconcileOrderStatusFromUnits(tx, input.orderId, now);
 
     if (!order) {
       throw new ApiError(404, "Pedido nao encontrado.");
@@ -520,6 +546,18 @@ export async function transitionOrderStatus(input: {
 
   if (!allowedTransitions[order.status].includes(input.toStatus)) {
     throw new ApiError(409, "Transicao de status invalida.");
+  }
+
+  if (input.toStatus === "em_preparo" || input.toStatus === "pronto") {
+    throw new ApiError(422, "Este status e atualizado automaticamente pela cozinha.");
+  }
+
+  if (input.toStatus === "saiu_para_entrega" && order.type !== "delivery") {
+    throw new ApiError(422, "Somente pedidos de delivery podem sair para entrega.");
+  }
+
+  if (input.toStatus === "entregue" && order.status === "pronto" && order.type === "delivery") {
+    throw new ApiError(422, "Pedidos de delivery precisam passar por saiu para entrega antes de serem entregues.");
   }
 
   const now = new Date();
